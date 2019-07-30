@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+device_type_install_libexec_dir="$(pkg_nixos_device_type_install_get_libexec_dir)"
+. "$device_type_install_libexec_dir/tools.sh"
+ensure_supported_device_from_nixos_live_cd
+
+hw_config_prepare_for_partition_and_format
+# hw_config_partition_legacy
+hw_config_partition_efi
+hw_config_format_lvm "14G"

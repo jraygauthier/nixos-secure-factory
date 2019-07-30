@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
+. "$common_factory_install_libexec_dir/prompt.sh"
+. "$common_factory_install_libexec_dir/app_current_device_store.sh"
+device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+
+search_str="$1"
+
+
+all_dirnames="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
+# matching_dirnames="$(echo "$all_dirnames" | grep "$search_str")"
+
+# echo "all_dirnames=\"$all_dirnames\""
+# echo "matching_dirnames=\"$matching_dirnames\""
+
+if ! matching_dirnames="$(echo "$all_dirnames" | grep "$search_str")"; then
+  echo "ERROR: No device dirname match specified search string: \`$search_str\`."
+  printf -- "\n"
+  printf -- "Available dirnames\n"
+  printf -- "------------------\n\n"
+  echo "$all_dirnames"
+  printf -- "\n"
+  exit 1
+fi
+
+match_count=$(echo "$matching_dirnames" | wc -l)
+# echo "match_count=$match_count"
+
+if test $match_count -gt 1; then
+  # TODO: We might instead want to provide an interractive readline.
+  echo "ERROR: Too many dirname match for the specified search string: \`$search_str\`."
+  printf -- "\n"
+  printf -- "Matching dirnames\n"
+  printf -- "-----------------\n\n"
+  echo "$matching_dirnames"
+  printf -- "\n"
+  exit 1
+fi
+
+dirname="$(echo "$matching_dirnames" | head -n 1)"
+
+yaml_str="$(cat "$device_cfg_repo_root_dir/device/$dirname/device.json" | yq -y '.')"
+printf -- "\n"
+printf -- "Device info\n"
+printf -- "-----------\n\n"
+
+printf -- "$yaml_str\n\n"
+
+
+if ! prompt_for_user_approval; then
+  exit 1
+fi
+
+echo "Writing device configuration to \`$device_cfg_repo_root_dir/.current_device.yaml\`."
+echo "$yaml_str" > "$device_cfg_repo_root_dir/.current_device.yaml"
+echo "Current device is now set to \`$dirname\`."

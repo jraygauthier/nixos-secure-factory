@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+(test -d /mnt && mountpoint /mnt) || \
+  { echo "ERROR: Nixos partition should be mounted on \`/mnt\` for this script to work."; exit 1; }
+
+# We will only show the config with the filesystems. However,
+# we do not want the generated file system as it refers to
+# partitions using the by-uuid method instead of the by-label
+# which will be identical for all devices and resistant to
+# repartitionning / reformatting.
+nixos-generate-config --root /mnt --show-hardware-config
+nixos-generate-config --root /mnt --no-filesystems

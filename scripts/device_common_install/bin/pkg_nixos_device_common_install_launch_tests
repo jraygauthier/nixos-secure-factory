@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+
+# Source some device specific tools.
+. "$device_common_install_libexec_dir/tools.sh"
+
+ensure_run_from_nixos_live_cd

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+swapoff -L swap > /dev/null 2>&1 || true
+mountpoint -q /mnt/boot && \
+  umount /dev/disk/by-label/boot
+mountpoint -q /mnt && \
+  umount /dev/disk/by-label/nixos
+
+if test -d "/mnt" && test "" != "$(ls -A /mnt/)"; then
+  2>&1 echo "WARNING: \`/mnt\` was unexpectedly found not empty after unmounting nixos partition."
+  2>&1 ls -la "/mnt"
+  exit 0
+fi
+
+! test -d "/mnt" || rmdir "/mnt"
+

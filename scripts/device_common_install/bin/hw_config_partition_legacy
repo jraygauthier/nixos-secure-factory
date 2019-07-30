@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+. "$device_common_install_libexec_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# TODO: Consider calling 'hw_config_remove_lvm.sh'
+
+parted -s /dev/sda -- mklabel msdos
+physical_memory_size_mb="$(free -m --si | grep Mem: | awk '{print $2}')"
+echo "This device has ${physical_memory_size_mb}MB of phyical memory."
+echo "Will be using this as the swap partition size. "
+echo "This is so that it is possible to hibernate."
+parted -s --align=opt /dev/sda -- mkpart primary 1MiB -${physical_memory_size_mb}MB
+parted -s --align=opt /dev/sda -- mkpart primary linux-swap -${physical_memory_size_mb}MB 100%
+# Print the resulting partition table.
+parted /dev/sda -- print

@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+
+# Source some device specific tools.
+. "$device_common_install_libexec_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# TODO: Consider calling 'hw_config_remove_lvm.sh'
+
+wipefs -a /dev/sda1
+mkfs.ext4 -L nixos /dev/sda1
+wipefs -a /dev/sda2
+mkswap -L swap /dev/sda2
+
+if parted /dev/sda -- print | grep ESP2; then
+  wipefs -a /dev/sda3
+  mkfs.fat -F 32 -n boot /dev/sda3
+fi
+# Print the result
+lsblk -o name,mountpoint,label,size,uuid

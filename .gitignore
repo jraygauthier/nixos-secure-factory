@@ -1,0 +1,7 @@
+/.current_device.yaml
+/.factory_info.yaml
+/result
+/scripts/device_common_install/result
+/scripts/factory_install/result
+/device_type/*/scripts/install/result
+.mypy_cache/

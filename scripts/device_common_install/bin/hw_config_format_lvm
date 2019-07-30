@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+
+default_nixos_partition_size="60G"
+nixos_partition_size="${1:-${default_nixos_partition_size}}"
+
+# Source some device specific tools.
+. "$device_common_install_libexec_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# TODO: Consider calling 'hw_config_remove_lvm.sh'
+
+wipefs -a /dev/sda1
+pvcreate /dev/sda1
+pvdisplay
+
+wipefs -a /dev/sda2
+mkswap -L swap /dev/sda2
+
+if parted /dev/sda -- print | grep ESP > /dev/null; then
+  wipefs -a /dev/sda3
+  mkfs.fat -F 32 -n boot /dev/sda3
+fi
+
+# Continue the lvm setup.
+vgcreate system_and_data /dev/sda1
+vgdisplay
+yes | lvcreate -L "$nixos_partition_size" system_and_data -n nixos || true
+yes | lvcreate -l 100%FREE system_and_data -n data || true
+lvdisplay
+mkfs.ext4 -L nixos /dev/system_and_data/nixos
+mkfs.ext4 -L data /dev/system_and_data/data
+# Print the result
+lsblk -o name,mountpoint,label,size,uuid

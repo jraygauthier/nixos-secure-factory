@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
+. "$common_factory_install_libexec_dir/app_current_device_store.sh"
+device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+
+# echo "$yaml_str" > "$device_cfg_repo_root_dir/.current_device.yaml"
+
+# TODO: When vm, consider releasing vm ressources as well.

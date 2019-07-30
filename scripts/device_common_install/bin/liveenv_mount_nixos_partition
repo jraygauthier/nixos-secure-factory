@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+mountpoint -q /mnt/ && \
+  { echo "ERROR: Nixos partition should not be mounted on \`/mnt\` for this script to work."; exit 1; }
+
+mkdir -p /mnt
+mount /dev/disk/by-label/nixos /mnt
+if parted /dev/sda -- print | grep -q ESP; then
+  mkdir -p /mnt/boot
+  mount /dev/disk/by-label/boot /mnt/boot
+fi
+# swapon /dev/sda2
+swapon -L swap
+
+ls -la "/mnt"

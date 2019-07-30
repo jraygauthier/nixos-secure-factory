@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+import sys
+import os
+import readline
+from argparse import ArgumentParser
+from itertools import count
+
+parser = ArgumentParser()
+parser.add_argument(
+    '-p', action='store', dest='prompt', type=str, default="")
+parser.add_argument(
+    '-of', action='store', dest='out_filename', type=str)
+parser.add_argument(
+    '-dc', action='store', dest='default_choices',
+    type=str, default=None, nargs='*')
+parser.add_argument(
+    '-s', '--strict', action='store_true', dest='strict_choice')
+parser.add_argument(
+    '-rc', '--retry-count',
+    type=int, dest='retry_count', default=1)
+opts = parser.parse_args()
+prompt = opts.prompt
+default_choices = set(opts.default_choices)
+out_filename = opts.out_filename
+strict_choice = opts.strict_choice
+retry_count = opts.retry_count
+
+
+def completer(text, state):
+    options = [x for x in default_choices if x.startswith(text)]
+    try:
+        return options[state]
+    except IndexError:
+        return None
+
+
+readline.set_completer(completer)
+readline.parse_and_bind("tab: complete")
+
+try:
+    infinite_retries = retry_count is None or retry_count <= 0
+    retries = count() if infinite_retries else range(0, retry_count)
+
+    for _ in retries:
+        user_in = input(prompt)
+
+        if strict_choice and user_in not in default_choices:
+            print("ERROR: '{}' not part of strict choice set: {}.".format(
+                user_in, default_choices), file=sys.stderr)
+        else:
+            out_str = "{}\n".format(user_in)
+
+            if out_filename is None:
+                print(out_str)
+            else:
+                with open(out_filename, 'w') as f:
+                    f.write(out_str)
+            sys.exit(0)
+
+    sys.exit(1)
+except KeyboardInterrupt:
+    # raise
+    sys.exit(130)

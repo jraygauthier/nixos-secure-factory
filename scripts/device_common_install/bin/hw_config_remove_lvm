@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+. "$device_common_install_libexec_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# This small script allow one to remove any lvm
+# entities which might prevent one from partitionning
+# or formating the drives (failing with "device busy"
+# errors).
+
+yes | lvremove /dev/system_and_data/nixos || true
+yes | lvremove /dev/system_and_data/data || true
+yes | vgremove /dev/system_and_data || true
+yes | pvremove /dev/sda1 || true

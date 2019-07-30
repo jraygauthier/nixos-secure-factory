@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+default_pkg_dir=`cd "$(dirname $0)/.." > /dev/null;pwd`
+if test -z ${PKG_NIXOS_DEVICE_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR+x}; then
+  lib_dir="$default_pkg_dir/libexec"
+else
+  lib_dir="$PKG_NIXOS_DEVICE_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR/libexec"
+fi
+echo "$lib_dir"

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+nixos-install --no-root-passwd

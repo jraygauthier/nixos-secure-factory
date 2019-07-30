@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
+. "$common_factory_install_libexec_dir/app_current_device.sh"
+
+cmd="$1"
+run_cmd_as_device_root "$cmd"

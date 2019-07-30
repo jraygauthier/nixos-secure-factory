@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
+. "$common_factory_install_libexec_dir/app_current_device_store.sh"
+. "$common_factory_install_libexec_dir/app_current_device.sh"
+
+read_or_prompt_for_current_device__hostname "device_hostname"
+read_or_prompt_for_current_device__ssh_port "device_ssh_port"
+
+ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
+
+echo " -> ssh${ssh_port_args} root@${device_hostname}"
+ssh${ssh_port_args} root@${device_hostname}

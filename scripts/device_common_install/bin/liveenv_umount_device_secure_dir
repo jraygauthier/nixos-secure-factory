@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+. "$device_common_install_libexec_dir/app_device_secrets.sh"
+umount_device_secure_dir_impl
