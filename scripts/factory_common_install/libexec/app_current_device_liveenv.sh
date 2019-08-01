@@ -7,10 +7,11 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 
 mount_liveenv_nixos_partitions() {
   print_title_lvl1 "Mounting nixos partitions in the liveenv"
+  run_cmd_as_device_root "liveenv_mount_nixos_partition"
 }
 
 
 umount_liveenv_nixos_partitions() {
   print_title_lvl1 "Unmounting nixos partitions in the liveenv"
-
+  run_cmd_as_device_root "liveenv_umount_nixos_partition"
 }
