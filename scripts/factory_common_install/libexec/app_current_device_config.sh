@@ -133,50 +133,69 @@ grant_factory_ssh_access_to_production_device() {
 
 
 build_device_config() {
+  print_title_lvl2 "Building device configuration"
+
+  local out_var_name="$1"
+
   local device_id
   device_id="$(get_required_current_device_id)" || return 1
 
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  local nix_build_stdout
-  nix_build_stdout="$(nix-build --no-out-link \
-    "$device_cfg_repo_root_dir/release.nix" \
-    --argstr device_identifier "$device_id")" || return 1
+  local tmpdir
+  tmpdir="$(mktemp -d)"
 
-  local cfg_closure
-  cfg_closure="$(echo "$nix_build_stdout" | tail -n 1)"
+  local outLink="$tmpdir/system"
 
-  echo "$cfg_closure"
-}
+  nix build --out-link "$outLink" \
+    -f "$device_cfg_repo_root_dir/release.nix" \
+    --argstr device_identifier "$device_id" \
+    || { rm -rf "$tmpdir"; return 1; }
 
+  local out_val
+  out_val=$(readlink -f "$outLink") \
+    || { rm -rf "$tmpdir"; return 1; }
 
-_build_device_config_system_closure_impl() {
-  local cfg_closure="$1"
+  rm -rf "$tmpdir"
 
-  nix-build ${cfg_closure}/pinned_nixos \
-      -I nixpkgs=${cfg_closure}/pinned_nixpkgs \
-      -I nixos-config=${cfg_closure}/configuration.nix \
-      -A system --no-out-link
-  # -A config.system.build
+  eval "$out_var_name='$out_val'"
 }
 
 
 # shellcheck disable=2120 # Optional arguments.
 build_device_config_system_closure() {
-  local cfg_closure="${1:-}"
+  print_title_lvl2 "Building device configuration system closure"
+  local out_var_name="$1"
+  local cfg_closure="${2:-}"
 
-  cfg_closure="$(build_device_config)"
+  if [[ -z "$cfg_closure" ]]; then
+    build_device_config "cfg_closure"
+  fi
 
-  local nix_build_stdout
-  nix_build_stdout="$(_build_device_config_system_closure_impl "$cfg_closure")" || return 1
+  local tmpdir
+  tmpdir="$(mktemp -d)"
 
-  local system_closure
-  system_closure="$(echo "$nix_build_stdout" | tail -n 1)"
-  echo "$system_closure"
+  local outLink="$tmpdir/system"
+
+  nix build \
+    --out-link "$outLink" \
+    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
+    -I "nixos-config=${cfg_closure}/configuration.nix" \
+    -f "${cfg_closure}/pinned_nixos" system \
+    || { rm -rf "$tmpdir"; return 1; }
+
+  local out_val
+  out_val=$(readlink -f "$outLink") \
+    || { rm -rf "$tmpdir"; return 1; }
+  rm -rf "$tmpdir"
+
+  eval "$out_var_name='$out_val'"
 }
 
+
 sent_config_closure_to_device() {
+  print_title_lvl2 "Sending configuration closure to device"
   local cfg_closure="$1"
   # copy_nix_closure_to_device "$cfg_closure"
   # nix copy --to file:///mnt "$cfg_closure"
@@ -190,15 +209,15 @@ sent_config_closure_to_device() {
   ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
   NIX_SSHOPTS="${ssh_port_args}" \
     nix copy --to "ssh://root@${device_hostname}" "$cfg_closure"
-  # NIX_OTHER_STORES
-  # --option use-ssh-substituter
 }
 
 
-_REMOTE_NIX_STORE_ROOT="/mnt/other"
+# _REMOTE_NIX_STORE_ROOT="/mnt/other"
+_REMOTE_NIX_STORE_ROOT="/mnt"
 
 
 sent_system_closure_to_device() {
+  print_title_lvl2 "Sending system closure to device"
   local system_closure="$1"
   # copy_nix_closure_to_device "$cfg_closure"
   # nix copy --to file:///mnt "$cfg_closure"
@@ -212,23 +231,39 @@ sent_system_closure_to_device() {
   ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
   NIX_SSHOPTS="${ssh_port_args}" \
     nix copy --to "ssh://root@${device_hostname}?remote-store=local?root=${_REMOTE_NIX_STORE_ROOT}" "$system_closure"
-  # NIX_OTHER_STORES
-  # --option use-ssh-substituter
 }
 
 install_config_to_device() {
+  print_title_lvl2 "Installing device configuration on device"
   local cfg_closure="$1"
-  run_cmd_as_device_root "mkdir -m 700 -p '/mnt/etc/nixos'"
-  run_cmd_as_device_root "unlink '/mnt/etc/nixos/configuration.nix' || true"
-  run_cmd_as_device_root "ln -s -T '$cfg_closure/configuration.nix' '/mnt/etc/nixos/configuration.nix'"
-  run_cmd_as_device_root "NIX_OTHER_STORES='$_REMOTE_NIX_STORE_ROOT/nix' nixos-install --no-root-passwd -I 'nixpkgs=${cfg_closure}/pinned_nixpkgs' -I 'nixos=${cfg_closure}/pinned_nixos' -I 'nixos-config=${cfg_closure}/configuration.nix'"
+
+  local cmd
+  cmd=$(cat <<EOF
+    NIXOS_CONFIG="$cfg_closure/configuration.nix" \
+      nixos-install \
+        --no-root-passwd --no-channel-copy \
+        -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
+        -I "nixos=${cfg_closure}/pinned_nixos" \
+        -I "nixos-config=${cfg_closure}/configuration.nix"
+EOF
+)
+  run_cmd_as_device_root "$cmd"
 }
 
 
 install_system_closure_to_device() {
+  print_title_lvl2 "Installing system closure on device"
   local system_closure="$1"
-  # run_cmd_as_device_root "nixos-install -I 'nixos-config=${cfg_closure}/configuration.nix'"
-  run_cmd_as_device_root "NIX_OTHER_STORES='$_REMOTE_NIX_STORE_ROOT/nix' nixos-install --no-root-passwd --system '${system_closure}'"
+
+  local cmd
+  cmd=$(cat <<EOF
+    nixos-install \
+      --substituters "$_REMOTE_NIX_STORE_ROOT" \
+      --no-root-passwd --no-channel-copy \
+      --system "$system_closure"
+EOF
+)
+  run_cmd_as_device_root "$cmd"
 }
 
 
@@ -237,14 +272,11 @@ build_and_deploy_device_config() {
 
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
-  local cfg_closure
-  cfg_closure="$(build_device_config)"
   local system_closure
-  system_closure="$(build_device_config_system_closure "$cfg_closure")"
+  build_device_config_system_closure "system_closure" ""
   mount_liveenv_nixos_partitions
   sent_system_closure_to_device "$system_closure"
-  sent_config_closure_to_device "$cfg_closure"
-  install_config_to_device "$cfg_closure"
+  install_system_closure_to_device "$system_closure"
 }
 
 
@@ -253,13 +285,9 @@ build_and_deploy_device_config_alt() {
 
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
-  local system_closure
-  system_closure="$(build_device_config_system_closure "")"
+  local cfg_closure
+  build_device_config "cfg_closure"
   mount_liveenv_nixos_partitions
-  sent_system_closure_to_device "$system_closure"
-  install_system_closure_to_device "$system_closure"
+  sent_config_closure_to_device "$cfg_closure"
+  install_config_to_device "$cfg_closure"
 }
-
-
-
-

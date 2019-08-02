@@ -17,9 +17,9 @@ read_or_prompt_for_current_device__hostname() {
   fi
 
   # TODO: auto -> retrieve from backend (e.g.: vbox backend).
-
-  # hostname="localhost"
-  # ssh_port="2222"
+  if [[ "$out" == "auto" ]]; then
+    out="localhost"
+  fi
 
   if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
     prompt_for_mandatory_parameter "$out_varname" "hostname"
@@ -37,6 +37,9 @@ read_or_prompt_for_current_device__ssh_port() {
   fi
 
   # TODO: auto -> retrieve from backend (e.g.: vbox backend).
+  if [[ "$out" == "auto" ]]; then
+    out="2222"
+  fi
 
   if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
     prompt_for_optional_parameter "$out_varname" "ssh_port"
@@ -67,19 +70,20 @@ copy_nix_closure_to_device() {
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
 
-  local runtime_deps_store_paths
-  echo "nix-store -q --references '$store_path'"
-  runtime_deps_store_paths="$(nix-store -q --references "$store_path")"
+  # local runtime_deps_store_paths
+  # echo "nix-store -q --references '$store_path'"
+  # runtime_deps_store_paths="$(nix-store -q --references "$store_path")"
 
-  echo "runtime_deps_store_paths:"
-  echo "$runtime_deps_store_paths" | awk '{ print "  "$0}'
+  # echo "runtime_deps_store_paths:"
+  # echo "$runtime_deps_store_paths" | awk '{ print "  "$0}'
 
-  local ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
+  local ssh_port_args
+  ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
 
-  echo "NIX_SSHOPTS='${ssh_port_args}' nix-copy-closure --to root@${device_hostname} '\$runtime_deps_store_paths'"
+  echo "NIX_SSHOPTS='${ssh_port_args}' nix copy --to root@${device_hostname} '\$store_path'"
   export NIX_SSHOPTS="${ssh_port_args}"
-  # echo "$runtime_deps_store_paths" | xargs nix-copy-closure --to root@${device_hostname}
-  echo "$store_path" | xargs nix-copy-closure --to root@${device_hostname}
+  # echo "$runtime_deps_store_paths" | xargs nix copy --to root@${device_hostname}
+  echo "$store_path" | xargs nix copy --to "ssh://root@${device_hostname}"
 }
 
 
@@ -102,7 +106,7 @@ build_nix_derivation_locally_and_install_it_on_device() {
 }
 
 
-deploy_factory_ssh_id_to_device_impl() {
+deploy_factory_ssh_id_to_device() {
   print_title_lvl1 "Deploy factory ssh id to device."
 
   local device_hostname
