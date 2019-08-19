@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
 . "$common_factory_install_libexec_dir/prompt.sh"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"

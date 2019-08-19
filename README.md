@@ -125,10 +125,10 @@ device configurations. Specific device factories are required to:
 
     The following helpers can optionally be provided as well:
 
-     -  `factory_repos_sync_dependencies`: reponsible to clone / synchronize
+     -  `factory_repos_update_dependencies`: reponsible to clone / synchronize
         the repo on which `my_factory_install`.
 
-     -  `factory_repos_sync`: reponsible to clone / synchronize all the
+     -  `factory_repos_update`: reponsible to clone / synchronize all the
         repositories including `my_factory_install`.
 
      -  `factory_repos_init_mr_config`: responsible to create a `.mrconfig`

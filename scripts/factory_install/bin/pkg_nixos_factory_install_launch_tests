@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euf -o pipefail
 factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_install_get_libexec_dir")"
 
 

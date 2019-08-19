@@ -212,13 +212,18 @@ sent_config_closure_to_device() {
 }
 
 
-# _REMOTE_NIX_STORE_ROOT="/mnt/other"
-_REMOTE_NIX_STORE_ROOT="/mnt"
+sent_initial_config_closure_to_device() {
+  sent_config_closure_to_device "$1"
+}
 
 
-sent_system_closure_to_device() {
-  print_title_lvl2 "Sending system closure to device"
+# _REMOTE_LIVEENV_NIX_STORE_ROOT="/mnt/other"
+_REMOTE_LIVEENV_NIX_STORE_ROOT="/mnt"
+
+
+_send_system_closure_to_device_impl() {
   local system_closure="$1"
+  local remote="$2"
   # copy_nix_closure_to_device "$cfg_closure"
   # nix copy --to file:///mnt "$cfg_closure"
 
@@ -230,8 +235,41 @@ sent_system_closure_to_device() {
   local ssh_port_args
   ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
   NIX_SSHOPTS="${ssh_port_args}" \
-    nix copy --to "ssh://root@${device_hostname}?remote-store=local?root=${_REMOTE_NIX_STORE_ROOT}" "$system_closure"
+    nix copy --to "$remote" "$system_closure"
 }
+
+
+send_initial_system_closure_to_device() {
+  print_title_lvl2 "Sending initial system closure to device"
+  local remote="ssh://root@${device_hostname}?remote-store=local?root=${_REMOTE_LIVEENV_NIX_STORE_ROOT}"
+  _send_system_closure_to_device_impl "$1" "$remote"
+}
+
+
+send_system_closure_to_device() {
+  print_title_lvl2 "Sending system closure to device"
+  local remote="ssh://root@${device_hostname}"
+  _send_system_closure_to_device_impl "$1" "$remote"
+}
+
+
+install_initial_config_to_device() {
+  print_title_lvl2 "Installing initial device configuration on device"
+  local cfg_closure="$1"
+
+  local cmd
+  cmd=$(cat <<EOF
+NIXOS_CONFIG="$cfg_closure/configuration.nix" \
+  nixos-install \
+    --no-root-passwd --no-channel-copy \
+    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
+    -I "nixos=${cfg_closure}/pinned_nixos" \
+    -I "nixos-config=${cfg_closure}/configuration.nix"
+EOF
+)
+  run_cmd_as_device_root "$cmd"
+}
+
 
 install_config_to_device() {
   print_title_lvl2 "Installing device configuration on device"
@@ -239,12 +277,27 @@ install_config_to_device() {
 
   local cmd
   cmd=$(cat <<EOF
-    NIXOS_CONFIG="$cfg_closure/configuration.nix" \
-      nixos-install \
-        --no-root-passwd --no-channel-copy \
-        -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
-        -I "nixos=${cfg_closure}/pinned_nixos" \
-        -I "nixos-config=${cfg_closure}/configuration.nix"
+NIXOS_CONFIG="$cfg_closure/configuration.nix" \
+  nixos-rebuild switch \
+    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
+    -I "nixos=${cfg_closure}/pinned_nixos" \
+    -I "nixos-config=${cfg_closure}/configuration.nix"
+EOF
+)
+  run_cmd_as_device_root "$cmd"
+}
+
+
+install_initial_system_closure_to_device() {
+  print_title_lvl2 "Installing initial system closure on device"
+  local system_closure="$1"
+
+  local cmd
+  cmd=$(cat <<EOF
+nixos-install \
+  --substituters "$_REMOTE_LIVEENV_NIX_STORE_ROOT" \
+  --no-root-passwd --no-channel-copy \
+  --system "$system_closure"
 EOF
 )
   run_cmd_as_device_root "$cmd"
@@ -255,32 +308,65 @@ install_system_closure_to_device() {
   print_title_lvl2 "Installing system closure on device"
   local system_closure="$1"
 
+  local profile=/nix/var/nix/profiles/system
+  local profile_name="system"
+  # local action="test"
+  # local action="dry-activate"
+  local action="switch"
+  if [ "$profile_name" != system ]; then
+    profile="/nix/var/nix/profiles/system-profiles/$1"
+    mkdir -p -m 0755 "$(dirname "$profile")"
+  fi
+
   local cmd
   cmd=$(cat <<EOF
-    nixos-install \
-      --substituters "$_REMOTE_NIX_STORE_ROOT" \
-      --no-root-passwd --no-channel-copy \
-      --system "$system_closure"
+nix-env -p "$profile" --set "$system_closure"
 EOF
 )
   run_cmd_as_device_root "$cmd"
+
+  local cmd2
+  cmd2=$(cat <<EOF
+$system_closure/bin/switch-to-configuration "$action" || \
+  { echo "warning: error(s) occurred while switching to the new configuration" >&2; exit 1; }
+EOF
+)
+
+  run_cmd_as_device_root "$cmd2"
 }
 
 
-build_and_deploy_device_config() {
-  print_title_lvl1 "Building, deploying and installing device configuration"
-
+_build_and_deploy_initial_device_config_impl() {
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local system_closure
   build_device_config_system_closure "system_closure" ""
   mount_liveenv_nixos_partitions
-  sent_system_closure_to_device "$system_closure"
+  send_initial_system_closure_to_device "$system_closure"
+  install_initial_system_closure_to_device "$system_closure"
+}
+
+
+_build_and_deploy_device_config_impl() {
+  local system_closure
+  build_device_config_system_closure "system_closure" ""
+  send_system_closure_to_device "$system_closure"
   install_system_closure_to_device "$system_closure"
 }
 
 
-build_and_deploy_device_config_alt() {
+build_and_deploy_device_config() {
+  if is_device_run_from_nixos_liveenv; then
+    print_title_lvl1 "Building, deploying and installing initial device configuration"
+    _build_and_deploy_initial_device_config_impl
+  else
+    print_title_lvl1 "Building, deploying and installing device configuration"
+    _build_and_deploy_device_config_impl
+  fi
+}
+
+
+build_and_deploy_device_config_alt_device_build_the_config_by_itself() {
   print_title_lvl1 "Building, deploying and installing device configuration (alternative method)"
 
   # Make sure current factory user has access to device via ssh.
@@ -288,6 +374,28 @@ build_and_deploy_device_config_alt() {
   local cfg_closure
   build_device_config "cfg_closure"
   mount_liveenv_nixos_partitions
-  sent_config_closure_to_device "$cfg_closure"
-  install_config_to_device "$cfg_closure"
+  sent_initial_config_closure_to_device "$cfg_closure"
+  install_initial_config_to_device "$cfg_closure"
+}
+
+
+build_and_deploy_device_config_alt() {
+  build_and_deploy_device_config_alt_device_build_the_config_by_itself
+}
+
+
+update_device_config() {
+  # TODO: Implement.
+  local cmd
+  cmd=$(cat <<EOF
+false
+EOF
+)
+  run_cmd_as_device_root "$cmd"
+}
+
+
+update_device_os() {
+  update_device_config
+  # TODO: Update secrets too.
 }

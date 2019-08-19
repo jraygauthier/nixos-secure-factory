@@ -4,38 +4,180 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 . "$common_factory_install_libexec_dir/vcs.sh"
 
 
-sync_repositories() {
+update_repositories() {
   local repo_urls="$1"
+  local branch_name="${2:-}"
 
-  # TODO: Consider using something like google repo or mr.
   local top_lvl
   top_lvl="$(get_factory_install_repo_parent_dir)"
 
-  print_title_lvl1 "Synching this project's dependencies"
-
+  print_title_lvl2 "Updating a set of repositories"
 
   for repo_url in $repo_urls; do
     local repo_name
     repo_name="$(basename "$repo_url" ".git")"
     local repo_dir="$top_lvl/$repo_name"
 
-    print_title_lvl2 "Repo: '$repo_name'"
+    print_title_lvl3 "Repo: '$repo_name'"
 
     if test -d "$repo_dir"; then
-      echo "Synching '$repo_dir' via \`pull\` from origin."
-      git -C "$repo_dir" pull || true
+      if [[ -n "$branch_name" ]]; then
+        echo "Checkout '$repo_dir' to branch '$branch_name'."
+        echo_eval "git -C '$repo_dir' checkout '$branch_name'"
+      fi
+      echo "Updating '$repo_dir' via \`pull -r\` from origin."
+      echo_eval "git -C '$repo_dir' pull -r --autostash"
     else
-      echo "Synching '$repo_dir' via \`clone\` from '$repo_url'."
-      git -C "$top_lvl" clone "$repo_url"
+      local cloned_branch_name="${branch_name:-master}"
+      echo "Updating '$repo_dir' via \`clone\` from '$repo_url' at branch '$cloned_branch_name'."
+      echo_eval "git -C '$top_lvl' clone --branch '$cloned_branch_name' '$repo_url'"
     fi
-
-    print_title_lvl3 "Repo status"
-    # git -C "$repo_dir" -c color.status=always status
-    git -C "$repo_dir" status
 
     printf -- "\n\n"
 
   done
+}
+
+
+checkout_repositories_w_stash() {
+  local repo_urls="$1"
+  local branch_name="$2"
+
+  local top_lvl
+  top_lvl="$(get_factory_install_repo_parent_dir)"
+
+  print_title_lvl2 "Checkouting a branch for a set of repositories moving uncommitted changes to target branch"
+
+  # TODO: How to restore global integrity in case of a error in stash pop?
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+    echo "Checkout '$repo_dir''s branch '$branch_name'."
+    echo_eval "git -C '$repo_dir' stash && git -C '$repo_dir' checkout '$branch_name' && git -C '$repo_dir' stash pop"
+
+    printf -- "\n\n"
+  done
+}
+
+
+checkout_repositories() {
+  local repo_urls="$1"
+  local branch_name="$2"
+
+  local top_lvl
+  top_lvl="$(get_factory_install_repo_parent_dir)"
+
+  print_title_lvl2 "Checkouting a branch for a set of repositories"
+
+  # TODO: In case of an error, checkout back to the previous branch.
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+    echo "Checkout '$repo_dir''s branch '$branch_name'."
+    echo_eval "git -C '$repo_dir' checkout '$branch_name'"
+
+    printf -- "\n\n"
+  done
+}
+
+
+print_repositories_status() {
+  local repo_urls="$1"
+
+  local top_lvl
+  top_lvl="$(get_factory_install_repo_parent_dir)"
+
+  print_title_lvl2 "Printing the status of a set of repositories"
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+
+    echo_eval "git -C '$repo_dir' status"
+
+    printf -- "\n\n"
+
+  done
+}
+
+
+push_repositories() {
+  local repo_urls="$1"
+
+  local top_lvl
+  top_lvl="$(get_factory_install_repo_parent_dir)"
+
+  print_title_lvl2 "Synching a set of repositories"
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+
+    echo "Pushing '$repo_dir' to tracked remote."
+    echo_eval "git -C '$repo_dir' push"
+
+    printf -- "\n\n"
+
+  done
+}
+
+
+sync_repositories() {
+  local repo_urls="$1"
+  local branch_name="${2:-}"
+  update_repositories "$repo_urls" "$branch_name" && \
+  push_repositories "$repo_urls"
+}
+
+
+add_and_commit_repositories() {
+  local repo_urls="$1"
+  local commit_msg="${2:-No comments}"
+
+  local top_lvl
+  top_lvl="$(get_factory_install_repo_parent_dir)"
+
+  print_title_lvl2 "Adding changes and committing to a set of repositories"
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+
+    echo_eval "git -C '$repo_dir' add ."
+    if ! git -C "$repo_dir" diff --cached --exit-code > /dev/null; then
+      # Not an error when nothing to commit
+      echo_eval "git -C '$repo_dir' commit -m '$commit_msg'"
+    fi
+
+    printf -- "\n\n"
+
+  done
+}
+
+
+add_commit_and_sync_repositories() {
+  local repo_urls="$1"
+  local commit_msg="${2:-No comments}"
+
+  add_and_commit_repositories "$repo_urls" "$commit_msg"
+  sync_repositories "$repo_urls"
 }
 
 
@@ -46,7 +188,7 @@ init_mr_config_for_repositories() {
   local top_lvl
   top_lvl="$(get_factory_install_repo_parent_dir)"
 
-  print_title_lvl1 "Creating mr config for this project's dependencies"
+  print_title_lvl2 "Creating mr config for this project's dependencies"
 
   rm -f "$top_lvl/.mrconfig"
   touch "$top_lvl/.mrconfig"
