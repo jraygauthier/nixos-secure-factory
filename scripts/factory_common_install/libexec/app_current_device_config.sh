@@ -6,7 +6,8 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   print_title_lvl3 "Removing existing factory user accesses from production devices"
 
-  local factory_user_id="$1"
+  local device_user="$1"
+  local factory_user_id="$2"
 
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
@@ -20,7 +21,8 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   if rel_pub_key_path_from_json="$(
       jq -j \
       --arg factory_user_id "$factory_user_id" \
-      '.root[$factory_user_id].public_key_file' \
+      --arg device_user "$device_user" \
+      '.[$device_user][$factory_user_id].public_key_file' \
       < "$json_path")" && \
       test "" != "$rel_pub_key_path_from_json" &&
       test "null" != "$rel_pub_key_path_from_json"; then
@@ -40,7 +42,8 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
     echo "$previous_json_content" | \
     jq \
     --arg factory_user_id "$factory_user_id" \
-    'del(.root[$factory_user_id])')"
+    --arg device_user "$device_user" \
+    'del(.[$device_user][$factory_user_id])')"
 
   echo "Removing '$factory_user_id' factory user from '$rel_json_path_from_root'."
   echo "echo '\$json_content' > '$json_path'"
@@ -54,12 +57,15 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
 deny_factory_ssh_access_to_production_device() {
   print_title_lvl2 "Denying factory user access to production devices via ssh"
 
-  local factory_user_id="${1:-}"
+  # All users by default.
+  local device_user="${1:-}"
+  local factory_user_id="${2:-}"
+
   if test "" == "$factory_user_id"; then
     factory_user_id="$(get_required_factory_info__user_id)"
   fi
 
-  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id"
+  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
 }
 
 
@@ -67,7 +73,10 @@ deny_factory_ssh_access_to_production_device() {
 grant_factory_ssh_access_to_production_device() {
   print_title_lvl2 "Granting factory user access to production devices via ssh"
 
-  local factory_user_id="${1:-}"
+  # All users by default.
+  local device_user="${1:-}"
+  local factory_user_id="${2:-}"
+
   if test "" == "$factory_user_id"; then
     factory_user_id="$(get_required_factory_info__user_id)"
   fi
@@ -75,7 +84,7 @@ grant_factory_ssh_access_to_production_device() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id"
+  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id" "$device_user"
 
   local device_access_ssh_dir="$device_cfg_repo_root_dir/device_access/ssh"
   local rel_ssh_dir_from_root="device_access/ssh"
@@ -86,7 +95,8 @@ grant_factory_ssh_access_to_production_device() {
   if rel_pub_key_path_from_json="$(
       jq -j \
       --arg factory_user_id "$factory_user_id" \
-      '.root[$factory_user_id].public_key_file' \
+      --arg device_user "$device_user" \
+      '.[$device_user][$factory_user_id].public_key_file' \
       < "$json_path")" && test "" != "$rel_pub_key_path_from_json"; then
     echo "Factory user already had access to the device. Will update the ssh public key."
     echo_eval "rm -f '$device_access_ssh_dir/$rel_pub_key_path_from_json'"
@@ -114,8 +124,9 @@ grant_factory_ssh_access_to_production_device() {
   json_content="$(
     echo "$previous_json_content" | jq \
     --arg factory_user_id "$factory_user_id" \
+    --arg device_user "$device_user" \
     --arg rel_pub_key_path_from_json "$rel_pub_key_path_from_json" \
-    '.root[$factory_user_id].public_key_file = $rel_pub_key_path_from_json')"
+    '.[$device_user][$factory_user_id].public_key_file = $rel_pub_key_path_from_json')"
 
   rel_pub_key_path_from_root="$rel_ssh_dir_from_root/$rel_pub_key_path_from_json"
 

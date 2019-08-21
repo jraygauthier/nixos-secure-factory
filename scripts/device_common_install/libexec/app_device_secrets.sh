@@ -181,7 +181,9 @@ _install_root_host_ssh_identity() {
   local rx_openssh_homedir
   rx_openssh_homedir="$(get_expected_factory_sent_host_ssh_homedir)"
 
-  mkdir -m 0755 -p "$open_ssh_cfg_dir"
+  mkdir -p "$open_ssh_cfg_dir"
+  # Make sure the directory has the proper access rights.
+  chmod 0755 "$open_ssh_cfg_dir"
 
   for kt in $(list_expected_device_host_ssh_key_types); do
     local key_basename
@@ -207,7 +209,7 @@ install_device_host_ssh_identity() {
 
   local open_ssh_cfg_dir
   open_ssh_cfg_dir="/mnt/$(get_rel_host_ssh_homedir)"
-  _install_root_user_ssh_identity "$open_ssh_cfg_dir"
+  _install_root_host_ssh_identity "$open_ssh_cfg_dir"
 }
 
 
@@ -223,7 +225,9 @@ _install_root_user_ssh_identity() {
   local rx_root_ssh_homedir
   rx_root_ssh_homedir="$(get_expected_factory_sent_root_user_ssh_homedir)"
 
-  mkdir -m 0700 -p "$root_user_ssh_dir"
+  mkdir -p "$root_user_ssh_dir"
+  # Make sure the directory has the proper access rights.
+  chmod 0700 "$root_user_ssh_dir"
 
   for kt in $(list_expected_device_root_user_ssh_key_types); do
     local key_basename="id_${kt}"
