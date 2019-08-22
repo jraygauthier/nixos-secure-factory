@@ -147,6 +147,7 @@ build_device_config() {
   print_title_lvl2 "Building device configuration"
 
   local out_var_name="$1"
+  local config_name="${2:-release}"
 
   local device_id
   device_id="$(get_required_current_device_id)" || return 1
@@ -160,7 +161,7 @@ build_device_config() {
   local outLink="$tmpdir/system"
 
   nix build --out-link "$outLink" \
-    -f "$device_cfg_repo_root_dir/release.nix" \
+    -f "$device_cfg_repo_root_dir/${config_name}.nix" \
     --argstr device_identifier "$device_id" \
     || { rm -rf "$tmpdir"; return 1; }
 
@@ -178,10 +179,11 @@ build_device_config() {
 build_device_config_system_closure() {
   print_title_lvl2 "Building device configuration system closure"
   local out_var_name="$1"
-  local cfg_closure="${2:-}"
+  local config_name="${2:-release}"
+  local cfg_closure="${3:-}"
 
   if [[ -z "$cfg_closure" ]]; then
-    build_device_config "cfg_closure"
+    build_device_config "cfg_closure" "$config_name"
   fi
 
   local tmpdir
@@ -191,9 +193,9 @@ build_device_config_system_closure() {
 
   nix build \
     --out-link "$outLink" \
-    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
+    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
     -I "nixos-config=${cfg_closure}/configuration.nix" \
-    -f "${cfg_closure}/pinned_nixos" system \
+    -f "${cfg_closure}/nixos_src" system \
     || { rm -rf "$tmpdir"; return 1; }
 
   local out_val
@@ -273,8 +275,8 @@ install_initial_config_to_device() {
 NIXOS_CONFIG="$cfg_closure/configuration.nix" \
   nixos-install \
     --no-root-passwd --no-channel-copy \
-    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
-    -I "nixos=${cfg_closure}/pinned_nixos" \
+    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
+    -I "nixos=${cfg_closure}/nixos_src" \
     -I "nixos-config=${cfg_closure}/configuration.nix"
 EOF
 )
@@ -290,8 +292,8 @@ install_config_to_device() {
   cmd=$(cat <<EOF
 NIXOS_CONFIG="$cfg_closure/configuration.nix" \
   nixos-rebuild switch \
-    -I "nixpkgs=${cfg_closure}/pinned_nixpkgs" \
-    -I "nixos=${cfg_closure}/pinned_nixos" \
+    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
+    -I "nixos=${cfg_closure}/nixos_src" \
     -I "nixos-config=${cfg_closure}/configuration.nix"
 EOF
 )
@@ -348,10 +350,12 @@ EOF
 
 
 _build_and_deploy_initial_device_config_impl() {
+  local config_name="${1:-release}"
+
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local system_closure
-  build_device_config_system_closure "system_closure" ""
+  build_device_config_system_closure "system_closure" "$config_name" ""
   mount_liveenv_nixos_partitions
   send_initial_system_closure_to_device "$system_closure"
   install_initial_system_closure_to_device "$system_closure"
@@ -359,20 +363,22 @@ _build_and_deploy_initial_device_config_impl() {
 
 
 _build_and_deploy_device_config_impl() {
+  local config_name="${1:-release}"
   local system_closure
-  build_device_config_system_closure "system_closure" ""
+  build_device_config_system_closure "system_closure" "$config_name" ""
   send_system_closure_to_device "$system_closure"
   install_system_closure_to_device "$system_closure"
 }
 
 
 build_and_deploy_device_config() {
+  local config_name="${1:-release}"
   if is_device_run_from_nixos_liveenv; then
     print_title_lvl1 "Building, deploying and installing initial device configuration"
-    _build_and_deploy_initial_device_config_impl
+    _build_and_deploy_initial_device_config_impl "$config_name"
   else
     print_title_lvl1 "Building, deploying and installing device configuration"
-    _build_and_deploy_device_config_impl
+    _build_and_deploy_device_config_impl "$config_name"
   fi
 }
 
@@ -380,10 +386,12 @@ build_and_deploy_device_config() {
 build_and_deploy_device_config_alt_device_build_the_config_by_itself() {
   print_title_lvl1 "Building, deploying and installing device configuration (alternative method)"
 
+  local config_name="${1:-release}"
+
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local cfg_closure
-  build_device_config "cfg_closure"
+  build_device_config "cfg_closure" "$config_name"
   mount_liveenv_nixos_partitions
   sent_initial_config_closure_to_device "$cfg_closure"
   install_initial_config_to_device "$cfg_closure"
@@ -391,7 +399,8 @@ build_and_deploy_device_config_alt_device_build_the_config_by_itself() {
 
 
 build_and_deploy_device_config_alt() {
-  build_and_deploy_device_config_alt_device_build_the_config_by_itself
+  local config_name="${1:-release}"
+  build_and_deploy_device_config_alt_device_build_the_config_by_itself "$config_name"
 }
 
 

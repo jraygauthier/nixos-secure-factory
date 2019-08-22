@@ -234,6 +234,14 @@ prompt_for_device_optional__x() {
 }
 
 
+print_current_device_state() {
+  local store_yaml
+  store_yaml="$(get_current_device_store_yaml_filename)"
+  print_title_lvl1 "Current device state"
+  cat "$store_yaml"
+}
+
+
 init_new_current_device_state() {
   local store_yaml
   store_yaml="$(get_current_device_store_yaml_filename)"
