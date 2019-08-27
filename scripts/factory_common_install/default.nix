@@ -1,6 +1,7 @@
 { stdenv
 , makeWrapper
 , nixos-common-install-scripts
+, nixos-device-system-update
 , openssh
 , yq
 , sshfs-fuse
@@ -28,6 +29,7 @@ stdenv.mkDerivation rec {
 
   propagatedUserEnvPkgs = [
     nixos-common-install-scripts
+    nixos-device-system-update
   ];
 
   propagatedBuildInputs = [
@@ -36,6 +38,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     nixos-common-install-scripts
+    nixos-device-system-update
     mr # Simplifies working with multiple repos.
 
     # TODO: Consider removing the openssh dep as the nix

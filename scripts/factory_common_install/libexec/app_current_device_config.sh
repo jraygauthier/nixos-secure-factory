@@ -3,6 +3,10 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 
+device_system_update_libexec_dir="$(pkg_nixos_device_system_update_get_libexec_dir)"
+. "$device_system_update_libexec_dir/device_system_config.sh"
+
+
 _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   print_title_lvl3 "Removing existing factory user accesses from production devices"
 
@@ -143,8 +147,8 @@ grant_factory_ssh_access_to_production_device() {
 }
 
 
-build_device_config() {
-  print_title_lvl2 "Building device configuration"
+build_current_device_config() {
+  print_title_lvl2 "Building current device configuration"
 
   local out_var_name="$1"
   local config_name="${2:-release}"
@@ -155,55 +159,24 @@ build_device_config() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  local tmpdir
-  tmpdir="$(mktemp -d)"
+  local config_filename="$device_cfg_repo_root_dir/${config_name}.nix"
 
-  local outLink="$tmpdir/system"
-
-  nix build --out-link "$outLink" \
-    -f "$device_cfg_repo_root_dir/${config_name}.nix" \
-    --argstr device_identifier "$device_id" \
-    || { rm -rf "$tmpdir"; return 1; }
-
-  local out_val
-  out_val=$(readlink -f "$outLink") \
-    || { rm -rf "$tmpdir"; return 1; }
-
-  rm -rf "$tmpdir"
-
-  eval "$out_var_name='$out_val'"
+  build_device_config "$out_var_name" "$config_filename" "$device_id"
 }
 
 
 # shellcheck disable=2120 # Optional arguments.
-build_device_config_system_closure() {
-  print_title_lvl2 "Building device configuration system closure"
+build_current_device_config_system_closure() {
+  print_title_lvl2 "Building current device configuration system closure"
   local out_var_name="$1"
   local config_name="${2:-release}"
   local cfg_closure="${3:-}"
 
   if [[ -z "$cfg_closure" ]]; then
-    build_device_config "cfg_closure" "$config_name"
+    build_current_device_config "cfg_closure" "$config_name"
   fi
 
-  local tmpdir
-  tmpdir="$(mktemp -d)"
-
-  local outLink="$tmpdir/system"
-
-  nix build \
-    --out-link "$outLink" \
-    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
-    -I "nixos-config=${cfg_closure}/configuration.nix" \
-    -f "${cfg_closure}/nixos_src" system \
-    || { rm -rf "$tmpdir"; return 1; }
-
-  local out_val
-  out_val=$(readlink -f "$outLink") \
-    || { rm -rf "$tmpdir"; return 1; }
-  rm -rf "$tmpdir"
-
-  eval "$out_var_name='$out_val'"
+  build_device_config_system_closure "$out_var_name" "$cfg_closure"
 }
 
 
@@ -316,46 +289,13 @@ EOF
   run_cmd_as_device_root "$cmd"
 }
 
-
-install_system_closure_to_device() {
-  print_title_lvl2 "Installing system closure on device"
-  local system_closure="$1"
-
-  local profile=/nix/var/nix/profiles/system
-  local profile_name="system"
-  # local action="test"
-  # local action="dry-activate"
-  local action="switch"
-  if [ "$profile_name" != system ]; then
-    profile="/nix/var/nix/profiles/system-profiles/$1"
-    mkdir -p -m 0755 "$(dirname "$profile")"
-  fi
-
-  local cmd
-  cmd=$(cat <<EOF
-nix-env -p "$profile" --set "$system_closure"
-EOF
-)
-  run_cmd_as_device_root "$cmd"
-
-  local cmd2
-  cmd2=$(cat <<EOF
-$system_closure/bin/switch-to-configuration "$action" || \
-  { echo "warning: error(s) occurred while switching to the new configuration" >&2; exit 1; }
-EOF
-)
-
-  run_cmd_as_device_root "$cmd2"
-}
-
-
 _build_and_deploy_initial_device_config_impl() {
   local config_name="${1:-release}"
 
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local system_closure
-  build_device_config_system_closure "system_closure" "$config_name" ""
+  build_current_device_config_system_closure "system_closure" "$config_name" ""
   mount_liveenv_nixos_partitions
   send_initial_system_closure_to_device "$system_closure"
   install_initial_system_closure_to_device "$system_closure"
@@ -365,7 +305,7 @@ _build_and_deploy_initial_device_config_impl() {
 _build_and_deploy_device_config_impl() {
   local config_name="${1:-release}"
   local system_closure
-  build_device_config_system_closure "system_closure" "$config_name" ""
+  build_current_device_config_system_closure "system_closure" "$config_name" ""
   send_system_closure_to_device "$system_closure"
   install_system_closure_to_device "$system_closure"
 }
@@ -391,7 +331,7 @@ build_and_deploy_device_config_alt_device_build_the_config_by_itself() {
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local cfg_closure
-  build_device_config "cfg_closure" "$config_name"
+  build_current_device_config "cfg_closure" "$config_name"
   mount_liveenv_nixos_partitions
   sent_initial_config_closure_to_device "$cfg_closure"
   install_initial_config_to_device "$cfg_closure"
