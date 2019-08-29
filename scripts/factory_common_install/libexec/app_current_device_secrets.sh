@@ -13,6 +13,7 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 . "$common_factory_install_libexec_dir/app_factory_secrets.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 
+
 # From deps libs.
 common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
 . "$common_install_libexec_dir/device_secrets.sh"
@@ -216,6 +217,13 @@ _check_device_factory_only_secret_files() {
 
 
 _get_device_factory_sent_secret_dir() {
+  if ! is_device_run_from_nixos_liveenv; then
+    # Target device is nixos so we can assume the run keys dir
+    # is available.
+    get_installed_device_factory_sent_secret_dir
+    return 0
+  fi
+
   local secret_dir
   if ! secret_dir="$(run_cmd_as_device_root 'os_secrets_get_secret_dir')"; then
     1>&2 echo "ERROR: _get_device_factory_sent_secret_dir: There was an error retriver the device's secret directory."
@@ -439,6 +447,17 @@ ls_device_secrets_groups_by_id() {
 }
 
 
+ls_matching_device_secrets_groups_by_id() {
+  local search_str="${1:-}"
+  if [[ -n "$search_str" ]]; then
+    ls_device_secrets_groups_by_id | grep "$search_str"
+  else
+    # Print all secrets groups when no search str provided.
+    ls_device_secrets_groups_by_id
+  fi
+}
+
+
 ls_device_secrets_ops_by_id() {
   echo "ls"
   # echo "rm_no_prompt"
@@ -449,29 +468,32 @@ ls_device_secrets_ops_by_id() {
 }
 
 
-_run_device_secrets_op_on_all_sgroups() {
-  op_id="$1"
-  for sg in $(ls_device_secrets_groups_by_id); do
+
+_run_device_secrets_op_on_matchin_sgroups() {
+  local op_id="$1"
+  local search_str="${2:-}"
+
+  for sg in $(ls_matching_device_secrets_groups_by_id "$search_str"); do
     ${op_id}_device_${sg} || exit 1
   done
 }
 
 
 ls_device_secrets() {
-  _run_device_secrets_op_on_all_sgroups "ls"
+  _run_device_secrets_op_on_matchin_sgroups "ls" "$@"
 }
 
 
 rm_no_prompt_device_secrets_prim() {
   print_title_lvl2 "Removing device secrets from the vault."
-  # _run_device_secrets_op_on_all_sgroups "rm_no_prompt"
+  # _run_device_secrets_op_on_matchin_sgroups "rm_no_prompt"
   rm_no_prompt_device_secret_vaults
 }
 
 
 create_device_secrets_prim() {
   print_title_lvl2 "Creating device secrets to secure directory."
-  _run_device_secrets_op_on_all_sgroups "create"
+  _run_device_secrets_op_on_matchin_sgroups "create" "$@"
 
   # TODO: user passwords + hashs.
 }
@@ -480,14 +502,14 @@ create_device_secrets_prim() {
 store_device_secrets_prim() {
   print_title_lvl2 "Storing device secrets to the vault."
   mount_device_secret_vaults
-  _run_device_secrets_op_on_all_sgroups "store"
+  _run_device_secrets_op_on_matchin_sgroups "store" "$@"
 }
 
 
 load_device_secrets_prim() {
   print_title_lvl2 "Loading device secrets from the vault to secure directory."
   mount_device_secret_vaults
-  _run_device_secrets_op_on_all_sgroups "load"
+  _run_device_secrets_op_on_matchin_sgroups "load" "$@"
 
   # TODO: Check that all expected secrets are found.
 }
@@ -496,7 +518,7 @@ load_device_secrets_prim() {
 check_device_secrets_prim() {
   print_title_lvl2 "Checkout device secrets loaded from the vault to secure directory against created secrets"
   mount_device_secret_vaults
-  _run_device_secrets_op_on_all_sgroups "check"
+  _run_device_secrets_op_on_matchin_sgroups "check" "$@"
 }
 
 
@@ -508,7 +530,7 @@ grant_access_device_secrets_prim() {
 
 deploy_device_secrets_prim() {
   print_title_lvl2 "Deploying device secrets from secure directory to the device"
-  _run_device_secrets_op_on_all_sgroups "deploy"
+  _run_device_secrets_op_on_matchin_sgroups "deploy" "$@"
 }
 
 
@@ -519,24 +541,26 @@ install_device_secrets_prim() {
 
 create_device_secrets() {
   print_title_lvl1 "Creating current device secrets and storing those to the vault"
-  create_device_secrets_prim
-  store_device_secrets_prim
+  create_device_secrets_prim "$@"
+  store_device_secrets_prim "$@"
   # We explicitly reload the secrets in order acertain their presence.
-  load_device_secrets_prim
-  check_device_secrets_prim
+  load_device_secrets_prim "$@"
+  check_device_secrets_prim "$@"
   grant_access_device_secrets_prim
 }
 
 
 create_and_deploy_device_secrets() {
   print_title_lvl1 "Creating and deploying current device secrets storing them to the vault"
-  create_device_secrets_prim
-  store_device_secrets_prim
-  load_device_secrets_prim
-  check_device_secrets_prim
+  create_device_secrets_prim "$@"
+  store_device_secrets_prim "$@"
+  load_device_secrets_prim "$@"
+  check_device_secrets_prim "$@"
   grant_access_device_secrets_prim
-  mount_liveenv_nixos_partitions
-  deploy_device_secrets_prim
+  if is_device_run_from_nixos_liveenv; then
+    mount_liveenv_nixos_partitions
+  fi
+  deploy_device_secrets_prim "$@"
   install_device_secrets_prim
   # wipe_device_secure_dir_content
 }
@@ -555,20 +579,30 @@ rm_device_secrets() {
 
 deploy_device_secrets() {
   print_title_lvl1 "Deploying current device secrets to the device"
-  load_device_secrets_prim
-  mount_liveenv_nixos_partitions
-  deploy_device_secrets_prim
+  load_device_secrets_prim "$@"
+  if is_device_run_from_nixos_liveenv; then
+    mount_liveenv_nixos_partitions
+  fi
+  deploy_device_secrets_prim "$@"
   install_device_secrets_prim
   # wipe_device_secure_dir_content
 }
 
 
 deploy_no_install_device_secrets() {
-  print_title_lvl1 "Deploying current device secrets to the device"
-  load_device_secrets_prim
-  mount_liveenv_nixos_partitions
-  deploy_device_secrets_prim
+  print_title_lvl1 "Deploying current device secrets to the device without installing"
+  load_device_secrets_prim "$@"
+  if is_device_run_from_nixos_liveenv; then
+    mount_liveenv_nixos_partitions
+  fi
+  deploy_device_secrets_prim "$@"
   # wipe_device_secure_dir_content
+}
+
+
+install_deployed_device_secrets() {
+  print_title_lvl1 "Install already deployed device secrets"
+  install_device_secrets_prim
 }
 
 

@@ -4,7 +4,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-device-system-update-scripts";
+  pname = "nixos-device-system-config-scripts";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -14,7 +14,7 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace ./bin/pkg_nixos_device_system_update_get_libexec_dir \
+    substituteInPlace ./bin/pkg_nixos_device_system_config_get_libexec_dir \
       --replace 'default_pkg_dir/libexec' 'default_pkg_dir/${pname}/libexec' \
   '';
 

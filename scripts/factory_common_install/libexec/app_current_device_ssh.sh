@@ -158,8 +158,8 @@ deploy_factory_ssh_id_to_device() {
 }
 
 
-deploy_factory_install_scripts_to_device_impl() {
-  print_title_lvl1 "Deploy factory install script to device."
+install_factory_tools_on_device() {
+  print_title_lvl1 "Install factory tools on device."
 
   local device_type_factory_install_dir
   device_type_factory_install_dir="$(get_required_current_device_type_factory_install_root_dir)"
@@ -167,6 +167,12 @@ deploy_factory_install_scripts_to_device_impl() {
   local derivation_path="$device_type_factory_install_dir/scripts/install/env.nix"
   echo "build_nix_derivation_locally_and_install_it_on_device '$derivation_path'"
   build_nix_derivation_locally_and_install_it_on_device "$derivation_path"
+}
+
+
+uninstall_factory_tools_from_device() {
+  print_title_lvl1 "Uninstall factory tools from device."
+  run_cmd_as_device_root 'nix-env -e "nixos-device-type-install-scripts-env"'
 }
 
 

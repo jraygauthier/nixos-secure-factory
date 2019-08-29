@@ -250,7 +250,7 @@ read_livecd_iso_filename_from_default_url() {
   local DEFAULT_LIVECD_ISO_URL_HASH="12g2znf2g5x8bcfxf50lnvjjbvmn8sl4ywf2wycfq2nykpqcp69w"
   echo "read_livecd_iso_filename_from_default_url: <${DEFAULT_LIVECD_ISO_URL}>"
   if ! nix-prefetch-url "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH"; then
-    1>&2 echo "ERROR: Was unable to complete download of \`<${$DEFAULT_LIVECD_ISO_URL}>\` nixos livcd iso."
+    1>&2 echo "ERROR: Was unable to complete download of \`<${DEFAULT_LIVECD_ISO_URL}>\` nixos livcd iso."
     exit 1
   fi
   local filename="$(nix-prefetch-url --print-path "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH" | tail -n 1)"
@@ -397,6 +397,10 @@ configure_vbox_vm() {
   VBoxManage modifyvm "$vm_name" --firmware efi
 
   VBoxManage modifyvm "$vm_name" --usbxhci on
+
+  # Requiring guest additions.
+  VBoxManage modifyvm "$vm_name" --clipboard bidirectional
+  VBoxManage modifyvm "$vm_name" --draganddrop bidirectional
 
   configure_vbox_vm_network_aspect_using_nat "$vm_name"
   configure_vbox_vm_main_storage_aspect "$vm_name"

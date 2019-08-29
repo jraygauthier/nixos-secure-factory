@@ -5,7 +5,7 @@ let
 in
 
 nixpkgs.pkgs.buildEnv {
-  name = "nixos-device-system-update-scripts-env";
+  name = "nixos-device-system-config-scripts-env";
   paths = [
   ];
 }

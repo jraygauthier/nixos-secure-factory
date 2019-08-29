@@ -12,7 +12,7 @@ export PKG_NIXOS_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR="$device_cfg_r
 # Should help with developping scripts.
 scripts_dir="$factory_install_repo_root_dir/scripts"
 export PKG_NIXOS_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/common_install"
-export PKG_NIXOS_DEVICE_SYSTEM_UPDATE_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/device_system_update"
+export PKG_NIXOS_DEVICE_SYSTEM_CONFIG_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/device_system_config"
 export PKG_NIXOS_FACTORY_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory_common_install"
 export PKG_NIXOS_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory_install"
 

@@ -9,32 +9,6 @@ common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
 
 
 
-
-_DEFAULT_DEVICE_SECURE_RAMFS_MOUNT_DIR="${TEMP:-/tmp}/nixos_device_secure_ramfs"
-_DEFAULT_DEVICE_RUN_KEYS_SECURE_RAMFS_DIR="/run/keys/nixos_device_secure_keys_ramfs"
-_DEFAULT_DEVICE_SECURE_TMPFS_DIR="${TEMP:-/tmp}/nixos_device_secure_tmpfs"
-
-
-get_device_secure_ramfs_mount_dir() {
-  echo "$_DEFAULT_DEVICE_SECURE_RAMFS_MOUNT_DIR"
-}
-
-
-is_run_keys_dir_available() {
-  mountpoint -q "/run/keys"
-}
-
-
-get_device_run_keys_secure_ramfs_dir() {
-  echo "$_DEFAULT_DEVICE_RUN_KEYS_SECURE_RAMFS_DIR"
-}
-
-
-get_device_secure_tmpfs_dir() {
-  echo "$_DEFAULT_DEVICE_SECURE_TMPFS_DIR"
-}
-
-
 mount_device_secure_dir_impl() {
   mount_secure_ramfs "$(get_device_secure_ramfs_mount_dir)"
 }
@@ -42,6 +16,22 @@ mount_device_secure_dir_impl() {
 
 umount_device_secure_dir_impl() {
   umount_secure_ramfs "$(get_device_secure_ramfs_mount_dir)"
+}
+
+
+ensure_expected_secret_install_root_dir_exists() {
+  if is_run_from_nixos_live_cd; then
+    ensure_nixos_partition_mounted
+  fi
+}
+
+
+get_secret_install_root_dir() {
+  if is_run_from_nixos_live_cd; then
+    echo "/mnt"
+  else
+    echo ""
+  fi
 }
 
 
@@ -101,7 +91,7 @@ wipe_device_secure_dir_content() {
 get_factory_sent_secret_dir() {
   local secure_dir_root
   secure_dir_root="$(get_device_secure_dir_impl)"
-  echo "$secure_dir_root/secrets"
+  echo "$secure_dir_root/$(get_device_factory_sent_secret_dir_basename)"
 }
 
 
@@ -205,10 +195,10 @@ _install_root_host_ssh_identity() {
 install_device_host_ssh_identity() {
   print_title_lvl3 "Installing device ssh host identity sent by factory"
 
-  ensure_nixos_partition_mounted
+  ensure_expected_secret_install_root_dir_exists
 
   local open_ssh_cfg_dir
-  open_ssh_cfg_dir="/mnt/$(get_rel_host_ssh_homedir)"
+  open_ssh_cfg_dir="$(get_secret_install_root_dir)/$(get_rel_host_ssh_homedir)"
   _install_root_host_ssh_identity "$open_ssh_cfg_dir"
 }
 
@@ -248,10 +238,10 @@ _install_root_user_ssh_identity() {
 install_device_root_user_ssh_identity() {
   print_title_lvl3 "Installing device ssh root user identity sent by factory"
 
-  ensure_nixos_partition_mounted
+  ensure_expected_secret_install_root_dir_exists
 
   local root_user_ssh_dir
-  root_user_ssh_dir="/mnt/$(get_rel_root_user_ssh_homedir)"
+  root_user_ssh_dir="$(get_secret_install_root_dir)/$(get_rel_root_user_ssh_homedir)"
 
   _install_root_user_ssh_identity "$root_user_ssh_dir"
 }
@@ -291,10 +281,10 @@ _install_root_user_gpg_identity() {
 install_device_root_user_gpg_identity() {
   print_title_lvl3 "Installing device gpg root user identity sent by factory"
 
-  ensure_nixos_partition_mounted
+  ensure_expected_secret_install_root_dir_exists
 
   local root_gpg_dir
-  root_gpg_dir="/mnt/$(get_rel_root_user_gpg_homedir)"
+  root_gpg_dir="$(get_secret_install_root_dir)/$(get_rel_root_user_gpg_homedir)"
 
   _install_root_user_gpg_identity "$root_gpg_dir"
 }
@@ -303,7 +293,7 @@ install_device_root_user_gpg_identity() {
 install_liveenv_root_user_gpg_identity() {
   print_title_lvl3 "Installing device gpg root user identity sent by factory"
 
-  ensure_nixos_partition_mounted
+  ensure_expected_secret_install_root_dir_exists
 
   local root_gpg_dir
   root_gpg_dir="/$(get_rel_root_user_gpg_homedir)"

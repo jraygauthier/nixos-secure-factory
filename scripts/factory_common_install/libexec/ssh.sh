@@ -25,14 +25,16 @@ create_ssh_identity() {
 
   ensure_no_ssh_identity_present "$@"
 
+  local default_comment
   default_comment="$(logname)@$(hostname)"
-  comment="${SSH_TOOLS_KEYGEN_COMMENT:-"$default_comment"}"
+  local comment="${SSH_TOOLS_KEYGEN_COMMENT:-"$default_comment"}"
 
-  if [ -z ${SSH_TOOLS_KEYGEN_PW+x} ]; then
-    pw_args=""
+  local pw_args=()
+  if [ -z "${SSH_TOOLS_KEYGEN_PW+x}" ]; then
+    true
   else
     echo "Specific password provided through 'SSH_TOOLS_KEYGEN_PW' env var."
-    pw_args=" -N\"${SSH_TOOLS_KEYGEN_PW:-}\""
+    pw_args=("-N" "${SSH_TOOLS_KEYGEN_PW:-}")
   fi
 
   echo "Creating ssh dir at '$ssh_homedir'."
@@ -44,9 +46,9 @@ create_ssh_identity() {
   done
   if test "rsa" == "$id_key_type"; then
     # Increase rsa key lenght to something better.
-    ssh-keygen${pw_args} -t "$id_key_type" -b "$id_rsa_key_bits" -f "$id_path" -C "$comment"
+    ssh-keygen "${pw_args[@]}" -t "$id_key_type" -b "$id_rsa_key_bits" -f "$id_path" -C "$comment"
   else
-    ssh-keygen${pw_args} -t "$id_key_type" -f "$id_path" -C "$comment"
+    ssh-keygen "${pw_args[@]}" -t "$id_key_type" -f "$id_path" -C "$comment"
   fi
 
   find "$ssh_homedir" | xargs -r stat -c '%a %n'

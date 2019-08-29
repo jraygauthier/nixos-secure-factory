@@ -3,7 +3,7 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 
-device_system_update_libexec_dir="$(pkg_nixos_device_system_update_get_libexec_dir)"
+device_system_update_libexec_dir="$(pkg_nixos_device_system_config_get_libexec_dir)"
 . "$device_system_update_libexec_dir/device_system_config.sh"
 
 
@@ -16,8 +16,8 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  local device_access_ssh_dir="$device_cfg_repo_root_dir/device_access/ssh"
-  local rel_ssh_dir_from_root="device_access/ssh"
+  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device_ssh/authorized"
+  local rel_ssh_dir_from_root="device_ssh/authorized"
   local rel_json_path_from_root="$rel_ssh_dir_from_root/per_user_authorized_keys.json"
   local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
 
@@ -31,7 +31,7 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
       test "" != "$rel_pub_key_path_from_json" &&
       test "null" != "$rel_pub_key_path_from_json"; then
     echo "Factory user already had access to the device. Will update the ssh public key."
-    echo_eval "rm -f '$device_access_ssh_dir/$rel_pub_key_path_from_json'"
+    echo_eval "rm -f '$device_ssh_authorized_dir/$rel_pub_key_path_from_json'"
   fi
 
   local previous_json_content=""
@@ -90,8 +90,8 @@ grant_factory_ssh_access_to_production_device() {
 
   _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id" "$device_user"
 
-  local device_access_ssh_dir="$device_cfg_repo_root_dir/device_access/ssh"
-  local rel_ssh_dir_from_root="device_access/ssh"
+  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device_ssh/authorized"
+  local rel_ssh_dir_from_root="device_ssh/authorized"
   local rel_json_path_from_root="$rel_ssh_dir_from_root/per_user_authorized_keys.json"
   local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
 
@@ -103,7 +103,7 @@ grant_factory_ssh_access_to_production_device() {
       '.[$device_user][$factory_user_id].public_key_file' \
       < "$json_path")" && test "" != "$rel_pub_key_path_from_json"; then
     echo "Factory user already had access to the device. Will update the ssh public key."
-    echo_eval "rm -f '$device_access_ssh_dir/$rel_pub_key_path_from_json'"
+    echo_eval "rm -f '$device_ssh_authorized_dir/$rel_pub_key_path_from_json'"
   fi
 
   local factory_pub_key_filename
@@ -162,6 +162,7 @@ build_current_device_config() {
   local config_filename="$device_cfg_repo_root_dir/${config_name}.nix"
 
   build_device_config "$out_var_name" "$config_filename" "$device_id"
+  echo "${out_var_name}='$(eval "echo \$${out_var_name}")'"
 }
 
 
@@ -239,41 +240,6 @@ send_system_closure_to_device() {
 }
 
 
-install_initial_config_to_device() {
-  print_title_lvl2 "Installing initial device configuration on device"
-  local cfg_closure="$1"
-
-  local cmd
-  cmd=$(cat <<EOF
-NIXOS_CONFIG="$cfg_closure/configuration.nix" \
-  nixos-install \
-    --no-root-passwd --no-channel-copy \
-    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
-    -I "nixos=${cfg_closure}/nixos_src" \
-    -I "nixos-config=${cfg_closure}/configuration.nix"
-EOF
-)
-  run_cmd_as_device_root "$cmd"
-}
-
-
-install_config_to_device() {
-  print_title_lvl2 "Installing device configuration on device"
-  local cfg_closure="$1"
-
-  local cmd
-  cmd=$(cat <<EOF
-NIXOS_CONFIG="$cfg_closure/configuration.nix" \
-  nixos-rebuild switch \
-    -I "nixpkgs=${cfg_closure}/nixpkgs_src" \
-    -I "nixos=${cfg_closure}/nixos_src" \
-    -I "nixos-config=${cfg_closure}/configuration.nix"
-EOF
-)
-  run_cmd_as_device_root "$cmd"
-}
-
-
 install_initial_system_closure_to_device() {
   print_title_lvl2 "Installing initial system closure on device"
   local system_closure="$1"
@@ -288,6 +254,41 @@ EOF
 )
   run_cmd_as_device_root "$cmd"
 }
+
+
+install_system_closure_to_device() {
+  print_title_lvl2 "Installing system closure on device"
+  local system_closure="$1"
+
+  local profile=/nix/var/nix/profiles/system
+  local profile_name="system"
+  # local action="test"
+  # local action="dry-activate"
+  local action="switch"
+
+
+  if [ "$profile_name" != system ]; then
+    profile="/nix/var/nix/profiles/system-profiles/$system_closure"
+    mkdir -p -m 0755 "$(dirname "$profile")"
+  fi
+
+  local cmd
+  cmd=$(cat <<EOF
+nix-env -p "$profile" --set "$system_closure"
+EOF
+)
+  run_cmd_as_device_root "$cmd"
+
+  local cmd2
+  cmd2=$(cat <<EOF
+$system_closure/bin/switch-to-configuration "$action" || \
+  { echo "warning: error(s) occurred while switching to the new configuration" >&2; exit 1; }
+EOF
+)
+
+  run_cmd_as_device_root "$cmd2"
+}
+
 
 _build_and_deploy_initial_device_config_impl() {
   local config_name="${1:-release}"
@@ -320,27 +321,6 @@ build_and_deploy_device_config() {
     print_title_lvl1 "Building, deploying and installing device configuration"
     _build_and_deploy_device_config_impl "$config_name"
   fi
-}
-
-
-build_and_deploy_device_config_alt_device_build_the_config_by_itself() {
-  print_title_lvl1 "Building, deploying and installing device configuration (alternative method)"
-
-  local config_name="${1:-release}"
-
-  # Make sure current factory user has access to device via ssh.
-  grant_factory_ssh_access_to_production_device ""
-  local cfg_closure
-  build_current_device_config "cfg_closure" "$config_name"
-  mount_liveenv_nixos_partitions
-  sent_initial_config_closure_to_device "$cfg_closure"
-  install_initial_config_to_device "$cfg_closure"
-}
-
-
-build_and_deploy_device_config_alt() {
-  local config_name="${1:-release}"
-  build_and_deploy_device_config_alt_device_build_the_config_by_itself "$config_name"
 }
 
 

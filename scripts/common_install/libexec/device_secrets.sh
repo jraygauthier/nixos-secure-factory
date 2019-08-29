@@ -2,6 +2,30 @@
 common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
 . "$common_install_libexec_dir/ssh.sh"
 . "$common_install_libexec_dir/gpg.sh"
+. "$common_install_libexec_dir/nixos.sh"
+
+
+get_device_secure_ramfs_mount_dir() {
+  echo "${TEMP:-/tmp}/nixos_device_secure_ramfs"
+}
+
+
+get_device_run_keys_secure_ramfs_dir() {
+  echo "$(get_nixos_run_keys_dir)/nixos_device_secure_keys_ramfs"
+}
+
+
+get_device_secure_tmpfs_dir() {
+  echo "${TEMP:-/tmp}/nixos_device_secure_tmpfs"
+}
+
+get_device_factory_sent_secret_dir_basename() {
+  echo "secrets"
+}
+
+get_installed_device_factory_sent_secret_dir() {
+  echo "$(get_device_run_keys_secure_ramfs_dir)/$(get_device_factory_sent_secret_dir_basename)"
+}
 
 
 list_expected_device_host_ssh_key_types() {

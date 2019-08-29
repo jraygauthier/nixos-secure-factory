@@ -387,8 +387,6 @@ _cat_gopass_device_bin_secret_from_repo() {
 
   _ensure_exists_gopass_device_secret "$repo" "$store_key" || return 1
 
-  local out_dirname
-  out_dirname="$(dirname "$out_file")"
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
   gopass binary cat "$full_store_key"
