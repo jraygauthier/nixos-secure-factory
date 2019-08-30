@@ -161,7 +161,7 @@ build_current_device_config() {
 
   local config_filename="$device_cfg_repo_root_dir/${config_name}.nix"
 
-  build_device_config "$out_var_name" "$config_filename" "$device_id"
+  build_device_config_dir "$out_var_name" "$config_filename" "$device_id"
   echo "${out_var_name}='$(eval "echo \$${out_var_name}")'"
 }
 
