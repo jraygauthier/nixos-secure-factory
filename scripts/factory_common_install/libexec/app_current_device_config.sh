@@ -266,14 +266,12 @@ install_system_closure_to_device() {
   # local action="dry-activate"
   local action="switch"
 
-
-  if [ "$profile_name" != system ]; then
-    profile="/nix/var/nix/profiles/system-profiles/$system_closure"
-    mkdir -p -m 0755 "$(dirname "$profile")"
-  fi
-
   local cmd
   cmd=$(cat <<EOF
+if [ "$profile_name" != system ]; then
+  profile="/nix/var/nix/profiles/system-profiles/$system_closure"
+  mkdir -p -m 0755 "$(dirname "$profile")"
+fi
 nix-env -p "$profile" --set "$system_closure"
 EOF
 )
