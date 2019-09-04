@@ -117,21 +117,21 @@ device configurations. Specific device factories are required to:
     It is recommanded that the following helpers are provided under
     `./scripts/factory_install/bin`:
 
-     -  `factory_state_init`: reponsible to initialize the factory's
+     -  `factory-state-init`: reponsible to initialize the factory's
         `.factory_info.yaml` file.
 
-     -  `device_state_init_new`: reponsible to initialize a new device's
+     -  `device-state-init-new`: reponsible to initialize a new device's
         `.current_device.yaml` file.
 
     The following helpers can optionally be provided as well:
 
-     -  `factory_repos_update_dependencies`: reponsible to clone / synchronize
+     -  `factory-repos-update-dependencies`: reponsible to clone / synchronize
         the repo on which `my_factory_install`.
 
-     -  `factory_repos_update`: reponsible to clone / synchronize all the
+     -  `factory-repos-update`: reponsible to clone / synchronize all the
         repositories including `my_factory_install`.
 
-     -  `factory_repos_init_mr_config`: responsible to create a `.mrconfig`
+     -  `factory-repos-init-mr-config`: responsible to create a `.mrconfig`
         in this project's top level folder (`my_factory_install/..`).
 
         This uses the [myrepos] tool to make it easier to work with multiple
@@ -153,9 +153,9 @@ device configurations. Specific device factories are required to:
     One can take this repos's `./device_type/virtual_box_vm` package as an baseline.
 
     This nix package is responsible for bringing the
-    `hw_config_partition_and_format` helper when installed on the target device.
+    `hw-config-partition-and-format` helper when installed on the target device.
 
-    `hw_config_partition_and_format` is simply the customized way a *device* of
+    `hw-config-partition-and-format` is simply the customized way a *device* of
     a particular *device type* gets partitioned and formated.
 
 

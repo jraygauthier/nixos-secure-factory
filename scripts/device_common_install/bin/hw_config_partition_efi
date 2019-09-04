@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-device-common-install-get-libexec-dir")"
 . "$device_common_install_libexec_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 
-# TODO: Consider calling 'hw_config_remove_lvm.sh'
+# TODO: Consider calling 'hw-config-remove-lvm.sh'
 
 parted -s /dev/sda -- mklabel gpt
 physical_memory_size_mb="$(free -m --si | grep Mem: | awk '{print $2}')"

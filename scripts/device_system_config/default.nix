@@ -14,7 +14,7 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace ./bin/pkg_nixos_device_system_config_get_libexec_dir \
+    substituteInPlace ./bin/pkg-nixos-device-system-config-get-libexec-dir \
       --replace 'default_pkg_dir/libexec' 'default_pkg_dir/${pname}/libexec' \
   '';
 

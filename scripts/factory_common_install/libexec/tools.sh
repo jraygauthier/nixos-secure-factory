@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
+common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/prettyprint.sh"
 
 
@@ -92,7 +92,7 @@ get_nixos_secure_factory_repo_root_dir() {
   # TODO: Consider overriding with a env?
 
   local pkg_libexec_dir
-  pkg_libexec_dir="$(pkg_nixos_factory_common_install_get_libexec_dir)"
+  pkg_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 
   local root_dir
   root_dir="$(cd "$pkg_libexec_dir/../../.." > /dev/null || exit 1; pwd)"

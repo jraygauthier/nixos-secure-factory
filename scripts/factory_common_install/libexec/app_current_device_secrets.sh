@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libexec_dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 # Source both dependencies.
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/mount.sh"
@@ -15,17 +15,17 @@ common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libex
 
 
 # From deps libs.
-common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
+common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/device_secrets.sh"
 
 
 mount_device_secure_dir_impl() {
-  run_cmd_as_device_root "liveenv_mount_device_secure_dir"
+  run_cmd_as_device_root "liveenv-mount-device-secure-dir"
 }
 
 
 umount_device_secure_dir_impl() {
-  run_cmd_as_device_root "liveenv_umount_device_secure_dir"
+  run_cmd_as_device_root "liveenv-umount-device-secure-dir"
 }
 
 
@@ -225,7 +225,7 @@ _get_device_factory_sent_secret_dir() {
   fi
 
   local secret_dir
-  if ! secret_dir="$(run_cmd_as_device_root 'os_secrets_get_secret_dir')"; then
+  if ! secret_dir="$(run_cmd_as_device_root 'os-secrets-get-secret-dir')"; then
     1>&2 echo "ERROR: _get_device_factory_sent_secret_dir: There was an error retriver the device's secret directory."
     exit 1
   fi
@@ -536,7 +536,7 @@ deploy_device_secrets_prim() {
 
 install_device_secrets_prim() {
   print_title_lvl2 "Installing device secrets on the device."
-  run_cmd_as_device_root "os_secrets_install_received"
+  run_cmd_as_device_root "os-secrets-install-received"
 }
 
 create_device_secrets() {

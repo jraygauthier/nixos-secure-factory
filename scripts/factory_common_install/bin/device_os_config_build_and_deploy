@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-common_factory_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_factory_common_install_get_libexec_dir")"
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/app_current_device_config.sh"
 config_name="${1:-release}"
 build_and_deploy_device_config "$config_name"

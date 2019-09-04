@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# device_type_install_libexec_dir="$(pkg_nixos_device_type_install_get_libexec_dir)"
-device_common_install_libexec_dir="$(pkg_nixos_device_common_install_get_libexec_dir)"
+# device_type_install_libexec_dir="$(pkg-nixos-device-type-install-get-libexec-dir)"
+device_common_install_libexec_dir="$(pkg-nixos-device-common-install-get-libexec-dir)"
 . "$device_common_install_libexec_dir/tools.sh"
 
 _SUPPORTED_DEVICES=$(cat <<EOF

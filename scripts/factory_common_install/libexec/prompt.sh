@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg_nixos_factory_common_install_get_libexec_dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 
 
 
@@ -99,7 +99,7 @@ _prompt_for_custom_choices_impl() {
   trap "{ rm_out_file; }" EXIT
 
   local libexec_dir
-  libexec_dir="$(pkg_nixos_factory_common_install_get_libexec_dir)"
+  libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
   $libexec_dir/prompt_for_custom_choices_readline -of "$out_file" "$@"
   return_code="$?"
   # echo "return_code1=$return_code"

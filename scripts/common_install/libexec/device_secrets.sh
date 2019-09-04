@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_install_libexec_dir="$(pkg_nixos_common_install_get_libexec_dir)"
+common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/ssh.sh"
 . "$common_install_libexec_dir/gpg.sh"
 . "$common_install_libexec_dir/nixos.sh"

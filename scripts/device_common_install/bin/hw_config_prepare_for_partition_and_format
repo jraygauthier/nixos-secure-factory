@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-device-common-install-get-libexec-dir")"
 . "$device_common_install_libexec_dir/tools.sh"
 
-liveenv_umount_nixos_partition
-hw_config_remove_lvm
+liveenv-umount-nixos-partition
+hw-config-remove-lvm
 

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_libexec_dir="$("$(dirname "$0")/pkg_nixos_device_common_install_get_libexec_dir")"
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-device-common-install-get-libexec-dir")"
 
 # Source some device specific tools.
 . "$device_common_install_libexec_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 
-# TODO: Consider calling 'hw_config_remove_lvm.sh'
+# TODO: Consider calling 'hw-config-remove-lvm.sh'
 
 wipefs -a /dev/sda1
 mkfs.ext4 -L nixos /dev/sda1
