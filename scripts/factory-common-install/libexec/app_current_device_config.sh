@@ -4,7 +4,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 
 device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
-. "$device_system_update_libexec_dir/device-system-config.sh"
+. "$device_system_update_libexec_dir/device_system_config.sh"
 
 
 _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
@@ -16,9 +16,9 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device_ssh/authorized"
-  local rel_ssh_dir_from_root="device_ssh/authorized"
-  local rel_json_path_from_root="$rel_ssh_dir_from_root/per_user_authorized_keys.json"
+  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
+  local rel_ssh_dir_from_root="device-ssh/authorized"
+  local rel_json_path_from_root="$rel_ssh_dir_from_root/per-user-authorized-keys.json"
   local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
 
   local rel_pub_key_path_from_json
@@ -90,9 +90,9 @@ grant_factory_ssh_access_to_production_device() {
 
   _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id" "$device_user"
 
-  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device_ssh/authorized"
-  local rel_ssh_dir_from_root="device_ssh/authorized"
-  local rel_json_path_from_root="$rel_ssh_dir_from_root/per_user_authorized_keys.json"
+  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
+  local rel_ssh_dir_from_root="device-ssh/authorized"
+  local rel_json_path_from_root="$rel_ssh_dir_from_root/per-user-authorized-keys.json"
   local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
 
   local rel_pub_key_path_from_json
@@ -112,7 +112,7 @@ grant_factory_ssh_access_to_production_device() {
   local factory_pub_key_basename
   factory_pub_key_basename="$(basename "$factory_pub_key_filename")"
 
-  local rel_pub_key_path_from_json="./public_keys/${factory_user_id}_${factory_pub_key_basename}"
+  local rel_pub_key_path_from_json="./public-keys/${factory_user_id}_${factory_pub_key_basename}"
   local rel_pub_key_path_from_root="$rel_ssh_dir_from_root/$rel_pub_key_path_from_json"
   local pub_key_path="$device_cfg_repo_root_dir/$rel_pub_key_path_from_root"
 
