@@ -21,7 +21,7 @@ build_nix_search_path_args_from_search_path_srcs() {
   local -n out_array="$1"
   local search_path_srcs="$2"
 
-  search_path_args=()
+  out_array=()
   while read -r path; do
     local pathName
     pathName="$(basename "$path")"
@@ -95,8 +95,7 @@ build_device_config_system_closure() {
   echo "build_device_config_system_closure begin"
   local out_var_name="$1"
   local system_cfg_dir="$2"
-  shift
-  shift
+  shift 2
   # Remaing arguments passed directly to 'nix build'.
 
   local tmpdir

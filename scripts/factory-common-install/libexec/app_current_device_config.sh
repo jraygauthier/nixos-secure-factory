@@ -147,11 +147,12 @@ grant_factory_ssh_access_to_production_device() {
 }
 
 
-build_current_device_config() {
+_build_current_device_config() {
   print_title_lvl2 "Building current device configuration"
 
   local out_var_name="$1"
-  local config_name="${2:-release}"
+  local config_name="$2"
+  shift 2
 
   local device_id
   device_id="$(get_required_current_device_id)" || return 1
@@ -161,7 +162,7 @@ build_current_device_config() {
 
   local config_filename="$device_cfg_repo_root_dir/${config_name}.nix"
 
-  build_device_config_dir "$out_var_name" "$config_filename" "$device_id"
+  build_device_config_dir "$out_var_name" "$config_filename" "$device_id" "$@"
   echo "${out_var_name}='$(eval "echo \$${out_var_name}")'"
 }
 
@@ -170,14 +171,11 @@ build_current_device_config() {
 _build_current_device_config_system_closure() {
   print_title_lvl2 "Building current device configuration system closure"
   local out_var_name="$1"
-  local config_name="${2:-release}"
-  local cfg_closure="${3:-}"
+  local config_name="$2"
+  shift 2
 
-  if [[ -z "$cfg_closure" ]]; then
-    build_current_device_config "cfg_closure" "$config_name"
-  fi
-
-  build_device_config_system_closure "$out_var_name" "$cfg_closure"
+  _build_current_device_config "cfg_closure" "$config_name" "$@"
+  build_device_config_system_closure "$out_var_name" "$cfg_closure" "$@"
 }
 
 
@@ -289,43 +287,97 @@ EOF
 
 
 _build_and_deploy_initial_device_config_impl() {
-  local config_name="${1:-release}"
+  local config_name="$1"
+  shift 1
 
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local system_closure
-  _build_current_device_config_system_closure "system_closure" "$config_name" ""
+  _build_current_device_config_system_closure "system_closure" "$config_name" "$@"
   mount_liveenv_nixos_partitions
   send_initial_system_closure_to_device "$system_closure"
   install_initial_system_closure_to_device "$system_closure"
 }
 
 
-build_device_config() {
-  local config_name="${1:-release}"
-  local system_closure
-  _build_current_device_config_system_closure "system_closure" "$config_name" ""
-  echo "system_closure='$system_closure'"
-}
-
-
 _build_and_deploy_device_config_impl() {
-  local config_name="${1:-release}"
+  local config_name="$1"
+  shift 1
   local system_closure
-  _build_current_device_config_system_closure "system_closure" "$config_name" ""
+  _build_current_device_config_system_closure "system_closure" "$config_name" "$@"
   send_system_closure_to_device "$system_closure"
   install_system_closure_to_device "$system_closure"
 }
 
 
+_parse_build_device_config_args() {
+  local -n _out_config_name="$1"
+  local -n _out_nix_build_fwd_flags="$2"
+  local default_config_name="$3"
+  shift 3
+
+  local available_cfgs_case_opts="release|local|dev"
+
+  _out_config_name="$default_config_name"
+  _out_nix_build_fwd_flags=()
+
+  local i
+  local j
+  local k
+
+  while [ "$#" -gt 0 ]; do
+      i="$1"; shift 1
+      case "$i" in
+        release|local|dev)
+          _out_config_name="$i"
+          ;;
+        --max-jobs|-j|--cores|-I|--builders)
+          j="$1"; shift 1
+          _out_nix_build_fwd_flags+=("$i" "$j")
+          ;;
+        --show-trace|--keep-failed|-K|--keep-going|-k|--verbose|-v|-vv|-vvv|-vvvv|-vvvvv|--fallback|--repair|--no-build-output|-Q|-j*)
+          _out_nix_build_fwd_flags+=("$i")
+          ;;
+        --option)
+          j="$1"; shift 1
+          k="$1"; shift 1
+          _out_nix_build_fwd_flags+=("$i" "$j" "$k")
+          ;;
+        *)
+          echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
+          return 1
+          ;;
+      esac
+  done
+}
+
+
+build_device_config() {
+  local default_config_name="release"
+  local config_name
+  local nix_build_fwd_flags
+  _parse_build_device_config_args \
+    "config_name" "nix_build_fwd_flags" "$default_config_name" "$@" || return 1
+
+  local system_closure
+  _build_current_device_config_system_closure "system_closure" "$config_name" "${nix_build_fwd_flags[@]}"
+  echo "system_closure='$system_closure'"
+}
+
+
 build_and_deploy_device_config() {
-  local config_name="${1:-release}"
+  local default_config_name="release"
+  local config_name
+  local nix_build_fwd_flags
+  _parse_build_device_config_args \
+    "config_name" "nix_build_fwd_flags" "$default_config_name" "$@" || return 1
+
   if is_device_run_from_nixos_liveenv; then
     print_title_lvl1 "Building, deploying and installing initial device configuration"
-    _build_and_deploy_initial_device_config_impl "$config_name"
+    _build_and_deploy_initial_device_config_impl "$config_name" "${nix_build_fwd_flags[@]}"
   else
     print_title_lvl1 "Building, deploying and installing device configuration"
-    _build_and_deploy_device_config_impl "$config_name"
+    _build_and_deploy_device_config_impl "$config_name" "${nix_build_fwd_flags[@]}"
   fi
 }
 
