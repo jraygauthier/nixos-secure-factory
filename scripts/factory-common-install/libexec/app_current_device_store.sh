@@ -10,7 +10,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 get_current_device_store_yaml_filename() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
-  echo "$device_cfg_repo_root_dir/.current_device.yaml"
+  echo "$device_cfg_repo_root_dir/.current-device.yaml"
 }
 
 

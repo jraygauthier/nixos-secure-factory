@@ -9,7 +9,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 
 get_factory_info_store_yaml_filename() {
   factory_install_repo_root_dir="$(get_factory_install_repo_root_dir)"
-  echo "$factory_install_repo_root_dir/.factory_info.yaml"
+  echo "$factory_install_repo_root_dir/.factory-info.yaml"
 }
 
 

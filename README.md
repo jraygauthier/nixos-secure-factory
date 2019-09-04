@@ -98,8 +98,8 @@ device configurations. Specific device factories are required to:
     state `*.yaml` files which are expected for this repos's tools to
     function properly:
 
-     1. `my_factory_install/.factory_info.yaml`.
-     2. `my_device_config/.current_device.yaml`
+     1. `my_factory_install/.factory-info.yaml`.
+     2. `my_device_config/.current-device.yaml`
 
     The specific repository configuration should be specify through environment
     variables in `scripts/factory-install/enter-env.sh`.
@@ -118,10 +118,10 @@ device configurations. Specific device factories are required to:
     `./scripts/factory-install/bin`:
 
      -  `factory-state-init`: reponsible to initialize the factory's
-        `.factory_info.yaml` file.
+        `.factory-info.yaml` file.
 
      -  `device-state-init-new`: reponsible to initialize a new device's
-        `.current_device.yaml` file.
+        `.current-device.yaml` file.
 
     The following helpers can optionally be provided as well:
 
