@@ -67,8 +67,13 @@ get_value_from_current_device_yaml_or_if_null_then_error() {
 }
 
 
+get_required_current_device_id() {
+  get_value_from_current_device_yaml_or_if_null_then_error '.identifier' || return 1
+}
+
+
 get_required_current_device_dirname() {
-  get_value_from_current_device_yaml_or_if_null_then_error '.dirname' || exit 1
+  get_required_current_device_id || return 1
 }
 
 
@@ -87,11 +92,6 @@ get_current_device_ssh_port() {
 }
 
 
-get_required_current_device_id() {
-  get_required_current_device_dirname || exit 1
-}
-
-
 get_required_current_device_email() {
   local email_domain
   email_domain="$(get_required_factory_info__device_defaults_email_domain)"
@@ -104,9 +104,9 @@ get_required_current_device_email() {
 get_required_current_device_root_dir() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
-  local dirname
-  dirname="$(get_required_current_device_dirname)"
-  local out_root_dir="$device_cfg_repo_root_dir/device/$dirname"
+  local device_dirname
+  device_dirname="$(get_required_current_device_dirname)"
+  local out_root_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   test -d "$out_root_dir" || \
     { 2>&1 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; exit 1; }
   echo "$out_root_dir"
@@ -148,12 +148,12 @@ update_device_json_from_current_yaml() {
   local store_yaml_basename="$(basename "$store_yaml")"
   local store_yaml_dirname="$(dirname "$store_yaml")"
 
-  local dirname
-  dirname="$(get_required_current_device_dirname)"
+  local device_dirname
+  device_dirname="$(get_required_current_device_dirname)"
   local json_str
   json_str="$(cat "$store_yaml" | yq '.')"
 
-  local dev_cfg_dir="$device_cfg_repo_root_dir/device/$dirname"
+  local dev_cfg_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   echo "Creating device config directory: \`$dev_cfg_dir\`"
   mkdir -p "$dev_cfg_dir"
   echo "Updating \`$dev_cfg_dir/device.json\` from \`$store_yaml\`."
@@ -169,7 +169,7 @@ list_available_device_types() {
 }
 
 
-prompt_for_device_mandatory__type() {
+prompt_for_device_mandatory__device_type() {
   local avail_types
   avail_types="$(list_available_device_types)" || return 1
   echo -e "\"type\" \u2208 {$(echo "$avail_types" | sed -E -e "s/^(.+)$/\'\1\'/g" | paste -d',' -s | sed 's/,/, /g')}"
@@ -178,24 +178,10 @@ prompt_for_device_mandatory__type() {
 }
 
 
-prompt_for_device_mandatory__city() {
+prompt_for_device_mandatory__device_id() {
   local value_re="^[a-z0-9-]+$"
-  echo -e "\"city\" \u2208 \`${value_re}\`: The city the device will be shipped to (e.g.: 'quebec', 'lost-angeles')."
-  prompt_for_mandatory_parameter_loop "$1" "city" "$value_re"
-}
-
-
-prompt_for_device_mandatory__organization() {
-  local value_re="^[a-z0-9-]+$"
-  echo -e "\"organization\" \u2208 \`${value_re}\`: The organization which will own the device (e.g.: 'british-airways')."
-  prompt_for_mandatory_parameter_loop "$1" "organization" "$value_re"
-}
-
-
-prompt_for_device_mandatory__short_misc_desc() {
-  local value_re="^[a-z0-9-]+$"
-  echo -e "\"short_misc_desc\" \u2208 \`${value_re}\`: A short human readable id for this particular device (e.g.: 'office-100', 'britany-mcmarry')."
-  prompt_for_mandatory_parameter_loop "$1" "short_misc_desc" "$value_re"
+  echo -e "\"device_id\" \u2208 \`${value_re}\`: A unique human readable id for this particular device (e.g.: 'my-office-device', 'my-personal-device-55')."
+  prompt_for_mandatory_parameter_loop "$1" "device_id" "$value_re"
 }
 
 
@@ -215,13 +201,13 @@ prompt_for_device_mandatory__x() {
 
 prompt_for_device_optional__ssh_port() {
   echo -e "\"ssh_port\": the ssh port to reach the device through specified \"hostname\" (e.g.: '22', '2222'). Default is '22'"
-  local value_re="^[0-9]+$"
+  local value_re="^[0-9]*$"
   prompt_for_optional_parameter_loop "$1" "ssh_port" "$value_re"
 }
 
 
 prompt_for_device_optional__uart_pty() {
-  local value_re="^[a-zA-Z0-9.-/]+$"
+  local value_re="^[a-zA-Z0-9.-/]*$"
   echo -e "\"uart_pty\": the path to the uart pty connected to the device (e.g.: '/dev/ttyS0'). Default is 'none'"
   prompt_for_optional_parameter_loop "$1" "uart_pty" "$value_re"
 }
@@ -231,6 +217,16 @@ prompt_for_device_optional__x() {
   local out_var_name="$1"
   local param="$2"
   prompt_for_device_optional__${param} "$out_var_name"
+}
+
+
+validate_device_id() {
+  local device_id="$1"
+  local value_re="^[a-z0-9-]+$"
+  if ! echo "$device_id" | grep -Eq "$value_re"; then
+    1>&2 echo "ERROR: Device id value of '$device_id' is not allowed to contain characters not in the set: \`$value_re\`."
+    return 1
+  fi
 }
 
 
@@ -248,22 +244,72 @@ init_new_current_device_state() {
 
   # TODO: Cli app that takes these parameters.
 
-  dirname="${city}_${organization}_${short_misc_desc}_${short_uuid}"
+  local device_id
+  local device_type
+  local hostname
+  local ssh_port
+  local uart_pty
+  local backend
 
+  local _REQ_PARAMS=$(cat <<EOF
+device_id
+device_type
+EOF
+)
 
-  _JQ_FILTER=$(cat <<EOF
-.dirname = \$dirname | \
-.type = \$type | \
+  for param in $_REQ_PARAMS; do
+    prompt_for_device_mandatory__x "$param" "$param"
+  done
+
+  local _NON_VM_REQ_PARAMS=$(cat <<EOF
+hostname
+EOF
+)
+
+  local _NON_VM_OPT_PARAMS=$(cat <<EOF
+ssh_port
+uart_pty
+EOF
+)
+
+  if test "$device_type" == "virtual-box-vm"; then
+    # This should already be well defined for a VM using
+    # "NAT" network adapter config.
+    backend="virtual_box"
+    hostname="auto"
+    ssh_port="auto"
+    uart_pty="auto"
+  else
+    backend="bare_metal"
+    for param in $_NON_VM_REQ_PARAMS; do
+      prompt_for_device_mandatory__x "$param" "$param"
+    done
+
+    for param in $_NON_VM_OPT_PARAMS; do
+      prompt_for_device_optional__x "$param" "$param"
+    done
+
+    if [[ -z "$ssh_port" ]]; then
+      ssh_port="auto"
+    fi
+    if [[ -z "$uart_pty" ]]; then
+      uart_pty="auto"
+    fi
+  fi
+
+  local _JQ_FILTER="$(cat <<EOF
+.identifier = \$device_id | \
+.type = \$device_type | \
 .backend = \$backend | \
 .hostname = \$hostname | \
 .ssh_port = \$ssh_port | \
 .uart_pty = \$uart_pty
 EOF
-)
+)"
 
-  yaml_str=$(echo "---" | yq -y \
-    --arg dirname "$dirname" \
-    --arg "type" "$type" \
+  local yaml_str=$(echo "---" | yq -y \
+    --arg device_id "$device_id" \
+    --arg device_type "$device_type" \
     --arg backend "$backend" \
     --arg hostname "$hostname" \
     --arg ssh_port "$ssh_port" \
@@ -276,12 +322,12 @@ EOF
   printf -- "$yaml_str\n\n"
 
   if ! prompt_for_user_approval; then
-    exit 1
+    return 1
   fi
 
   echo "Writing device configuration to '$store_yaml'."
   echo "$yaml_str" > "$store_yaml"
-  echo "Current device is now set to \`$dirname\`."
+  echo "Current device is now set to \`$device_id\`."
 
   update_device_json_from_current_yaml
 

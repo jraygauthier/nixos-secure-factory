@@ -8,39 +8,39 @@ device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 search_str="$1"
 
 
-all_dirnames="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
-# matching_dirnames="$(echo "$all_dirnames" | grep "$search_str")"
+all_devices="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
+# matching_devices="$(echo "$all_devices" | grep "$search_str")"
 
-# echo "all_dirnames=\"$all_dirnames\""
-# echo "matching_dirnames=\"$matching_dirnames\""
+# echo "all_devices=\"$all_devices\""
+# echo "matching_devices=\"$matching_devices\""
 
-if ! matching_dirnames="$(echo "$all_dirnames" | grep "$search_str")"; then
+if ! matching_devices="$(echo "$all_devices" | grep "$search_str")"; then
   echo "ERROR: No device dirname match specified search string: \`$search_str\`."
   printf -- "\n"
-  printf -- "Available dirnames\n"
+  printf -- "Available devices\n"
   printf -- "------------------\n\n"
-  echo "$all_dirnames"
+  echo "$all_devices"
   printf -- "\n"
   exit 1
 fi
 
-match_count=$(echo "$matching_dirnames" | wc -l)
+match_count=$(echo "$matching_devices" | wc -l)
 # echo "match_count=$match_count"
 
 if test $match_count -gt 1; then
   # TODO: We might instead want to provide an interractive readline.
   echo "ERROR: Too many dirname match for the specified search string: \`$search_str\`."
   printf -- "\n"
-  printf -- "Matching dirnames\n"
+  printf -- "Matching devices\n"
   printf -- "-----------------\n\n"
-  echo "$matching_dirnames"
+  echo "$matching_devices"
   printf -- "\n"
   exit 1
 fi
 
-dirname="$(echo "$matching_dirnames" | head -n 1)"
+device_id="$(echo "$matching_devices" | head -n 1)"
 
-yaml_str="$(cat "$device_cfg_repo_root_dir/device/$dirname/device.json" | yq -y '.')"
+yaml_str="$(cat "$device_cfg_repo_root_dir/device/$device_id/device.json" | yq -y '.')"
 printf -- "\n"
 printf -- "Device info\n"
 printf -- "-----------\n\n"
@@ -54,4 +54,4 @@ fi
 
 echo "Writing device configuration to \`$device_cfg_repo_root_dir/.current-device.yaml\`."
 echo "$yaml_str" > "$device_cfg_repo_root_dir/.current-device.yaml"
-echo "Current device is now set to \`$dirname\`."
+echo "Current device is now set to \`$device_id\`."
