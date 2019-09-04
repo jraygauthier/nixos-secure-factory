@@ -179,22 +179,22 @@ prompt_for_device_mandatory__type() {
 
 
 prompt_for_device_mandatory__city() {
-  local value_re="^[a-z0-9_]+$"
-  echo -e "\"city\" \u2208 \`${value_re}\`: The city the device will be shipped to (e.g.: 'quebec', 'lost_angeles')."
+  local value_re="^[a-z0-9-]+$"
+  echo -e "\"city\" \u2208 \`${value_re}\`: The city the device will be shipped to (e.g.: 'quebec', 'lost-angeles')."
   prompt_for_mandatory_parameter_loop "$1" "city" "$value_re"
 }
 
 
 prompt_for_device_mandatory__organization() {
-  local value_re="^[a-z0-9_]+$"
-  echo -e "\"organization\" \u2208 \`${value_re}\`: The organization which will own the device (e.g.: 'british_airways')."
+  local value_re="^[a-z0-9-]+$"
+  echo -e "\"organization\" \u2208 \`${value_re}\`: The organization which will own the device (e.g.: 'british-airways')."
   prompt_for_mandatory_parameter_loop "$1" "organization" "$value_re"
 }
 
 
 prompt_for_device_mandatory__short_misc_desc() {
-  local value_re="^[a-z0-9_]+$"
-  echo -e "\"short_misc_desc\" \u2208 \`${value_re}\`: A short human readable id for this particular device (e.g.: 'office_100', 'britany_mcmarry')."
+  local value_re="^[a-z0-9-]+$"
+  echo -e "\"short_misc_desc\" \u2208 \`${value_re}\`: A short human readable id for this particular device (e.g.: 'office-100', 'britany-mcmarry')."
   prompt_for_mandatory_parameter_loop "$1" "short_misc_desc" "$value_re"
 }
 
