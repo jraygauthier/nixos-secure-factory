@@ -223,9 +223,9 @@ retrieve_config_from_live_usb_impl() {
 
   scp_port_args="$(build_scp_port_args_for_ssh_port "$device_ssh_port")"
 
-  mkdir -p "${device_cfg_repo_root_dir}/device_type/teguar_tp_4040_15/nixos"
+  mkdir -p "${device_cfg_repo_root_dir}/device-type/teguar-tp-4040-15/nixos"
   scp${scp_port_args} -r root@${device_hostname}:/mnt/etc/nixos/\{hardware-configuration,configuration\}.nix \
-    ${device_cfg_repo_root_dir}/device_type/teguar_tp_4040_15/nixos
+    ${device_cfg_repo_root_dir}/device-type/teguar-tp-4040-15/nixos
 }
 
 
@@ -242,7 +242,7 @@ deploy_config_to_device_live_usb_impl() {
 
   ssh${ssh_port_args} root@${device_hostname} 'mkdir -p /mnt/etc/nixos/'
 
-  pushd ${device_cfg_repo_root_dir}/device_type/teguar_tp_4040_15/nixos > /dev/null
+  pushd ${device_cfg_repo_root_dir}/device-type/teguar-tp-4040-15/nixos > /dev/null
 
   in_files=$(cat <<EOF
 ./hardware-configuration.nix
@@ -269,7 +269,7 @@ deploy_config_to_device_impl() {
 
   scp_port_args="$(build_scp_port_args_for_ssh_port "$device_ssh_port")"
 
-  pushd ${device_cfg_repo_root_dir}/device_type/teguar_tp_4040_15/nixos > /dev/null
+  pushd ${device_cfg_repo_root_dir}/device-type/teguar-tp-4040-15/nixos > /dev/null
 
   in_files=$(cat <<EOF
 ./hardware-configuration.nix

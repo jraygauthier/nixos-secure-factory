@@ -4,7 +4,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 
 device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
-. "$device_system_update_libexec_dir/device_system_config.sh"
+. "$device_system_update_libexec_dir/device-system-config.sh"
 
 
 _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {

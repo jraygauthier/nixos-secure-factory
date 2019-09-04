@@ -4,7 +4,7 @@ device_common_install_libexec_dir="$(pkg-nixos-device-common-install-get-libexec
 . "$device_common_install_libexec_dir/tools.sh"
 
 _SUPPORTED_DEVICES=$(cat <<EOF
-virtual_box_vm
+virtual-box-vm
 EOF
 )
 

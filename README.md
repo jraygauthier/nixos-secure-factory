@@ -32,7 +32,7 @@ device configurations. Specific device factories are required to:
 
         Note that it is possible but not advised for production setups to embbed
         the device configuration as part of `my_factory_install`. This is the
-        approach taking for `./demo_nixos_config`.
+        approach taking for `./demo-nixos-config`.
 
      3. `my_factory_secrets`: A private *git* repository containing the secrets
         that only the factory technicians / developers should have access to.
@@ -47,13 +47,13 @@ device configurations. Specific device factories are required to:
         in each device sub stores can only be accessed by the specific device
         and its factory devs/techs through their respective [gnupg] identities.
 
- 2. Create its own specific version of `demo_nixos_config`.
+ 2. Create its own specific version of `demo-nixos-config`.
 
     In `my_device_config`.
 
     This repository should contains the 2 following mandatory folders:
 
-     1. `./device_type`:
+     1. `./device-type`:
 
         Contain a sub directory for each *device type* the specific factory is
         able to produce.
@@ -89,10 +89,10 @@ device configurations. Specific device factories are required to:
         particular device.
 
 
- 3. Create its own specific version of `./scripts/factory_install` depending
-    on `./scripts/factory_common_install`.
+ 3. Create its own specific version of `./scripts/factory-install` depending
+    on `./scripts/factory-common-install`.
 
-    Under `my_factory_install/scripts/factory_install`.
+    Under `my_factory_install/scripts/factory-install`.
 
     These specific tools will be responsible for initializing the following
     state `*.yaml` files which are expected for this repos's tools to
@@ -102,7 +102,7 @@ device configurations. Specific device factories are required to:
      2. `my_device_config/.current_device.yaml`
 
     The specific repository configuration should be specify through environment
-    variables in `scripts/factory_install/enter_env.sh`.
+    variables in `scripts/factory-install/enter-env.sh`.
 
     2 mandatory env var should be set there:
 
@@ -115,7 +115,7 @@ device configurations. Specific device factories are required to:
         Should points to the root of your local of `my_device_config`.
 
     It is recommanded that the following helpers are provided under
-    `./scripts/factory_install/bin`:
+    `./scripts/factory-install/bin`:
 
      -  `factory-state-init`: reponsible to initialize the factory's
         `.factory_info.yaml` file.
@@ -140,17 +140,17 @@ device configurations. Specific device factories are required to:
         Note that one could instead decide to use [google-repo] tool instead
         to tackle the multiple repositories problem.
 
-    And finally, a `my_factory_install/enter_factory_install_scripts_env.sh`
+    And finally, a `my_factory_install/enter-factory-install-scripts-env.sh`
     helper script should be provided to quickly enter the factory install
     environment.
 
- 4. For each supported *device type*, a `my_factory_install/device_type/my_device_type`
+ 4. For each supported *device type*, a `my_factory_install/device-type/my_device_type`
     script package should be defined.
 
     Replace `my_device_type` by your own *device type*. Note that it should match
-    the *device type* used under `my_device_config/device_type`
+    the *device type* used under `my_device_config/device-type`
 
-    One can take this repos's `./device_type/virtual_box_vm` package as an baseline.
+    One can take this repos's `./device-type/virtual-box-vm` package as an baseline.
 
     This nix package is responsible for bringing the
     `hw-config-partition-and-format` helper when installed on the target device.

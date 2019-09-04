@@ -1,8 +1,8 @@
 { nixpkgs ? import <nixpkgs> {} }:
 
 let
-  common-install-scripts = nixpkgs.pkgs.callPackage ../common_install {};
-  common-factory-install-scripts = nixpkgs.pkgs.callPackage ../factory_common_install {
+  common-install-scripts = nixpkgs.pkgs.callPackage ../common-install {};
+  common-factory-install-scripts = nixpkgs.pkgs.callPackage ../factory-common-install {
     nixos-common-install-scripts = common-install-scripts;
   };
   factory-install-scripts = nixpkgs.pkgs.callPackage ./default.nix {

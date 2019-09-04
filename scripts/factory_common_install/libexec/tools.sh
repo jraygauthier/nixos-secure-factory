@@ -5,7 +5,7 @@ common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 
 is_device_cfg_repo_root_dir() {
   local root_dir=${1:-$PWD}
-  test -d "$root_dir/device_type" && \
+  test -d "$root_dir/device-type" && \
   test -d "$root_dir/device" && \
   test -f "$root_dir/release.nix"
 }
@@ -15,7 +15,7 @@ is_device_cfg_repo_writable_root_dir() {
   local root_dir=${1:-$PWD}
   is_device_cfg_repo_root_dir "$root_dir" &&
   test -w "$root_dir" && \
-  test -w "$root_dir/device_type" && \
+  test -w "$root_dir/device-type" && \
   test -w "$root_dir/device" && \
   test -w "$root_dir"
 }
@@ -23,18 +23,18 @@ is_device_cfg_repo_writable_root_dir() {
 
 is_nixos_secure_factory_repo_root_dir() {
   local root_dir=${1:-$PWD}
-  test -d "$root_dir/device_type" && \
-  test -d "$root_dir/scripts/device_common_install" && \
-  test -d "$root_dir/scripts/factory_common_install"
+  test -d "$root_dir/device-type" && \
+  test -d "$root_dir/scripts/device-common-install" && \
+  test -d "$root_dir/scripts/factory-common-install"
 }
 
 
 is_factory_install_repo_root_dir() {
   local root_dir=${1:-$PWD}
-  test -d "$root_dir/device_family" && \
-  test -d "$root_dir/device_type" && \
-  test -d "$root_dir/scripts/factory_install" && \
-  test -f "$root_dir/enter_factory_install_scripts_env.sh"
+  test -d "$root_dir/device-family" && \
+  test -d "$root_dir/device-type" && \
+  test -d "$root_dir/scripts/factory-install" && \
+  test -f "$root_dir/enter-factory-install-scripts-env.sh"
 }
 
 

@@ -118,7 +118,7 @@ get_required_current_device_type_config_root_dir() {
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
   local type
   type="$(get_required_current_device_type)"
-  out_root_dir="$device_cfg_repo_root_dir/device_type/$type"
+  out_root_dir="$device_cfg_repo_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
     { 2>&1 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; exit 1; }
   echo "$out_root_dir"
@@ -130,7 +130,7 @@ get_required_current_device_type_factory_install_root_dir() {
   factory_install_repo_root_dir="$(get_factory_install_repo_root_dir)"
   local type
   type="$(get_required_current_device_type)"
-  out_root_dir="$factory_install_repo_root_dir/device_type/$type"
+  out_root_dir="$factory_install_repo_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
     { 2>&1 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; exit 1; }
   echo "$out_root_dir"
@@ -165,7 +165,7 @@ list_available_device_types() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  find "$device_cfg_repo_root_dir/device_type" -mindepth 1 -maxdepth 1 | xargs -r -l1 basename
+  find "$device_cfg_repo_root_dir/device-type" -mindepth 1 -maxdepth 1 | xargs -r -l1 basename
 }
 
 
