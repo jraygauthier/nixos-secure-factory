@@ -88,7 +88,7 @@ get_factory_install_repo_root_dir() {
 }
 
 
-get_nixos_secure_factory_repo_root_dir() {
+get_nixos-secure-factory_repo_root_dir() {
   # TODO: Consider overriding with a env?
 
   local pkg_libexec_dir
@@ -98,7 +98,7 @@ get_nixos_secure_factory_repo_root_dir() {
   root_dir="$(cd "$pkg_libexec_dir/../../.." > /dev/null || exit 1; pwd)"
 
   if ! is_nixos_secure_factory_repo_root_dir "$root_dir"; then
-    1>&2 printf -- "ERROR: Cannot resolve 'nixos_secure_factory' repository root."
+    1>&2 printf -- "ERROR: Cannot resolve 'nixos-secure-factory' repository root."
     1>&2 printf -- " -> Please make sure your are executing the tool from a properly"
     1>&2 printf -- "    configured factory environement."
     exit 1
