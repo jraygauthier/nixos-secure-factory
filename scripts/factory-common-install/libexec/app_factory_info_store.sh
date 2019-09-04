@@ -85,7 +85,7 @@ get_factory_info__user_id() {
 
 
 get_factory_info__user_full_name() {
-  get_value_from_factory_info_yaml_or_if_null_then_replace_with '.user.full_name' ""
+  get_value_from_factory_info_yaml_or_if_null_then_replace_with '.user."full-name"' ""
 }
 
 
@@ -95,7 +95,7 @@ get_factory_info__user_email() {
 
 
 get_factory_info__user_gpg_default_id() {
-  get_value_from_factory_info_yaml_or_if_null_then_replace_with '.user.gpg.default_id' ""
+  get_value_from_factory_info_yaml_or_if_null_then_replace_with '.user.gpg."default-id"' ""
 }
 
 
@@ -105,7 +105,7 @@ get_required_factory_info__user_id() {
 
 
 get_required_factory_info__user_full_name() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.user.full_name'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.user."full-name"'
 }
 
 
@@ -115,32 +115,32 @@ get_required_factory_info__user_email() {
 
 
 get_required_factory_info__user_gpg_default_id() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.user.gpg.default_id'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.user.gpg."default-id"'
 }
 
 
 get_required_factory_info__gopass_factory_only_vault_id() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass.factory_only_vault.id'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass."factory-only-vault".id'
 }
 
 
 get_required_factory_info__gopass_factory_only_vault_repo_name() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass.factory_only_vault.repo_name'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass."factory-only-vault"."repo-name"'
 }
 
 
 get_required_factory_info__gopass_default_device_vault_id() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass.default_device_vault.id'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass."default-device-vault".id'
 }
 
 
 get_required_factory_info__gopass_default_device_vault_repo_name() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass.default_device_vault.repo_name'
+  get_value_from_factory_info_yaml_or_if_null_then_error '.gopass."default-device-vault"."repo-name"'
 }
 
 
 get_required_factory_info__device_defaults_email_domain() {
-  get_value_from_factory_info_yaml_or_if_null_then_error '.device_defaults.email_domain'
+  get_value_from_factory_info_yaml_or_if_null_then_error '."device-defaults"."email-domain"'
 }
 
 
@@ -240,9 +240,9 @@ EOF
 
   local _JQ_FILTER=$(cat <<EOF
 .user.id = \$user_id | \
-.user.full_name = \$user_full_name | \
+.user."full-name" = \$user_full_name | \
 .user.email = \$user_email | \
-.user.gpg.default_id = \$user_gpg_default_id
+.user.gpg."default-id" = \$user_gpg_default_id
 EOF
 )
 

@@ -88,7 +88,7 @@ get_current_device_hostname() {
 
 
 get_current_device_ssh_port() {
-  get_value_from_current_device_yaml_or_if_null_then_replace_with '.ssh_port' ""
+  get_value_from_current_device_yaml_or_if_null_then_replace_with '."ssh-port"' ""
 }
 
 
@@ -302,8 +302,8 @@ EOF
 .type = \$device_type | \
 .backend = \$backend | \
 .hostname = \$hostname | \
-.ssh_port = \$ssh_port | \
-.uart_pty = \$uart_pty
+."ssh-port" = \$ssh_port | \
+."uart-pty" = \$uart_pty
 EOF
 )"
 
