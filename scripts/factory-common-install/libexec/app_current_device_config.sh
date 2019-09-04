@@ -167,7 +167,7 @@ build_current_device_config() {
 
 
 # shellcheck disable=2120 # Optional arguments.
-build_current_device_config_system_closure() {
+_build_current_device_config_system_closure() {
   print_title_lvl2 "Building current device configuration system closure"
   local out_var_name="$1"
   local config_name="${2:-release}"
@@ -294,17 +294,25 @@ _build_and_deploy_initial_device_config_impl() {
   # Make sure current factory user has access to device via ssh.
   grant_factory_ssh_access_to_production_device ""
   local system_closure
-  build_current_device_config_system_closure "system_closure" "$config_name" ""
+  _build_current_device_config_system_closure "system_closure" "$config_name" ""
   mount_liveenv_nixos_partitions
   send_initial_system_closure_to_device "$system_closure"
   install_initial_system_closure_to_device "$system_closure"
 }
 
 
+build_device_config() {
+  local config_name="${1:-release}"
+  local system_closure
+  _build_current_device_config_system_closure "system_closure" "$config_name" ""
+  echo "system_closure='$system_closure'"
+}
+
+
 _build_and_deploy_device_config_impl() {
   local config_name="${1:-release}"
   local system_closure
-  build_current_device_config_system_closure "system_closure" "$config_name" ""
+  _build_current_device_config_system_closure "system_closure" "$config_name" ""
   send_system_closure_to_device "$system_closure"
   install_system_closure_to_device "$system_closure"
 }
