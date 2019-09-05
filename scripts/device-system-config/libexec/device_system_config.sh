@@ -106,12 +106,16 @@ build_device_config_system_closure() {
   local search_path_args=()
   build_nix_search_path_args_from_system_cfg_dir "search_path_args" "$system_cfg_dir"
 
+  # The nixos's nixpkgs sources (nixos channel).
+  local nixos_src
+  nixos_src="${system_cfg_dir}$(get_device_config_etc_nix_search_path_dir)/nixos"
+
   nix build \
     --out-link "$outLink" \
     -I "nixos-config=${system_cfg_dir}$(get_device_config_etc_dir)/configuration.nix" \
     "${search_path_args[@]}" \
     "$@" \
-    -f "${system_cfg_dir}$(get_device_config_etc_nix_search_path_dir)/nixos" system \
+    -f "$nixos_src/nixos" system \
     || { rm -rf "$tmpdir"; return 1; }
 
   local out_val
