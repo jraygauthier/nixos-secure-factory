@@ -90,6 +90,61 @@ build_device_config_dir() {
 }
 
 
+_parse_user_search_path_overrides_args() {
+  local -n _out_nix_search_path_overrides_a="$1"
+  shift 1
+
+  _out_nix_search_path_overrides_a=()
+  declare -gA _out_nix_search_path_overrides_aa=() # Global associative array.
+
+  local i
+  local j
+  local k
+
+  while [ "$#" -gt 0 ]; do
+      i="$1"; shift 1
+      case "$i" in
+        -I)
+          j="$1"; shift 1
+          _out_nix_search_path_overrides_a+=("$j")
+          ;;
+        --max-jobs|-j|--cores|--builders)
+          j="$1"; shift 1
+          _out_nix_build_fwd_flags+=("$i" "$j")
+          ;;
+        --show-trace|--keep-failed|-K|--keep-going|-k|--verbose|-v|-vv|-vvv|-vvvv|-vvvvv|--fallback|--repair|--no-build-output|-Q|-j*)
+          _out_nix_build_fwd_flags+=("$i")
+          ;;
+        --option)
+          j="$1"; shift 1
+          k="$1"; shift 1
+          _out_nix_build_fwd_flags+=("$i" "$j" "$k")
+          ;;
+        *)
+          echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
+          return 1
+          ;;
+      esac
+  done
+}
+
+
+create_aa_from_parsed_serach_path_override_args() {
+    local -n _out_nix_search_path_overrides_aa="$1"
+    shift 1
+
+    declare -gA _out_nix_search_path_overrides_aa=() # Global associative array.
+
+    while IFS= read -d '' -r sp_override; do
+      local key
+      key="$(echo "$sp_override" | awk -F '=' '{ print $1}')"
+      local value
+      value="$(echo "$sp_override" | awk -F '=' '{ print $2}')"
+      _out_nix_search_path_overrides_aa["$key"]="$value"
+    done < <(printf "%s\0" "$@")
+}
+
+
 # shellcheck disable=2120 # Optional arguments.
 build_device_config_system_closure() {
   echo "build_device_config_system_closure begin"
@@ -106,16 +161,39 @@ build_device_config_system_closure() {
   local search_path_args=()
   build_nix_search_path_args_from_system_cfg_dir "search_path_args" "$system_cfg_dir"
 
-  # The nixos's nixpkgs sources (nixos channel).
-  local nixos_src
-  nixos_src="${system_cfg_dir}$(get_device_config_etc_nix_search_path_dir)/nixos"
+  local search_path_args_overrides_a=()
 
+  _parse_user_search_path_overrides_args \
+    "search_path_args_overrides_a" "$@"
+
+  # echo "search_path_args_overrides_a='$(printf "%s\n" "${search_path_args_overrides_a[@]}" | paste -s -d',')'"
+
+  declare -A search_path_args_overrides_aa=() # Associative array.
+  create_aa_from_parsed_serach_path_override_args \
+    "search_path_args_overrides_aa" "${search_path_args_overrides_a[@]}"
+
+  # echo "search_path_args_overrides_aa='$(printf "%s\n" "${search_path_args_overrides_aa[@]}" | paste -s -d',')'"
+
+  # The nixos's nixpkgs sources (nixos channel).
+  local nixos_src_from_sp_dir
+  nixos_src_from_sp_dir="${system_cfg_dir}$(get_device_config_etc_nix_search_path_dir)/nixos"
+
+  local nixos_src
+  nixos_src="${search_path_args_overrides_aa["nixos"]:-$nixos_src_from_sp_dir}"
+  # echo "nixos_src='$nixos_src'"
+
+  # We call nix build with user custom args in front of
+  # filtered_search_path_args ones. This is bause the leftmost
+  # arg has priority over the rightmost one (-I in particular).
+  # This will allow the user to override some of the fixed -I
+  # instructions here.
   nix build \
     --out-link "$outLink" \
+    -f "$nixos_src/nixos" \
+    "$@" \
     -I "nixos-config=${system_cfg_dir}$(get_device_config_etc_dir)/configuration.nix" \
     "${search_path_args[@]}" \
-    "$@" \
-    -f "$nixos_src/nixos" system \
+    system \
     || { rm -rf "$tmpdir"; return 1; }
 
   local out_val
