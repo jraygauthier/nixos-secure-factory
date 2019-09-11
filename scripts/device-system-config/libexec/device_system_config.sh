@@ -135,11 +135,14 @@ create_aa_from_parsed_serach_path_override_args() {
 
     declare -gA _out_nix_search_path_overrides_aa=() # Global associative array.
 
+    [[ $# -gt 0 ]] || return 0
+
     while IFS= read -d '' -r sp_override; do
       local key
       key="$(echo "$sp_override" | awk -F '=' '{ print $1}')"
       local value
       value="$(echo "$sp_override" | awk -F '=' '{ print $2}')"
+      # echo "key='$key'; value='$value'"
       _out_nix_search_path_overrides_aa["$key"]="$value"
     done < <(printf "%s\0" "$@")
 }
