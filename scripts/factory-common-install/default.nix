@@ -7,6 +7,8 @@
 , sshfs-fuse
 , gnupg
 , gopass
+, pwgen
+, mkpasswd
 , screen
 , socat
 , picocom
@@ -44,10 +46,12 @@ stdenv.mkDerivation rec {
     # TODO: Consider removing the openssh dep as the nix
     # version might not work on non-nixos.
     openssh # ssh, sftp, scp, ssh-keygen
-    gnupg
     yq # yaml manipulations
     sshfs-fuse
+    gnupg
     gopass
+    pwgen
+    mkpasswd
 
     screen
     socat
