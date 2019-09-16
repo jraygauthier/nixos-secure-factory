@@ -2,15 +2,4 @@
 set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
-device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
-# all_dirnames="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
-
-# TODO: If arg specified, attempt to reduce the list.
-
-# TODO: If a single device remain, this is the one.
-
-# TODO: If many, provide an interractive readline.
-
-if ! prompt_for_user_approval; then
-  exit 1
-fi
+rm_current_device_state

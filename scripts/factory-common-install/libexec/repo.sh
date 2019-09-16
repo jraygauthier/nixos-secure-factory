@@ -9,7 +9,7 @@ update_repositories() {
   local branch_name="${2:-}"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Updating a set of repositories"
 
@@ -44,7 +44,7 @@ checkout_repositories_w_stash() {
   local branch_name="$2"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Checkouting a branch for a set of repositories moving uncommitted changes to target branch"
 
@@ -69,7 +69,7 @@ checkout_repositories() {
   local branch_name="$2"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Checkouting a branch for a set of repositories"
 
@@ -93,7 +93,7 @@ print_repositories_status() {
   local repo_urls="$1"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Printing the status of a set of repositories"
 
@@ -116,7 +116,7 @@ push_repositories() {
   local repo_urls="$1"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Synching a set of repositories"
 
@@ -149,7 +149,7 @@ add_and_commit_repositories() {
   local commit_msg="${2:-No comments}"
 
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Adding changes and committing to a set of repositories"
 
@@ -186,7 +186,7 @@ init_mr_config_for_repositories() {
 
   # TODO: Consider using something like google repo or mr.
   local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
 
   print_title_lvl2 "Creating mr config for this project's dependencies"
 

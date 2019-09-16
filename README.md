@@ -106,7 +106,7 @@ device configurations. Specific device factories are required to:
 
     2 mandatory env var should be set there:
 
-     1. `PKG_NIXOS_FACTORY_COMMON_INSTALL_FACTORY_STATE_REPO_DIR`
+     1. `PKG_NIXOS_FACTORY_COMMON_INSTALL_DEVICE_TYPE_DEFINITIONS_DIR`
 
         Should points to the root of your local of `my_factory_install`.
 

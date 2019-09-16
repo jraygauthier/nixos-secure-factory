@@ -1,25 +1,5 @@
 #!/usr/bin/env bash
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
+. "$common_factory_install_libexec_dir/tests.sh"
 
-
-list_all_modules() {
-  find "$($script_dir/pkg-nixos-factory-common-install-get-libexec-dir)" -mindepth 1 -maxdepth 1 -name '*.sh'
-}
-
-
-# Source all modules.
-for m in $(list_all_modules); do
-  echo "Sourcing module '$m'"
-  . "$m"
-done
-
-
-factory_install_repo_root_dir=$(get_factory_install_repo_root_dir)
-echo "factory_install_repo_root_dir=\"$factory_install_repo_root_dir\""
-
-factory_install_repo_parent_dir=$(get_factory_install_repo_parent_dir)
-echo "factory_install_repo_parent_dir=\"$factory_install_repo_parent_dir\""
-
-device_cfg_repo_root_dir=$(get_device_cfg_repo_root_dir)
-echo "device_cfg_repo_root_dir=\"$device_cfg_repo_root_dir\""
-
+launch_all_tests

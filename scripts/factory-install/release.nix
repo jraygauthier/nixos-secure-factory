@@ -1,9 +1,9 @@
 { nixpkgs ? import <nixpkgs> {} }:
 
 let
-  common-install-scripts = nixpkgs.pkgs.callPackage ../common-install {};
+  nixos-factory-common-install-scripts = import ../factory-common-install/release.nix { inherit nixpkgs; };
 in
 
 (nixpkgs.pkgs.callPackage ./. {
-  nixos-common-install-scripts = common-install-scripts;
+  inherit nixos-factory-common-install-scripts;
 })

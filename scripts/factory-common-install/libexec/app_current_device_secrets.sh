@@ -522,11 +522,57 @@ check_device_secrets_prim() {
 }
 
 
+import_missing_gpg_keys_from_gopass_vaults() {
+  print_title_lvl2 "Importing missing gpg keys from the gopass vaults"
+  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring
+}
+
+
+# update_device_gpg_identity_in_factory_keyring_and_store() {
+#   print_title_lvl2 "Updating device's gpg identity in factory keyring and store"
+#
+#   local device_public_key_file
+#   device_public_key_file="$(get_device_factory_only_stored_secrets_secure_dir)/$(get_rel_gpg_public_key_filename)" \
+#     || return 1
+#
+#   if ! [[ -f "$device_public_key_file" ]]; then
+#     1>&2 echo "ERROR: Missing expected device public key file at: '$device_public_key_file'."
+#     return 1
+#   fi
+#
+#   local device_gpg_id_w_email
+#   device_gpg_id_w_email="$(get_unique_gpg_id_w_email_from_armored_pub_key_stdin < "$device_public_key_file")"
+#   local device_gpg_id
+#   device_gpg_id="$(echo "$device_gpg_id_w_email" | awk '{ print $1 }')"
+#   local device_gpg_email
+#   device_gpg_email="$(echo "$device_gpg_id_w_email" | awk '{ print $2 }')"
+#
+#
+#   local device_email_from_store
+#   device_email_from_store="$(get_required_current_device_email)"
+#
+#   if ! echo "$device_gpg_email" | grep -q "$device_email_from_store"; then
+#     1>&2 echo "ERROR: Device's pub gpg id key's email '$device_gpg_email' does not match email from the device's store: '$device_email_from_store'"
+#     return 1
+#   fi
+#
+#   print_title_lvl3 "Updating device's gpg identity in factory keyring"
+#   # Removing all gpg keys matching the device's email.
+#   delete_gpg_public_key_from_factory_keyring "$device_gpg_email"
+#
+#   import_from_armored_pub_key_stdin  < "$device_public_key_file"
+#
+#   print_title_lvl3 "Updating device's gpg identity in device store"
+#   store_current_device_gpg_id "$device_gpg_id"
+# }
+
+
 grant_access_device_secrets_prim() {
   print_title_lvl2 "Granting device access to its private vault"
   mount_device_secret_vaults
   authorize_gopass_device_to_device_private_substore
 }
+
 
 deploy_device_secrets_prim() {
   print_title_lvl2 "Deploying device secrets from secure directory to the device"
@@ -539,23 +585,28 @@ install_device_secrets_prim() {
   run_cmd_as_device_root "os-secrets-install-received"
 }
 
-create_device_secrets() {
+
+create_device_secrets_cli() {
   print_title_lvl1 "Creating current device secrets and storing those to the vault"
   create_device_secrets_prim "$@"
   store_device_secrets_prim "$@"
   # We explicitly reload the secrets in order acertain their presence.
   load_device_secrets_prim "$@"
   check_device_secrets_prim "$@"
+  import_missing_gpg_keys_from_gopass_vaults
+  # update_device_gpg_identity_in_factory_keyring_and_store
   grant_access_device_secrets_prim
 }
 
 
-create_and_deploy_device_secrets() {
+create_and_deploy_device_secrets_cli() {
   print_title_lvl1 "Creating and deploying current device secrets storing them to the vault"
   create_device_secrets_prim "$@"
   store_device_secrets_prim "$@"
   load_device_secrets_prim "$@"
   check_device_secrets_prim "$@"
+  import_missing_gpg_keys_from_gopass_vaults
+  # update_device_gpg_identity_in_factory_keyring_and_store
   grant_access_device_secrets_prim
   if is_device_run_from_nixos_liveenv; then
     mount_liveenv_nixos_partitions
@@ -566,7 +617,7 @@ create_and_deploy_device_secrets() {
 }
 
 
-rm_device_secrets() {
+rm_device_secrets_cli() {
   print_title_lvl1 "Removing current device secrets from the vault"
   # TODO: Return early when nothing to remove.
 
@@ -577,7 +628,7 @@ rm_device_secrets() {
 }
 
 
-deploy_device_secrets() {
+deploy_device_secrets_cli() {
   print_title_lvl1 "Deploying current device secrets to the device"
   load_device_secrets_prim "$@"
   if is_device_run_from_nixos_liveenv; then
@@ -589,7 +640,7 @@ deploy_device_secrets() {
 }
 
 
-deploy_no_install_device_secrets() {
+deploy_no_install_device_secrets_cli() {
   print_title_lvl1 "Deploying current device secrets to the device without installing"
   load_device_secrets_prim "$@"
   if is_device_run_from_nixos_liveenv; then
@@ -600,13 +651,13 @@ deploy_no_install_device_secrets() {
 }
 
 
-install_deployed_device_secrets() {
+install_deployed_device_secrets_cli() {
   print_title_lvl1 "Install already deployed device secrets"
   install_device_secrets_prim
 }
 
 
-copy_device_ssh_identity_to_clipboard() {
+copy_device_ssh_identity_to_clipboard_cli() {
   print_title_lvl1 "Copying current device ssh identity (root public key) to your clipboard"
   local store_key
   store_key="$(get_rel_root_user_ssh_rsa_public_key)"
@@ -616,4 +667,50 @@ copy_device_ssh_identity_to_clipboard() {
 
   cat_gopass_device_bin_secret "$store_key" "ssh_pub_key" | xclip -selection clipboard
   echo "Device public key at '$full_store_key' has been placed in your clipboard. Paste it where you need."
+}
+
+
+deauthorize_user_from_device_vault_cli() {
+  deauthorize_gopass_device_from_device_private_substore "$@"
+}
+
+
+authorize_user_to_device_vault_cli() {
+  authorize_gopass_device_to_device_private_substore "$@"
+}
+
+
+deauthorize_user_from_device_factory_only_vaults_cli() {
+  user_gpg_id="$1"
+
+  deauthorize_gopass_device_from_device_private_substore "$user_gpg_id"
+
+  1>&2 echo "TODO: Implement de-auth to factory only vault."
+  false
+}
+
+
+authorize_user_to_device_factory_only_vaults_cli() {
+  user_gpg_id="$1"
+
+  if ! is_factory_user_gopass_gpg_id "$user_gpg_id"; then
+    1>&2 echo "ERROR: Non factory user (such as devices) should never be granted access to this store."
+    return 1
+  fi
+
+  authorize_gopass_device_to_device_private_substore "$user_gpg_id"
+
+  1>&2 echo "TODO: Implement auth to factory only vault."
+  false
+}
+
+
+list_device_substore_authorized_gpg_ids_w_email_cli() {
+  list_authorized_gopass_device_substore_peers_gpg_ids_w_email
+}
+
+
+list_device_factory_only_substore_authorized_gpg_ids_w_email_cli() {
+  1>&2 echo "TODO: Implement."
+  false
 }

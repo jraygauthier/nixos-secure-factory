@@ -9,7 +9,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 
 get_current_device_store_yaml_filename() {
   local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  device_cfg_repo_root_dir="$(get_nixos_secure_factory_workspace_dir)"
   echo "$device_cfg_repo_root_dir/.current-device.yaml"
 }
 
@@ -26,14 +26,45 @@ ensure_current_device_specified() {
   local store_yaml_basename="$(basename "$store_yaml")"
   local store_yaml_dirname="$(dirname "$store_yaml")"
   is_current_device_specified || \
-    { 1>&2 echo "ERROR: '$store_yaml_basename' file does not exists in '$store_yaml_dirname'."; exit 1; }
+    { 1>&2 echo "ERROR: '$store_yaml_basename' file does not exists in '$store_yaml_dirname'."; return 1; }
+}
+
+
+print_current_device_state() {
+  local filename
+  filename="$(get_current_device_store_yaml_filename)"
+  print_title_lvl1 "Content of '$filename':"
+
+  ensure_factory_info_specified || return 1
+  cat "$filename"
+}
+
+
+rm_current_device_state() {
+  local filename
+  filename="$(get_current_device_store_yaml_filename)" || return 1
+  print_title_lvl1 "Removing '$filename':"
+
+  if ! [[ -e "$filename" ]]; then
+    echo "Nothing do remove."
+    return 0
+  fi
+
+  print_title_lvl2 "Content is:"
+  cat "$filename"
+
+  if ! prompt_for_user_approval; then
+    return 1
+  fi
+
+  echo_eval "rm '$filename'"
 }
 
 
 get_value_from_current_device_yaml() {
   local jq_filter=$1
 
-  ensure_current_device_specified || exit 1
+  ensure_current_device_specified || return 1
   local store_yaml
   store_yaml="$(get_current_device_store_yaml_filename)"
 
@@ -58,10 +89,10 @@ get_value_from_current_device_yaml_or_if_null_then_replace_with() {
 
 get_value_from_current_device_yaml_or_if_null_then_error() {
   local out
-  out="$(get_value_from_current_device_yaml "$1")" || exit 1
+  out="$(get_value_from_current_device_yaml "$1")" || return 1
   if [[ "$out" == "null" ]]; then
     1>&2 echo "ERROR: Unexpected null value found when looking for \`$1\` in current device config."
-    exit 1
+    return 1
   fi
   echo "$out"
 }
@@ -92,12 +123,70 @@ get_current_device_ssh_port() {
 }
 
 
-get_required_current_device_email() {
+_build_device_email_from_device_id() {
+  local device_id="$1"
+
   local email_domain
   email_domain="$(get_required_factory_info__device_defaults_email_domain)"
-  local device_id
-  device_id="$(get_required_current_device_id)" || exit 1
   echo "${device_id}@${email_domain}"
+}
+
+
+get_required_current_device_email() {
+  local device_id
+  device_id="$(get_required_current_device_id)" || return 1
+
+  local default_email
+  default_email="$(_build_device_email_from_device_id "$device_id")"
+
+  local email
+  email="$(get_value_from_current_device_yaml_or_if_null_then_replace_with '."email"' "$default_email")"
+  echo "$email"
+}
+
+
+has_current_device_gpg_id() {
+  local gpg_id
+  gpg_id="$(get_value_from_current_device_yaml '."gpg-id"')" || return 1
+
+  ! [[ "$gpg_id" == "null" ]]
+}
+
+
+get_current_device_gpg_id() {
+  local gpg_id
+  gpg_id="$(get_value_from_current_device_yaml_or_if_null_then_error '."gpg-id"')"
+  echo "$gpg_id"
+}
+
+
+get_current_device_gpg_id_or_email() {
+  local default_gpg_id
+  default_gpg_id="$(get_required_current_device_email)"
+
+  local gpg_id
+  gpg_id="$(get_value_from_current_device_yaml_or_if_null_then_replace_with '."gpg-id"' "$default_gpg_id")"
+  echo "$gpg_id"
+}
+
+
+store_current_device_gpg_id() {
+  local gpg_id="$1"
+  ensure_current_device_specified
+  local store_yaml
+  store_yaml="$(get_current_device_store_yaml_filename)"
+
+  local yaml_str
+  yaml_str="$(\
+    yq -y --arg gpg_id "$gpg_id" '."gpg-id" = $gpg_id' \
+      < "$(get_current_device_store_yaml_filename)")"
+
+  # echo "yaml_str='$yaml_str'"
+
+  echo "Writing device configuration to '$store_yaml'."
+  echo "$yaml_str" > "$store_yaml"
+
+  update_device_json_from_current_yaml
 }
 
 
@@ -108,7 +197,7 @@ get_required_current_device_root_dir() {
   device_dirname="$(get_required_current_device_dirname)"
   local out_root_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; exit 1; }
+    { 2>&1 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
@@ -120,19 +209,19 @@ get_required_current_device_type_config_root_dir() {
   type="$(get_required_current_device_type)"
   out_root_dir="$device_cfg_repo_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; exit 1; }
+    { 2>&1 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
 
 get_required_current_device_type_factory_install_root_dir() {
-  local factory_install_repo_root_dir
-  factory_install_repo_root_dir="$(get_factory_install_repo_root_dir)"
+  local device_type_defs_root_dir
+  device_type_defs_root_dir="$(get_factory_install_device_type_definitions_root_dir)"
   local type
   type="$(get_required_current_device_type)"
-  out_root_dir="$factory_install_repo_root_dir/device-type/$type"
+  out_root_dir="$device_type_defs_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; exit 1; }
+    { 2>&1 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
@@ -230,14 +319,6 @@ validate_device_id() {
 }
 
 
-print_current_device_state() {
-  local store_yaml
-  store_yaml="$(get_current_device_store_yaml_filename)"
-  print_title_lvl1 "Current device state"
-  cat "$store_yaml"
-}
-
-
 init_new_current_device_state() {
   local store_yaml
   store_yaml="$(get_current_device_store_yaml_filename)"
@@ -297,29 +378,43 @@ EOF
     fi
   fi
 
-  local _JQ_FILTER="$(cat <<EOF
+  local email
+  email="$(_build_device_email_from_device_id "$device_id")"
+
+  # Will be the device's email until the device's secrets are
+  # first created, at which time a real gpg id should be set.
+  local gpg_id="$email"
+
+
+  local _JQ_FILTER
+  _JQ_FILTER="$(cat <<EOF
 .identifier = \$device_id | \
 .type = \$device_type | \
 .backend = \$backend | \
 .hostname = \$hostname | \
 ."ssh-port" = \$ssh_port | \
-."uart-pty" = \$uart_pty
+."uart-pty" = \$uart_pty | \
+."email" = \$email | \
+."gpg-id" = \$gpg_id
 EOF
 )"
 
-  local yaml_str=$(echo "---" | yq -y \
+  local yaml_str
+  yaml_str=$(echo "---" | yq -y \
     --arg device_id "$device_id" \
     --arg device_type "$device_type" \
     --arg backend "$backend" \
     --arg hostname "$hostname" \
     --arg ssh_port "$ssh_port" \
     --arg uart_pty "$uart_pty" \
+    --arg email "$email" \
+    --arg gpg_id "$gpg_id" \
     "$_JQ_FILTER")
 
   printf -- "Device info\n"
   printf -- "-----------\n\n"
 
-  printf -- "$yaml_str\n\n"
+  printf -- "%s\n\n" "$yaml_str"
 
   if ! prompt_for_user_approval; then
     return 1

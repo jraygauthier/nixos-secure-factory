@@ -5,6 +5,8 @@ factory_install_repo_root_dir=`cd "$(dirname $0)/../../../.." > /dev/null;pwd`
 
 # Should help with developping scripts.
 scripts_dir="$factory_install_repo_root_dir/scripts"
+
+export PKG_NIXOS_COMMON_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/common"
 export PKG_NIXOS_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/common-install"
 export PKG_NIXOS_DEVICE_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/device-common-install"
 

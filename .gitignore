@@ -4,4 +4,6 @@
 /scripts/device-common-install/result
 /scripts/factory-install/result
 /device-type/*/scripts/install/result
-.mypy_cache/
+**/__pycache__/
+**/.mypy_cache/
+**/.pytest_cache/
