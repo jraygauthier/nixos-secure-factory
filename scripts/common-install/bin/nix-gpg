@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+exec -a "$0" gpg "${extraFlagsArray[@]}" "$@"

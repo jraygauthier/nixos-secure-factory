@@ -1,16 +1,12 @@
 { nixpkgs ? import <nixpkgs> {} }:
 
 let
-  common-install-scripts = nixpkgs.pkgs.callPackage ../common-install {};
-  common-device-install-scripts = nixpkgs.pkgs.callPackage ./default.nix {
-    nixos-common-install-scripts = common-install-scripts;
-  };
+  nixos-device-common-install-scripts = import ./release.nix { inherit nixpkgs; };
 in
 
 nixpkgs.pkgs.buildEnv {
   name = "nixos-device-common-install-scripts-env";
   paths = [
-    common-install-scripts
-    common-device-install-scripts
+    nixos-device-common-install-scripts
   ];
 }

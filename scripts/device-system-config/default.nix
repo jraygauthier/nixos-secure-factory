@@ -4,7 +4,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-device-system-config-scripts";
+  pname = "nixos-device-system-config";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -14,19 +14,27 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace ./bin/pkg-nixos-device-system-config-get-libexec-dir \
-      --replace 'default_pkg_dir/libexec' 'default_pkg_dir/${pname}/libexec' \
+    substituteInPlace ./bin/pkg-${pname}-get-libexec-dir \
+      --replace 'default_pkg_dir=' '# default_pkg_dir=' \
+      --replace '$default_pkg_dir/libexec' "$out/share/${pname}/libexec"
+
+    substituteInPlace ./bin/pkg-${pname}-get-root-dir \
+      --replace 'default_pkg_dir=' '# default_pkg_dir=' \
+      --replace '$default_pkg_dir' "$out/share/${pname}"
+
+    ! test -e "./.local-env.sh" || rm ./.local-env.sh
   '';
 
   installPhase = ''
-    mkdir -p "$out/${pname}/libexec"
-    cp -p "./libexec/"* "$out/${pname}/libexec"
+    mkdir -p "$out/share/${pname}"
+    find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 
-    for cmd in $(find ./bin -mindepth 1 -maxdepth 1); do
-      cmd_basename="$(basename $cmd)"
-      install -vD $cmd $out/bin/$cmd_basename;
-      wrapProgram $out/bin/$cmd_basename \
-        --prefix PATH : ${stdenv.lib.makeBinPath buildInputs}
+    mkdir -p "$out/bin"
+    for cmd in $(find "$out/share/${pname}/bin" -mindepth 1 -maxdepth 1); do
+      target_cmd_basename="$(basename "$cmd")"
+      makeWrapper "$cmd" "$out/bin/$target_cmd_basename" \
+        --prefix PATH : "${stdenv.lib.makeBinPath buildInputs}" \
+        --prefix PATH : "$out/share/${pname}/bin"
     done
   '';
 

@@ -8,7 +8,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 
 
 get_factory_info_store_yaml_filename() {
-  factory_install_repo_root_dir="$(get_factory_install_repo_root_dir)"
+  factory_install_repo_root_dir="$(get_nixos_secure_factory_workspace_dir)" || return 1
   echo "$factory_install_repo_root_dir/.factory-info.yaml"
 }
 
@@ -30,12 +30,43 @@ ensure_factory_info_specified() {
 }
 
 
+print_factory_info_state() {
+  local filename
+  filename="$(get_factory_info_store_yaml_filename)"
+  print_title_lvl1 "Content of '$filename':"
+
+  ensure_factory_info_specified || return 1
+  cat "$filename"
+}
+
+
+rm_factory_info_state() {
+  local filename
+  filename="$(get_factory_info_store_yaml_filename)" || return 1
+  print_title_lvl1 "Removing '$filename':"
+
+  if ! [[ -e "$filename" ]]; then
+    echo "Nothing do remove."
+    return 0
+  fi
+
+  print_title_lvl2 "Content is:"
+  cat "$filename"
+
+  if ! prompt_for_user_approval; then
+    return 1
+  fi
+
+  echo_eval "rm '$filename'"
+}
+
+
 get_required_value_from_factory_info_yaml() {
   local jq_filter=$1
 
   ensure_factory_info_specified
   local store_yaml
-  store_yaml="$(get_factory_info_store_yaml_filename)"
+  store_yaml="$(get_factory_info_store_yaml_filename)" || return 1
 
   local out
   out="$(cat "$store_yaml" | yq -j "$jq_filter")"
@@ -47,7 +78,7 @@ get_value_from_factory_info_yaml() {
   local jq_filter=$1
 
   local store_yaml
-  store_yaml="$(get_factory_info_store_yaml_filename)"
+  store_yaml="$(get_factory_info_store_yaml_filename)" || return 1
   if ! test -f "$store_yaml"; then
     # 1>&2 echo "WARNING: Factory info store at '$store_yaml' not found when looking for '$jq_filter'."
     echo "null"
@@ -61,8 +92,10 @@ get_value_from_factory_info_yaml() {
 
 
 get_value_from_factory_info_yaml_or_if_null_then_replace_with() {
+  local null_replacement_value
   null_replacement_value="$2"
-  out="$(get_value_from_factory_info_yaml "$1")"
+  local out
+  out="$(get_value_from_factory_info_yaml "$1")" || return 1
   if [[ "$out" == "null" ]]; then
     out="$null_replacement_value"
   fi
@@ -70,7 +103,8 @@ get_value_from_factory_info_yaml_or_if_null_then_replace_with() {
 }
 
 get_value_from_factory_info_yaml_or_if_null_then_error() {
-  out="$(get_required_value_from_factory_info_yaml "$1")"
+  local out
+  out="$(get_required_value_from_factory_info_yaml "$1")" || return 1
   if [[ "$out" == "null" ]]; then
     1>&2 echo "ERROR: Unexpected null value found when looking for \`$1\` in factory info config."
     exit 1

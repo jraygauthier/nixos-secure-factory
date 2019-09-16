@@ -1,12 +1,11 @@
 { nixpkgs ? import <nixpkgs> {} }:
 
 let
-  common-install-scripts = nixpkgs.pkgs.callPackage ../../../../scripts/common-install {};
-  device-common-install-scripts = nixpkgs.pkgs.callPackage ../../../../scripts/device-common-install {
-    nixos-common-install-scripts = common-install-scripts;
+  nixos-device-common-install-scripts = import ../../../../scripts/device-common-install {
+    inherit nixpkgs;
   };
 in
 
 (nixpkgs.pkgs.callPackage ./. {
-  nixos-device-common-install-scripts = common-install-scripts;
+  inherit nixos-device-common-install-scripts;
 })

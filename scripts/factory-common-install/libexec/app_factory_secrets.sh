@@ -8,6 +8,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/prompt.sh"
 . "$common_factory_install_libexec_dir/app_factory_info_store.sh"
 . "$common_factory_install_libexec_dir/app_factory_gopass.sh"
+. "$common_factory_install_libexec_dir/app_factory_gpg.sh"
 
 
 
@@ -134,11 +135,13 @@ rm_factory_gpg_identity_impl() {
   printf -- "Removing user gpg identity(ies)\n"
   printf -- "===============================\n\n"
 
-  read_or_prompt_for_factory_info__user_email "user_email"
+  local gpg_id
+  read_or_prompt_for_factory_info__user_gpg_default_id "gpg_id"
+  local gpg_passphrase
   prompt_for_passphrase_no_repeat_loop "gpg_passphrase"
 
   GPG_TOOLS_PROMPT_BEFORE_IDENTITY_REMOVAL=1 \
-    rm_current_user_gpg_identity "$user_email" "$gpg_passphrase"
+    rm_current_user_gpg_identity "$gpg_id" "$gpg_passphrase"
 }
 
 
@@ -175,11 +178,20 @@ create_factory_gpg_identity_impl() {
   echo "Once done, please **wipe those keys** using the 'wipe_factory_secure_dir_content' tool."
 
 
+  local gpg_ids
+  gpg_ids="$(list_gpg_secret_key_ids "" "$user_email" "$gpg_passphrase")" || return 1
+  if ! test "1" -eq "$(echo "$gpg_ids" | wc -l)"; then
+    1>&2 echo "ERROR: More than a single secret key or no key found for email '$user_email': '$gpg_ids'."
+    return 1
+  fi
+
+  local gpg_id
+  gpg_id="$(echo "$gpg_ids" | head -n 1)"
+
   printf -- "\n"
   printf -- "Copying factory gpg public key to clipboard\n"
   printf -- "-------------------------------------------\n\n"
-
-  copy_current_user_gpg_public_key_to_clipboard "$user_email"
+  copy_current_user_gpg_public_key_to_clipboard "$gpg_id"
 
   printf -- "\n"
   echo "Note that you will be able to retrieve this information "
@@ -192,8 +204,10 @@ copy_factory_gpg_identity_to_clipboard_impl() {
   printf -- "Copying factory gpg public key to clipboard\n"
   printf -- "===========================================\n\n"
 
-  read_or_prompt_for_factory_info__user_email "user_email"
-  copy_current_user_gpg_public_key_to_clipboard "$user_email"
+  local gpg_id
+  read_or_prompt_for_factory_user_gpg_default_id "gpg_id"
+  echo "gpg_id='$gpg_id'"
+  copy_current_user_gpg_public_key_to_clipboard "$gpg_id"
 }
 
 
@@ -232,4 +246,59 @@ mount_factory_secret_vaults() {
 umount_factory_secret_vaults() {
   print_title_lvl4 "umount_factory_secret_vaults"
   umount_factory_gopass_secrets_stores
+}
+
+
+mount_factory_secret_vaults_cli() {
+  print_title_lvl1 "Mounting factory secret vaults"
+
+  local shallow="false"
+  if printf "%s\n" "$@" | grep -q '\-\-shallow'; then
+    shallow=true
+  fi
+
+  print_title_lvl2 "Mounting factory secret vaults themselves"
+  mount_factory_secret_vaults
+
+  if ! $shallow; then
+    print_title_lvl2 "Mounting per device substores"
+    mount_all_gopass_device_substores
+  fi
+}
+
+
+umount_factory_secret_vaults_cli() {
+  print_title_lvl1 "Unmounting factory secret vaults"
+
+  local shallow="false"
+  if printf "%s\n" "$@" | grep -q '\-\-shallow'; then
+    shallow=true
+  fi
+
+  if ! $shallow; then
+    print_title_lvl2 "Unmounting per device substores"
+    umount_all_gopass_device_substores
+  fi
+
+  print_title_lvl2 "Unmounting factory secret vaults themselves"
+  umount_factory_secret_vaults
+}
+
+
+list_factory_secrets_gpg_public_keys_cli() {
+  list_factory_gpg_public_key_ids_w_email "$@"
+}
+
+
+list_factory_secrets_gpg_secret_keys_cli() {
+  list_factory_gpg_secret_key_ids_w_email "$@"
+}
+
+
+list_factory_secrets_vaults_gopass_recipients_cli() {
+  list_factory_gopass_vaults_recipients
+}
+
+import_factory_secrets_gopass_vaults_gpg_keys_cli() {
+  import_all_authorized_peers_public_key_files_from_gopass_vaults
 }

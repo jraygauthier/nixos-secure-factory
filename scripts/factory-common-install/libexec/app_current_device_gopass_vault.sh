@@ -11,130 +11,125 @@ common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/device_secrets.sh"
 
 
+_ensure_gopass_device_id_or_current_device_id() {
+  local device_id
+  if [[ "x" == "${1:+x}" ]]; then
+    device_id="$1"
+  else
+    device_id="$(get_required_current_device_id)" || return 1
+  fi
+  echo "$device_id"
+}
+
+
+_get_gopass_device_substore_key() {
+  local repo_store_key="$1"
+  local device_id
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "${2:-}")"
+  get_gopass_device_substore_key_pure_impl "$repo_store_key" "$device_id"
+}
+
+
+get_gopass_device_substore_key() {
+  _get_gopass_device_substore_key "$(get_gopass_device_vault_id)" "$@"
+}
+
+
+get_gopass_device_factory_only_substore_key() {
+  _get_gopass_device_substore_key "$(get_gopass_factory_only_vault_id)" "$@"
+}
+
+
+get_gopass_device_substore_dir() {
+  local repo_dir_parent
+  repo_dir_parent="$(get_gopass_device_vault_repo_dir | xargs -L 1 dirname)" || return 1
+
+  local sskey
+  sskey="$(get_gopass_device_substore_key "$@")" || return 1
+
+  echo "$repo_dir_parent/$sskey"
+}
+
+
+get_gopass_device_factory_only_substore_dir() {
+  local repo_dir_parent
+  repo_dir_parent="$(get_gopass_factory_only_vault_repo_dir | xargs -L 1 dirname)" || return 1
+
+  local sskey
+  sskey="$(get_gopass_device_factory_only_substore_key "$@")" || return 1
+
+  echo "$repo_dir_parent/$sskey"
+}
+
+
+
 exists_gopass_device_secrets() {
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
-  gopass ls -f -fo "$(get_gopass_device_vault_id)/${device_id}" &> /dev/null
+  local device_id
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  exists_gopass_device_substore "$device_id"
 }
 
 
 exists_gopass_factory_only_device_secrets() {
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
-  gopass ls -f -fo  "$(get_gopass_factory_only_vault_id)/${device_id}" &> /dev/null
+  local device_id
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  exists_gopass_factory_only_device_substore "$device_id"
 }
 
 
 mount_gopass_device() {
   print_title_lvl5 "mount_gopass_device"
 
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
+  local device_id
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
 
-  # device_gpg_key
-
-  if exists_gopass_device_secrets "$device_id"; then
-    echo "Device secret store already exists."
-    return 0
-  fi
-
-  local factory_gpg_key_id
-  read_or_prompt_for_factory_info__user_gpg_default_id "factory_gpg_key_id"
-  local top_lvl
-  top_lvl="$(get_factory_install_repo_parent_dir)"
-
-  echo_eval "gopass mounts add -i '$factory_gpg_key_id'" \
-    "'$(get_gopass_device_vault_id)/$device_id'" \
-    "'$top_lvl/$(get_gopass_device_vault_id)/$device_id'"
-
-  # TODO grant access to device gpgid
+  mount_gopass_device_substore "$device_id"
 }
 
 
 umount_gopass_device() {
   print_title_lvl5 "umount_gopass_device"
 
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
+  local device_id
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
 
-  if ! exists_gopass_device_secrets "$device_id"; then
-    echo "Device secret store does not exists. Nothing to unmount."
-    return 0
-  fi
-
-  echo_eval "gopass mounts remove '$(get_gopass_device_vault_id)/$device_id'"
+  umount_gopass_device_substore "$device_id"
 }
 
 
 rm_no_prompt_gopass_device() {
   print_title_lvl5 "rm_no_prompt_gopass_device"
 
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
-
-  if ! exists_gopass_device_secrets "$device_id"; then
+  if ! exists_gopass_device_secrets "$@"; then
     echo "Device secret store does not exists. Nothing to remove."
     return 0
   fi
 
-  umount_gopass_device "$device_id"
-  echo_eval "gopass --yes rm -r '$(get_gopass_device_vault_id)/$device_id'"
+  umount_gopass_device "$@"
+  echo_eval "factory-gopass --yes rm -r '$(get_gopass_device_substore_key "$@")'"
 }
 
 
 rm_no_prompt_gopass_factory_only_device() {
   print_title_lvl5 "rm_no_prompt_gopass_factory_only_device"
 
-  local device_id="${1:-}"
-  test "" != "$device_id" \
-    || device_id="$(get_required_current_device_id)" \
-    || exit 1
-
-  if ! exists_gopass_factory_only_device_secrets "$device_id"; then
+  if ! exists_gopass_factory_only_device_secrets "$@"; then
     echo "Factory only device secret store does not exists. Nothing to remove."
     return 0
   fi
 
-  umount_gopass_device "$device_id"
-  echo_eval "gopass --yes rm -r '$(get_gopass_factory_only_vault_id)/$device_id'"
-}
-
-
-_get_gopass_device_substore_key() {
-  local repo="$1"
-  local device_id
-  device_id="$(get_required_current_device_id)" || exit 1
-  local device_store="$repo/$device_id"
-  echo "$device_store"
-}
-
-
-get_gopass_device_substore_key() {
-  _get_gopass_device_substore_key "$(get_gopass_device_vault_id)"
-}
-
-
-get_gopass_factory_only_substore_key() {
-  _get_gopass_device_substore_key "$(get_gopass_factory_only_vault_id)"
+  umount_gopass_device "$@"
+  echo_eval "factory-gopass --yes rm -r '$(get_gopass_device_factory_only_substore_key "$@")'"
 }
 
 
 _get_gopass_device_full_store_key_for() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
+  local device_id="${3:-}"
 
   local device_store
-  device_store="$(_get_gopass_device_substore_key "$repo")"
+  device_store="$(_get_gopass_device_substore_key "$repo_store_key" "$device_id")"
   local full_store_key="${device_store}/${store_key}"
 
   # Remove all leading dot in filenames and directory components.
@@ -158,7 +153,7 @@ get_gopass_factory_only_device_full_store_key_for() {
 _exists_gopass_device_secret() {
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
-  gopass ls -f | grep -q "${full_store_key}"
+  factory-gopass ls -f | grep -q "${full_store_key}"
 }
 
 
@@ -173,15 +168,12 @@ _ensure_exists_gopass_device_secret() {
 
 
 _exists_gopass_device_text_secret() {
-  local repo="$1"
-  local store_key="$2"
-  local full_store_key
-
   _ensure_exists_gopass_device_secret "$@" || return 1
 
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  local full_store_key
+  full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
   local binary_ext="b64"
-  ! gopass ls -f | grep -q "${full_store_key}.${binary_ext}"
+  ! factory-gopass ls -f | grep -q "${full_store_key}.${binary_ext}"
 }
 
 
@@ -219,36 +211,40 @@ exists_gopass_factory_only_device_text_secret() {
 
 # TODO: Consider removing. Unreliable.
 _store_gopass_device_text_secret_to_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local in_text="$3"
+  local device_id="${4:-}"
+
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Storing text secret to gopass '$full_store_key'."
-  echo_eval "echo '$in_text' | gopass --yes insert --force '$full_store_key'"
+  echo_eval "echo '$in_text' | factory-gopass --yes insert --force '$full_store_key'"
 }
 
 
 # TODO: Consider removing. Unreliable.
 _store_gopass_device_text_file_secret_to_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local in_file="$3"
+  local device_id="${4:-}"
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Storing text file '$in_file' to gopass '$full_store_key'."
-  echo_eval "cat '$in_file' | gopass --yes insert --force '$full_store_key'"
+  echo_eval "cat '$in_file' | factory-gopass --yes insert --force '$full_store_key'"
 }
 
 
 _store_gopass_device_bin_file_secret_to_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local in_file="$3"
+  local device_id="${4:-}"
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Storing binary file '$in_file' to gopass '$full_store_key'."
-  echo_eval "gopass --yes binary cp --force '$in_file' '$full_store_key'"
+  echo_eval "factory-gopass --yes binary cp --force '$in_file' '$full_store_key'"
 }
 
 
@@ -288,18 +284,19 @@ store_gopass_factory_only_device_bin_file_secret() {
 
 # TODO: Consider removing. Unreliable.
 _load_gopass_device_text_secret_from_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local out_varname="$3"
-  _ensure_exists_gopass_device_secret "$repo" "$store_key" || return 1
+  local device_id="${4:-}"
+  _ensure_exists_gopass_device_secret "$repo_store_key" "$store_key" "$device_id" || return 1
 
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Loading gopass text secret at '$full_store_key' to bash variable '$out_varname'."
 
-  echo "out_val=\"\$(gopass show -f '$full_store_key')\""
+  echo "out_val=\"\$(factory-gopass show -f '$full_store_key')\""
   local out_val
-  out_val="$(gopass show -f "$full_store_key")"
+  out_val="$(factory-gopass show -f "$full_store_key")"
   if test "$(echo "$out_val" | wc -l)" -gt "1"; then
     # Gopass seems to trim trailing newlines on insert.
     # Ensure the secrets gets back its original newline.
@@ -312,39 +309,41 @@ _load_gopass_device_text_secret_from_repo() {
 
 # TODO: Consider removing. Unreliable.
 _load_gopass_device_text_file_secret_from_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local out_file="$3"
+  local device_id="${4:-}"
 
-  _ensure_exists_gopass_device_secret "$repo" "$store_key" || return 1
+  _ensure_exists_gopass_device_secret "$repo_store_key" "$store_key" "$device_id" || return 1
 
   local out_dirname
   out_dirname="$(dirname "$out_file")"
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Loading gopass text secret at '$full_store_key' to file '$out_file'."
   mkdir -m 700 -p "$out_dirname"
   # Gopass seems to trim trailing newlines on insert.
   # Ensure the secrets gets back its original newline.
-  echo_eval "gopass show -f '$full_store_key' > '$out_file'" || return 1
+  echo_eval "factory-gopass show -f '$full_store_key' > '$out_file'" || return 1
   echo_eval "printf '\n' >> '$out_file'"
 }
 
 
 _load_gopass_device_bin_file_secret_from_repo() {
-  local repo="$1"
+  local repo_store_key="$1"
   local store_key="$2"
   local out_file="$3"
+  local device_id="${4:-}"
 
-  _ensure_exists_gopass_device_secret "$repo" "$store_key" || return 1
+  _ensure_exists_gopass_device_secret "$repo_store_key" "$store_key" "$device_id" || return 1
 
   local out_dirname
   out_dirname="$(dirname "$out_file")"
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Loading gopass binary secret at '$full_store_key' to file '$out_file'."
   mkdir -m 700 -p "$out_dirname"
-  echo_eval "gopass binary cp '$full_store_key' '$out_file'"
+  echo_eval "factory-gopass binary cp '$full_store_key' '$out_file'"
 }
 
 
@@ -382,14 +381,11 @@ load_gopass_factory_only_device_bin_file_secret() {
 
 
 _cat_gopass_device_bin_secret_from_repo() {
-  local repo="$1"
-  local store_key="$2"
-
-  _ensure_exists_gopass_device_secret "$repo" "$store_key" || return 1
+  _ensure_exists_gopass_device_secret "$@" || return 1
 
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$repo" "$store_key")"
-  gopass binary cat "$full_store_key"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
+  factory-gopass binary cat "$full_store_key"
 }
 
 
@@ -403,109 +399,179 @@ cat_gopass_factory_only_device_bin_secret() {
 }
 
 
-delete_gopass_device_gpg_public_key_from_factory_keyring() {
-  delete_device_gpg_public_key_from_factory_keyring
+list_gopass_device_substore_peers_public_keys() {
+  local device_sstore
+  device_sstore="$(get_gopass_device_substore_dir "$@")"
+
+  local device_sub_store_pubkeys_dir
+  device_sub_store_pubkeys_dir="$device_sstore/.public-keys"
+
+  local pubkey_dirs=()
+
+  if [[ -d "$device_sub_store_pubkeys_dir" ]]; then
+    pubkey_dirs+=( "$device_sub_store_pubkeys_dir" )
+  fi
+
+  find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1 \
+    && list_factory_user_peers_pub_keys_from_gopass_vaults
 }
 
 
-import_gopass_device_gpg_public_key_to_factory_keyring() {
-  false
+list_authorized_gopass_device_substore_peers_gpg_ids() {
+  local device_sstore
+  device_sstore="$(get_gopass_device_substore_dir "$@")"
+
+  local device_sub_store_gpg_id_file
+  device_sub_store_gpg_id_file="$device_sstore/.gpg-id"
+
+  if ! [[ -f "$device_sub_store_gpg_id_file" ]]; then
+    1>&2 echo "ERROR: list_authorized_gopass_device_substore_peers_gpg_ids:"
+    1>&2 echo " -> Cannot find '$device_sub_store_gpg_id_file'"
+    return 1
+  fi
+
+ cat "$device_sub_store_gpg_id_file" | sort | uniq
+}
+
+
+list_authorized_gopass_device_substore_peers_public_keys() {
+  local auth_gpg_ids
+  auth_gpg_ids="$(list_authorized_gopass_device_substore_peers_gpg_ids "$@")" || return 1
+  local pubkey_files
+  pubkey_files="$(list_gopass_device_substore_peers_public_keys "$@")" || return 1
+  _list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files \
+    "$auth_gpg_ids" "$pubkey_files"
+}
+
+
+import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring() {
+  local authorized_gpg_pub_keys
+  authorized_gpg_pub_keys="$(list_authorized_gopass_device_substore_peers_public_keys "$@")" || return 1
+
+  while read -r pk; do
+    local gpg_id_w_email
+    gpg_id_w_email="$(list_gpg_id_w_email_from_armored_pub_key_stdin < "$pk")"
+    echo "Importing '$gpg_id_w_email' into factory keyring."
+    printf "$ factory-gpg --import '%s'\n" "$pk"
+    factory-gpg --import "$pk"
+  done < <(printf "%s\n" "$authorized_gpg_pub_keys")
+}
+
+
+list_authorized_gopass_device_substore_peers_gpg_ids_w_email() {
+  local peers_gpg_pub_keys
+  mapfile -t peers_gpg_pub_keys < <(list_authorized_gopass_device_substore_peers_public_keys) \
+    || return 1
+
+  list_gpg_id_w_email_from_key_files "${peers_gpg_pub_keys[@]}"
 }
 
 
 _deauthorize_gopass_device_from_device_private_substore_prim() {
-  # local device_gpg_id_or_email="${1:-}"
   local device_gpg_key
-  device_gpg_key="$(get_device_gpg_public_key_id)" || return 1
+  device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"
+  # echo "device_gpg_key='$device_gpg_key'"
 
   local device_private_substore
   device_private_substore="$(get_gopass_device_substore_key)"
 
-  # TODO: Improve: For the moment we have to do contorted / not robust matching on error as there are
-  # no reliable way to check for authorized recipients.
-  # if gopass recipients | grep -q "$device_gpg_key"; then
-
-  local error_msg
-  error_msg="$(2>&1 gopass --yes recipients deauthorize --store "$device_private_substore" "$device_gpg_key")"
-
-  if echo "$error_msg" | grep -q "Starting rencrypt"; then
-    echo "Secrets in substore '$device_private_substore' re-encryted so that '$device_gpg_key' no longer has access."
-  elif ! echo "$error_msg" | grep -q "recipient not in store"; then
-    1>&2 echo "ERROR: There was a problem deauthorizing '$device_gpg_key' as recipient to substore: '$device_private_substore'."
-    1>&2 echo " -> $error_msg"
-    return 1
-  else
-    echo "Nothing to do, '$device_gpg_key' already **not** authorized to '$device_private_substore'."
-    # echo " -> $error_msg"
-  fi
+  deauthorize_gpg_id_from_gopass_store "$device_private_substore" "$device_gpg_key"
+  delete_gpg_public_key_from_factory_keyring "$device_gpg_key" || return 1
 }
+
+
+deauthorize_gopass_stale_gpg_keys_from_private_substore() {
+  local device_gpg_key
+  device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"
+
+  local non_current_gpg_ids
+  if ! non_current_gpg_ids="$(list_device_non_current_gpg_ids "$device_gpg_key")"; then
+    # Nothing to do.
+    return 0
+  fi
+
+  echo "non_current_gpg_ids='$non_current_gpg_ids'"
+
+  while read -r old_gpg_id; do
+    _deauthorize_gopass_device_from_device_private_substore_prim "$old_gpg_id"
+  done < <(printf "%s\n" "$non_current_gpg_ids")
+}
+
+
+_deauthorize_gopass_stale_gpg_keys_from_private_substore_step() {
+  local device_gpg_key="$1"
+
+  # TODO: It won't be possible to do this automatically until we
+  # have a way of retrieving device's state via ssh and store
+  # it locally (secrets version / currently used gpg key).
+  return 0
+
+  # Ensure any non current device gpg key are deauthorized and deleted from
+  # the keyring.
+  print_title_lvl4 "Deauthorizing any non current device gpg key already in the factory user's keyring"
+  deauthorize_gopass_stale_gpg_keys_from_private_substore "$device_gpg_key" || return 1
+}
+
 
 
 deauthorize_gopass_device_from_device_private_substore() {
   print_title_lvl3 "Deauthorize device from accessing its private sub-store"
 
-  if has_device_gpg_public_key_id; then
-    # Ensure any device key already in the factory keyring is
-    # deauthorized and deleted from the keyring.
-    print_title_lvl4 "Deauthorizing any device gpg key already in the factory user's keyring"
-    _deauthorize_gopass_device_from_device_private_substore_prim || return 1
-    delete_gopass_device_gpg_public_key_from_factory_keyring || return 1
+  print_title_lvl4 "Importing gopass device authorized gpg keys to factory keyring"
+  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring "$@"
+
+  local device_gpg_key
+  device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"
+
+  # Make sure we're not mistakenly trying to deauthorize ourself (factory user).
+  if is_factory_gpg_id "$device_gpg_key"; then
+    1>&2 echo "ERROR: Trying to deauthorize factory user's gpg id from gopass store. Unsupported operation."
+    return 1
   fi
+
+  _deauthorize_gopass_stale_gpg_keys_from_private_substore_step "$device_gpg_key" || return 1
 
   print_title_lvl4 "Deauthorizing device gpg key stored in the vault itself"
 
-  if ! exists_gopass_factory_only_device_secret "$(get_rel_gpg_public_key_filename)"; then
-    echo "No device gpg public public key stored. Nothing to do."
-    return 0
-  fi
+  # if ! exists_gopass_factory_only_device_secret "$(get_rel_gpg_public_key_filename)"; then
+  #   echo "No device gpg public public key stored. Nothing to do."
+  #   return 0
+  # fi
+  #
+  # cat_gopass_factory_only_device_bin_secret "$(get_rel_gpg_public_key_filename)" \
+  #   | import_gpg_public_key_from_stdin_to_factory_keyring || return 1
 
-  cat_gopass_factory_only_device_bin_secret "$(get_rel_gpg_public_key_filename)" \
-    | import_gpg_public_key_from_stdin_to_factory_keyring || return 1
+  # echo "device_gpg_key='$device_gpg_key'"
+  _deauthorize_gopass_device_from_device_private_substore_prim "$device_gpg_key" || return 1
 
-  _deauthorize_gopass_device_from_device_private_substore_prim || return 1
-  delete_gopass_device_gpg_public_key_from_factory_keyring || return 1
-
-  echo_eval 'gopass --yes recipients'
+  echo_eval "factory-gopass --yes recipients"
 }
 
 
 authorize_gopass_device_to_device_private_substore() {
   print_title_lvl3 "Authorize device access to its private sub-store"
 
-  if ! exists_gopass_factory_only_device_secret "$(get_rel_gpg_public_key_filename)"; then
-    1>&2 echo "ERROR: No device gpg public public key stored. Cannat proceed with device autorization."
-    return 1
-  fi
-
-  cat_gopass_factory_only_device_bin_secret "$(get_rel_gpg_public_key_filename)" \
-    | import_gpg_public_key_from_stdin_to_factory_keyring || return 1
+  print_title_lvl4 "Importing gopass device authorized gpg keys to factory keyring"
+  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring "$@"
 
   local device_gpg_key
-  device_gpg_key="$(get_device_gpg_public_key_id)" || return 1
+  device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"
+
+  # echo "device_gpg_key='$device_gpg_key'"
+
+  _deauthorize_gopass_stale_gpg_keys_from_private_substore_step "$device_gpg_key" || return 1
 
   local device_private_substore
   device_private_substore="$(get_gopass_device_substore_key)"
-  # TODO: Improve: For the moment we have to do contorted / not robust matching on error as there are
-  # no reliable way to check for authorized recipients.
-  # if ! gopass recipients | grep -q "$device_gpg_key"; then
 
-  local error_msg
-  echo "$ gopass --yes recipients authorize --store '$device_private_substore' '$device_gpg_key'"
-  error_msg="$(2>&1 gopass --yes recipients authorize --store "$device_private_substore" "$device_gpg_key")"
+  print_title_lvl4 "Authorizing factory user peers to the device vault"
+  authorize_factory_user_peers_to_gopass_store "$device_private_substore"
 
-  if echo "$error_msg" | grep -q "Reencrypting existing secrets"; then
-    echo "Secrets in substore '$device_private_substore' re-encryted for '$device_gpg_key'."
-  elif ! echo "$error_msg" | grep -q "Recipient already in store"; then
-    1>&2 echo "ERROR: There was a problem authorizing '$device_gpg_key' as recipient to substore: '$device_private_substore'."
-    1>&2 echo " -> $error_msg"
-    return 1
-  else
-    echo "Nothing to do, '$device_gpg_key' already authorized to '$device_private_substore'."
-    # echo " -> $error_msg"
-  fi
+  print_title_lvl4 "Authorizing device gpg key its own private vault"
 
-  echo_eval 'gopass --yes recipients'
+  authorize_gpg_id_to_gopass_store "$device_private_substore" "$device_gpg_key"
 
-  # TODO: Consider if we want the device key to be preserved in factory user's keyring.
-  delete_gopass_device_gpg_public_key_from_factory_keyring || return 1
+  echo_eval "factory-gopass --yes recipients"
 }
+
+

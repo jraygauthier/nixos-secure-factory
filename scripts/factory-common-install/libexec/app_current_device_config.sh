@@ -393,7 +393,7 @@ EOF
 }
 
 
-update_device_os() {
+update_device_os_cli() {
   update_device_config
   # TODO: Update secrets too.
 }

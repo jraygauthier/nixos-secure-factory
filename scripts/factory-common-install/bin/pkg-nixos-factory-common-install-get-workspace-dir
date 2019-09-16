@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+if test -z ${PKG_NIXOS_FACTORY_COMMON_INSTALL_WORKSPACE_DIR+x}; then
+  script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
+  user_home_ws_dir="$HOME/.nixos-secure-factory"
+
+  if echo "$script_dir" | grep -q -E '/nix/store'; then
+    # In the installed case, we use the user home ws dir.
+    default_default_ws_dir="$user_home_ws_dir"
+  else
+    # In the developer case, we attempt to use this repository's parent
+    # directory as ws.
+    repo_parent_ws_dir="$(cd "$script_dir/../../../.." > /dev/null && pwd)"
+
+    if [ -r "$repo_parent_ws_dir" ] && [ -w "$repo_parent_ws_dir" ]; then
+      default_default_ws_dir="$repo_parent_ws_dir"
+    else
+      # That is, unless we get no rw access in which case we
+      # fallback to the user home ws option.
+      default_default_ws_dir="$user_home_ws_dir"
+    fi
+  fi
+
+  default_ws_dir="$default_default_ws_dir"
+else
+  default_ws_dir="$PKG_NIXOS_FACTORY_COMMON_INSTALL_WORKSPACE_DIR"
+fi
+echo "$default_ws_dir"

@@ -1,3 +1,6 @@
 { nixpkgs ? import <nixpkgs> {} }:
 
-(nixpkgs.pkgs.callPackage ./. {})
+let
+  nixos-common-scripts = import ../common/release.nix { inherit nixpkgs; };
+in
+(nixpkgs.pkgs.callPackage ./. { inherit nixos-common-scripts; })
