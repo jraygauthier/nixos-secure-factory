@@ -166,3 +166,9 @@ device configurations. Specific device factories are required to:
 [git]: https://git-scm.com/
 [myrepos]: https://myrepos.branchable.com/
 [google-repo]: https://gerrit.googlesource.com/git-repo/
+
+
+Contributing
+------------
+
+Contributing implies licensing those contributions under the terms of [LICENSE](./LICENSE), which is an *Apache 2.0* license.
