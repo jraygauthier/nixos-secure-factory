@@ -5,7 +5,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 # From dependency libs.
 common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/gpg.sh"
-
+. "$common_install_libexec_dir/device_secrets.sh"
 
 
 
