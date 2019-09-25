@@ -528,45 +528,6 @@ import_missing_gpg_keys_from_gopass_vaults() {
 }
 
 
-# update_device_gpg_identity_in_factory_keyring_and_store() {
-#   print_title_lvl2 "Updating device's gpg identity in factory keyring and store"
-#
-#   local device_public_key_file
-#   device_public_key_file="$(get_device_factory_only_stored_secrets_secure_dir)/$(get_rel_gpg_public_key_filename)" \
-#     || return 1
-#
-#   if ! [[ -f "$device_public_key_file" ]]; then
-#     1>&2 echo "ERROR: Missing expected device public key file at: '$device_public_key_file'."
-#     return 1
-#   fi
-#
-#   local device_gpg_id_w_email
-#   device_gpg_id_w_email="$(get_unique_gpg_id_w_email_from_armored_pub_key_stdin < "$device_public_key_file")"
-#   local device_gpg_id
-#   device_gpg_id="$(echo "$device_gpg_id_w_email" | awk '{ print $1 }')"
-#   local device_gpg_email
-#   device_gpg_email="$(echo "$device_gpg_id_w_email" | awk '{ print $2 }')"
-#
-#
-#   local device_email_from_store
-#   device_email_from_store="$(get_required_current_device_email)"
-#
-#   if ! echo "$device_gpg_email" | grep -q "$device_email_from_store"; then
-#     1>&2 echo "ERROR: Device's pub gpg id key's email '$device_gpg_email' does not match email from the device's store: '$device_email_from_store'"
-#     return 1
-#   fi
-#
-#   print_title_lvl3 "Updating device's gpg identity in factory keyring"
-#   # Removing all gpg keys matching the device's email.
-#   delete_gpg_public_key_from_factory_keyring "$device_gpg_email"
-#
-#   import_from_armored_pub_key_stdin  < "$device_public_key_file"
-#
-#   print_title_lvl3 "Updating device's gpg identity in device store"
-#   store_current_device_gpg_id "$device_gpg_id"
-# }
-
-
 grant_access_device_secrets_prim() {
   print_title_lvl2 "Granting device access to its private vault"
   mount_device_secret_vaults
@@ -589,11 +550,11 @@ install_device_secrets_prim() {
 create_device_secrets_cli() {
   print_title_lvl1 "Creating current device secrets and storing those to the vault"
   create_device_secrets_prim "$@"
+  import_missing_gpg_keys_from_gopass_vaults
   store_device_secrets_prim "$@"
   # We explicitly reload the secrets in order acertain their presence.
   load_device_secrets_prim "$@"
   check_device_secrets_prim "$@"
-  import_missing_gpg_keys_from_gopass_vaults
   # update_device_gpg_identity_in_factory_keyring_and_store
   grant_access_device_secrets_prim
 }
@@ -602,10 +563,10 @@ create_device_secrets_cli() {
 create_and_deploy_device_secrets_cli() {
   print_title_lvl1 "Creating and deploying current device secrets storing them to the vault"
   create_device_secrets_prim "$@"
+  import_missing_gpg_keys_from_gopass_vaults
   store_device_secrets_prim "$@"
   load_device_secrets_prim "$@"
   check_device_secrets_prim "$@"
-  import_missing_gpg_keys_from_gopass_vaults
   # update_device_gpg_identity_in_factory_keyring_and_store
   grant_access_device_secrets_prim
   if is_device_run_from_nixos_liveenv; then
