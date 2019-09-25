@@ -417,7 +417,7 @@ list_gopass_device_substore_peers_public_keys() {
 }
 
 
-list_authorized_gopass_device_substore_peers_gpg_ids() {
+list_authorized_gopass_device_substores_peers_gpg_ids() {
   local device_sstore
   device_sstore="$(get_gopass_device_substore_dir "$@")"
 
@@ -425,18 +425,18 @@ list_authorized_gopass_device_substore_peers_gpg_ids() {
   device_sub_store_gpg_id_file="$device_sstore/.gpg-id"
 
   if ! [[ -f "$device_sub_store_gpg_id_file" ]]; then
-    1>&2 echo "ERROR: list_authorized_gopass_device_substore_peers_gpg_ids:"
+    1>&2 echo "ERROR: list_authorized_gopass_device_substores_peers_gpg_ids:"
     1>&2 echo " -> Cannot find '$device_sub_store_gpg_id_file'"
     return 1
   fi
 
- cat "$device_sub_store_gpg_id_file" | sort | uniq
+ cat "$device_sub_store_gpg_id_file" && list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults | sort | uniq
 }
 
 
-list_authorized_gopass_device_substore_peers_public_keys() {
+list_authorized_gopass_device_substores_peers_public_keys() {
   local auth_gpg_ids
-  auth_gpg_ids="$(list_authorized_gopass_device_substore_peers_gpg_ids "$@")" || return 1
+  auth_gpg_ids="$(list_authorized_gopass_device_substores_peers_gpg_ids "$@")" || return 1
   local pubkey_files
   pubkey_files="$(list_gopass_device_substore_peers_public_keys "$@")" || return 1
   _list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files \
@@ -444,9 +444,9 @@ list_authorized_gopass_device_substore_peers_public_keys() {
 }
 
 
-import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring() {
+import_authorized_gopass_device_substores_gpg_keys_to_factory_keyring() {
   local authorized_gpg_pub_keys
-  authorized_gpg_pub_keys="$(list_authorized_gopass_device_substore_peers_public_keys "$@")" || return 1
+  authorized_gpg_pub_keys="$(list_authorized_gopass_device_substores_peers_public_keys "$@")" || return 1
 
   while read -r pk; do
     local gpg_id_w_email
@@ -458,9 +458,9 @@ import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring() {
 }
 
 
-list_authorized_gopass_device_substore_peers_gpg_ids_w_email() {
+list_authorized_gopass_device_substores_peers_gpg_ids_w_email() {
   local peers_gpg_pub_keys
-  mapfile -t peers_gpg_pub_keys < <(list_authorized_gopass_device_substore_peers_public_keys) \
+  mapfile -t peers_gpg_pub_keys < <(list_authorized_gopass_device_substores_peers_public_keys) \
     || return 1
 
   list_gpg_id_w_email_from_key_files "${peers_gpg_pub_keys[@]}"
@@ -518,7 +518,7 @@ deauthorize_gopass_device_from_device_private_substore() {
   print_title_lvl3 "Deauthorize device from accessing its private sub-store"
 
   print_title_lvl4 "Importing gopass device authorized gpg keys to factory keyring"
-  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring "$@"
+  import_authorized_gopass_device_substores_gpg_keys_to_factory_keyring "$@"
 
   local device_gpg_key
   device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"
@@ -552,7 +552,7 @@ authorize_gopass_device_to_device_private_substore() {
   print_title_lvl3 "Authorize device access to its private sub-store"
 
   print_title_lvl4 "Importing gopass device authorized gpg keys to factory keyring"
-  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring "$@"
+  import_authorized_gopass_device_substores_gpg_keys_to_factory_keyring "$@"
 
   local device_gpg_key
   device_gpg_key="$(ensure_arg_gpg_id_or_device_current_gpg_id "$@")"

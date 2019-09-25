@@ -524,7 +524,7 @@ check_device_secrets_prim() {
 
 import_missing_gpg_keys_from_gopass_vaults() {
   print_title_lvl2 "Importing missing gpg keys from the gopass vaults"
-  import_authorized_gopass_device_substore_gpg_keys_to_factory_keyring
+  import_authorized_gopass_device_substores_gpg_keys_to_factory_keyring
 }
 
 
@@ -667,7 +667,7 @@ authorize_user_to_device_factory_only_vaults_cli() {
 
 
 list_device_substore_authorized_gpg_ids_w_email_cli() {
-  list_authorized_gopass_device_substore_peers_gpg_ids_w_email
+  list_authorized_gopass_device_substores_peers_gpg_ids_w_email
 }
 
 
