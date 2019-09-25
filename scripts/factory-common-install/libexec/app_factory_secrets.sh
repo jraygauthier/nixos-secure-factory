@@ -99,7 +99,7 @@ rm_factory_ssh_identity_impl() {
 }
 
 
-create_factory_ssh_identity_impl() {
+create_factory_ssh_identity_cli() {
   printf -- "\n"
   printf -- "Creating factory ssh identity\n"
   printf -- "=============================\n\n"
@@ -121,7 +121,7 @@ create_factory_ssh_identity_impl() {
 }
 
 
-copy_factory_ssh_identity_to_clipboard_impl() {
+copy_factory_ssh_identity_to_clipboard_cli() {
   printf -- "\n"
   printf -- "Copying factory ssh public key to clipboard\n"
   printf -- "===========================================\n\n"
@@ -130,7 +130,7 @@ copy_factory_ssh_identity_to_clipboard_impl() {
 }
 
 
-rm_factory_gpg_identity_impl() {
+rm_factory_gpg_identity_cli() {
   printf -- "\n"
   printf -- "Removing user gpg identity(ies)\n"
   printf -- "===============================\n\n"
@@ -145,7 +145,7 @@ rm_factory_gpg_identity_impl() {
 }
 
 
-create_factory_gpg_identity_impl() {
+create_factory_gpg_identity_cli() {
   printf -- "\n"
   printf -- "Creating factory gpg identity\n"
   printf -- "=============================\n\n"
@@ -173,9 +173,9 @@ create_factory_gpg_identity_impl() {
   printf -- "\n"
 
   echo "You should **copy those to an external / offline usb stick** and store it in a safe place."
-  echo "You can use the 'get_factory_gpg_master_key_dir' tool to retrive the master key directory."
+  echo "You can use the 'factory-secrets-gpg-get-master-key-dir' tool to retrive the master key directory."
   printf -- "\n"
-  echo "Once done, please **wipe those keys** using the 'wipe_factory_secure_dir_content' tool."
+  echo "Once done, please **wipe those keys** using the 'factory-secrets-secure-dir-wipe-content' tool."
 
 
   local gpg_ids
@@ -199,7 +199,7 @@ create_factory_gpg_identity_impl() {
 }
 
 
-copy_factory_gpg_identity_to_clipboard_impl() {
+copy_factory_gpg_identity_to_clipboard_cli() {
   printf -- "\n"
   printf -- "Copying factory gpg public key to clipboard\n"
   printf -- "===========================================\n\n"
@@ -211,7 +211,7 @@ copy_factory_gpg_identity_to_clipboard_impl() {
 }
 
 
-get_factory_gpg_master_key_dir_impl() {
+get_factory_gpg_master_key_dir_cli() {
   local secure_dir
   secure_dir="$(get_factory_secure_dir_impl)"
 
