@@ -4,6 +4,7 @@
 , nixos-common-scripts
 , gnupg
 , gopass
+, git
 }:
 
 stdenv.mkDerivation rec {
@@ -28,6 +29,7 @@ stdenv.mkDerivation rec {
     nixos-common-scripts
     gnupg
     gopass
+    git
   ];
 
   postPatch = ''

@@ -3,7 +3,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 # Source both dependencies.
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
-
+. "$common_factory_install_libexec_dir/git.sh"
 
 
 
@@ -186,9 +186,8 @@ prompt_for_factory_info_mandatory__user_id() {
 
 
 prompt_for_factory_info_mandatory__user_full_name() {
-  # local value_re="^[a-zA-Z0-9\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u00ff\s_]+$"
-  # TODO: Review this if at some point non latin alphabets are required.
-  local value_re="^[a-zA-Z0-9$(get_latin_accented_chars)_ -]+$"
+  local value_re
+  value_re="$(get_user_full_name_regexpr)"
   echo -e "\"user_full_name\" \u2208 \`${value_re}\`: The factory user's full name(e.g.: Étienne Bédard)."
   # TODO: Autocompletion with gpg public id if any.
   prompt_for_mandatory_parameter_loop "$1" "user_full_name" "$value_re"
@@ -196,7 +195,8 @@ prompt_for_factory_info_mandatory__user_full_name() {
 
 
 prompt_for_factory_info_mandatory__user_email() {
-  local value_re="^[a-zA-Z0-9@\.$(get_latin_accented_chars)_-]+$"
+  local value_re
+  value_re="$(get_email_address_regexpr)"
   echo -e "\"user_email\" \u2208 \`${value_re}\`: The factory user's email address (e.g.: ebedard@mydomain.com)."
   # TODO: Autocompletion with gpg public id email if any.
   prompt_for_mandatory_parameter_loop "$1" "user_email" "$value_re"
@@ -204,7 +204,8 @@ prompt_for_factory_info_mandatory__user_email() {
 
 
 prompt_for_factory_info_mandatory__user_gpg_default_id() {
-  local value_re="^[a-zA-Z0-9@\.$(get_latin_accented_chars)_-]+$"
+  local value_re
+  value_re="$(get_email_address_regexpr)"
   echo -e "\"user_gpg_default_id\" \u2208 \`${value_re}\`: The factory user's default gpg id. Can be a email address or the gpg public key id (e.g.: ebedard@mydomain.com, AF72B07CD39B7712AC472EB0FA282F683BDE3F7D)."
   # TODO: Autocompletion with available gpg id and current email if any.
   prompt_for_mandatory_parameter_loop "$1" "user_gpg_default_id" "$value_re"
@@ -301,4 +302,7 @@ EOF
   echo "Writing factory info configuration to '$info_store_path'."
   echo "$yaml_str" > "$info_store_path"
   echo "Current device is now set to '$user_id'."
+
+  echo "Checking for other required states."
+  ensure_minimal_git_config_prompt_and_setup_if_not
 }

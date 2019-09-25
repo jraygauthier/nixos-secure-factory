@@ -5,6 +5,7 @@ common_libexec_dir="$(pkg-nixos-common-get-libexec-dir)"
 common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/gpg.sh"
+. "$common_factory_install_libexec_dir/git.sh"
 
 
 # permissions
@@ -50,10 +51,12 @@ get_gopass_home_dir() {
 
 run_sandboxed_gopass() {
   local gpg_home_dir
-  gpg_home_dir="$(get_default_gpg_home_dir)"
+  gpg_home_dir="$(get_default_gpg_home_dir)" || return 1
 
   local gopass_home_dir
-  gopass_home_dir="$(get_gopass_home_dir)"
+  gopass_home_dir="$(get_gopass_home_dir)" || return 1
+
+  ensure_minimal_git_config_error_if_not || return 1
 
   GOPASS_HOMEDIR="$gopass_home_dir" \
   GOPASS_CONFIG="$gopass_home_dir/.config/gopass/gopass.yaml" \

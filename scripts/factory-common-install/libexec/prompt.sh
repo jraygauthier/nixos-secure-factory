@@ -211,3 +211,13 @@ prompt_for_optional_parameter_loop() {
     true
   done
 }
+
+get_user_full_name_regexpr() {
+  # local value_re="^[a-zA-Z0-9\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u00ff\s_]+$"
+  # TODO: Review this if at some point non latin alphabets are required.
+  echo "^[a-zA-Z0-9$(get_latin_accented_chars)_ -]+$"
+}
+
+get_email_address_regexpr() {
+  echo "^[a-zA-Z0-9@\.$(get_latin_accented_chars)_-]+$"
+}

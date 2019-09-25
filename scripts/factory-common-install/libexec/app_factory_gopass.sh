@@ -157,7 +157,7 @@ init_factory_gopass_main_store_and_config() {
 }
 
 
-configure_factory_gopass_secrets_stores() {
+_configure_factory_gopass_secrets_stores() {
   stores_ids="$(
     get_gopass_factory_only_vault_id
     get_gopass_device_vault_id
@@ -186,7 +186,7 @@ mount_factory_gopass_secrets_stores() {
     "'$(get_gopass_device_vault_id)'" \
     "'$(get_gopass_device_vault_repo_dir)'"
 
-  configure_factory_gopass_secrets_stores
+  _configure_factory_gopass_secrets_stores
 }
 
 
@@ -234,6 +234,7 @@ mount_gopass_device_substore() {
   ssdir="$(get_gopass_device_substore_dir_pure "$@")"
 
   echo_eval "factory-gopass mounts add -i '$factory_gpg_key_id' '$sskey' '$ssdir'"
+  configure_gopass_store "$sskey"
 }
 
 
