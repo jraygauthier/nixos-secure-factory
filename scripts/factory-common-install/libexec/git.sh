@@ -98,7 +98,7 @@ change_minimal_git_config() {
 ensure_minimal_git_config_prompt_and_setup_if_not() {
   local suggested_user_email="${1:-}"
   local suggested_user_name="${2:-}"
-  local treat_missing_fields_as_error"${3:-true}"
+  local treat_missing_fields_as_error="${3:-"true"}"
   if [[ "0" == "$treat_missing_fields_as_error" ]] \
       || [[ "false" == "$treat_missing_fields_as_error" ]]; then
     treat_missing_fields_as_error="false"
