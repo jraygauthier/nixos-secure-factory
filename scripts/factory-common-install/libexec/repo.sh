@@ -39,6 +39,36 @@ update_repositories() {
 }
 
 
+update_repositories_remotes() {
+  local repo_urls="$1"
+  local branch_name="${2:-}"
+
+  local top_lvl
+  top_lvl="$(get_nixos_secure_factory_workspace_dir)"
+
+  print_title_lvl2 "Updating a set of repositories're remotes"
+
+  for repo_url in $repo_urls; do
+    local repo_name
+    repo_name="$(basename "$repo_url" ".git")"
+    local repo_dir="$top_lvl/$repo_name"
+
+    print_title_lvl3 "Repo: '$repo_name'"
+
+    if test -d "$repo_dir"; then
+      echo "Updating '$repo_dir''s remote to '$repo_url'."
+      echo_eval "git -C '$repo_dir' remote set-url origin '$repo_url'"
+      # TODO: Update push to also when set? Do we ask?
+    else
+      1>&2 echo "ERROR: Repository does not exists at '$repo_dir'. Please clone it."
+    fi
+
+    printf -- "\n\n"
+
+  done
+}
+
+
 checkout_repositories_w_stash() {
   local repo_urls="$1"
   local branch_name="$2"
