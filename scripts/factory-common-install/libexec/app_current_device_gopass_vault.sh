@@ -412,7 +412,8 @@ list_gopass_device_substore_peers_public_keys() {
     pubkey_dirs+=( "$device_sub_store_pubkeys_dir" )
   fi
 
-  find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1 \
+
+  ([[ "${#pubkey_dirs[@]}" -eq 0 ]] || find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1) \
     && list_factory_user_peers_pub_keys_from_gopass_vaults
 }
 
@@ -424,13 +425,8 @@ list_authorized_gopass_device_substores_peers_gpg_ids() {
   local device_sub_store_gpg_id_file
   device_sub_store_gpg_id_file="$device_sstore/.gpg-id"
 
-  if ! [[ -f "$device_sub_store_gpg_id_file" ]]; then
-    1>&2 echo "ERROR: list_authorized_gopass_device_substores_peers_gpg_ids:"
-    1>&2 echo " -> Cannot find '$device_sub_store_gpg_id_file'"
-    return 1
-  fi
-
- cat "$device_sub_store_gpg_id_file" && list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults | sort | uniq
+  (! [[ -f "$device_sub_store_gpg_id_file" ]] || cat "$device_sub_store_gpg_id_file") \
+    && list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults | sort | uniq
 }
 
 

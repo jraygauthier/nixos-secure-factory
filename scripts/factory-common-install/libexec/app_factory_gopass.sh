@@ -267,12 +267,13 @@ list_all_device_names_from_gopass_factory_vaults_and_device_config() {
     "$factory_secrets_repo_root/device" \
   )
 
-  find \
-    "${device_search_path[@]}" \
-    -mindepth 1 -maxdepth 1 -exec basename {} \; | \
-      grep -v -E  -e '^.git$' -e '^.public-keys$' -e '^.gpg-id$' \
-        -e '^device$' -e '^device-family$' -e '^device-type$' | \
-      sort | uniq
+  [[ "${#device_search_path[@]}" -eq 0 ]] || \
+    find \
+      "${device_search_path[@]}" \
+      -mindepth 1 -maxdepth 1 -exec basename {} \; | \
+        grep -v -E  -e '^.git$' -e '^.public-keys$' -e '^.gpg-id$' \
+          -e '^device$' -e '^device-family$' -e '^device-type$' | \
+        sort | uniq
 }
 
 
@@ -284,12 +285,13 @@ list_all_device_names_from_gopass_device_secret_vault() {
     "$device_secrets_repo_root/device" \
   )
 
-  find \
-    "${device_search_path[@]}" \
-    -mindepth 1 -maxdepth 1 -exec basename {} \; | \
-      grep -v -E  -e '^.git$' -e '^.public-keys$' -e '^.gpg-id$' \
-        -e '^device$' -e '^device-family$' -e '^device-type$' | \
-      sort | uniq
+  [[ "${#device_search_path[@]}" -eq 0 ]] || \
+    find \
+      "${device_search_path[@]}" \
+      -mindepth 1 -maxdepth 1 -exec basename {} \; | \
+        grep -v -E  -e '^.git$' -e '^.public-keys$' -e '^.gpg-id$' \
+          -e '^device$' -e '^device-family$' -e '^device-type$' | \
+        sort | uniq
 }
 
 
@@ -503,7 +505,8 @@ list_factory_user_peers_pub_keys_from_gopass_vaults() {
   local pubkey_dirs=( \
     "$factory_secrets_repo_root_pubkeys_dir" )
 
-  find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1
+  [[ "${#pubkey_dirs[@]}" -eq 0 ]] || \
+    find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1
 }
 
 
@@ -517,7 +520,9 @@ list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults() {
     return 1
   fi
 
- cat "$factory_secrets_repo_root_gpg_id_file" | sort | uniq
+  (! [[ -f "$factory_secrets_repo_root_gpg_id_file" ]] \
+      || cat "$factory_secrets_repo_root_gpg_id_file") \
+    | sort | uniq
 }
 
 

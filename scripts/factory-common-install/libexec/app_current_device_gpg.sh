@@ -86,7 +86,7 @@ ensure_arg_gpg_id_or_device_current_gpg_id() {
 
       echo "$gpg_pub_key" | import_gpg_public_key_from_stdin_to_factory_keyring || return 1
 
-      store_current_device_gpg_id "$gpg_id_from_pub_key" || return 1
+      1>&2 store_current_device_gpg_id "$gpg_id_from_pub_key" || return 1
       device_gpg_key="$(get_device_gpg_id)" || return 1
     fi
   fi
