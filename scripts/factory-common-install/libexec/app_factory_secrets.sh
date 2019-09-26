@@ -173,7 +173,7 @@ create_factory_gpg_identity_cli() {
   printf -- "\n"
 
   echo "You should **copy those to an external / offline usb stick** and store it in a safe place."
-  echo "You can use the 'factory-secrets-gpg-get-master-key-dir' tool to retrive the master key directory."
+  echo "You can use the 'factory-gpg-get-master-key-dir' tool to retrive the master key directory."
   printf -- "\n"
   echo "Once done, please **wipe those keys** using the 'factory-secrets-secure-dir-wipe-content' tool."
 

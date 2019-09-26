@@ -13,7 +13,9 @@ get_latin_accented_chars() {
 
 
 prompt_for_user_approval() {
-  read -p "Continue (y/n)? " -n 1 -r
+  local prompt="${1:-Continue}"
+
+  read -p "${prompt} (y/n)? " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     true
@@ -26,41 +28,41 @@ prompt_for_user_approval() {
 
 
 prompt_for_passphrase_no_repeat_impl() {
-  local out_var_name="$1"
-  local prompt_str="${2:-Enter passphrase (empty for no passphrase): }"
+  local _out_var_name="$1"
+  local _prompt_str="${2:-Enter passphrase (empty for no passphrase): }"
 
-  read -p "$prompt_str" -s "password"
+  read -r -p "$_prompt_str" -s "password"
   printf -- "\n"
 
   # TODO: Validate using 'cracklib''s 'cracklib-check' which however currently
   # fails with: "pw_dict.pwd.gz: No such file or directory"
   # on nixos 19.03.
 
-  eval "${out_var_name}=\"${password}\""
+  eval "${_out_var_name}=\"${password}\""
 }
 
 
 prompt_for_passphrase_impl() {
-  local out_var_name="$1"
-  local prompt_str="${2:-Enter passphrase (empty for no passphrase): }"
-  local repeat_prompt_str="${3:-Enter same passphrase again: }"
-  local not_match_error_str="${4:-Passphrases do not match. Try again.}"
+  local _out_var_name="$1"
+  local _prompt_str="${2:-Enter passphrase (empty for no passphrase): }"
+  local _repeat_prompt_str="${3:-Enter same passphrase again: }"
+  local _not_match_error_str="${4:-Passphrases do not match. Try again.}"
 
-  prompt_for_passphrase_no_repeat_impl "to_be_confirmed_pw" "$prompt_str"
-  prompt_for_passphrase_no_repeat_impl "repeated_pw" "$repeat_prompt_str"
+  prompt_for_passphrase_no_repeat_impl "to_be_confirmed_pw" "$_prompt_str"
+  prompt_for_passphrase_no_repeat_impl "repeated_pw" "$_repeat_prompt_str"
 
   if test "$to_be_confirmed_pw" != "$repeated_pw"; then
-    1>&2 echo "$not_match_error_str"
+    1>&2 echo "$_not_match_error_str"
     return 1
   fi
 
-  eval "${out_var_name}=\"${repeated_pw}\""
+  eval "${_out_var_name}=\"${repeated_pw}\""
 }
 
 
 prompt_for_passphrase() {
-  local not_match_error_str="${4:-Passphrases do not match. Please try again later. Exiting.}"
-  if ! prompt_for_passphrase_impl "$1" "${2:-}" "${3:-}" "$not_match_error_str"; then
+  local _not_match_error_str="${4:-Passphrases do not match. Please try again later. Exiting.}"
+  if ! prompt_for_passphrase_impl "$1" "${2:-}" "${3:-}" "$_not_match_error_str"; then
     exit 1
   fi
 }
@@ -88,118 +90,115 @@ prompt_for_passphrase_no_repeat_loop() {
 
 
 _prompt_for_custom_choices_impl() {
-  local out_var_name="$1"
+  local -n _out_var_ref="$1"
   shift 1
 
-  local out_file="$(mktemp)"
+  local _out_file="$(mktemp)"
   rm_out_file() {
-    # echo "rm_out_file: $out_file"
-    rm -f "$out_file"
+    # echo "rm_out_file: $_out_file"
+    rm -f "$_out_file"
   }
   trap "{ rm_out_file; }" EXIT
 
-  local libexec_dir
-  libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
-  $libexec_dir/prompt_for_custom_choices_readline -of "$out_file" "$@"
-  return_code="$?"
-  # echo "return_code1=$return_code"
+  local _libexec_dir
+  _libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+  "$_libexec_dir/prompt_for_custom_choices_readline" -of "$_out_file" "$@"
+  _return_code="$?"
+  # echo "return_code1=$_return_code"
 
-  if ! test "0" -eq "$return_code"; then
-    if test "$return_code" -gt "1"; then
-      current_proc_id=$$
-      # echo "current_proc_id=$current_proc_id"
+  if ! test "0" -eq "$_return_code"; then
+    if test "$_return_code" -gt "1"; then
+      _current_proc_id=$$
+      # echo "_current_proc_id=$_current_proc_id"
       printf "^C"
-      kill -INT $current_proc_id
+      kill -INT $_current_proc_id
     fi
-    return $return_code
+    return $_return_code
   fi
-  local out="$(cat "$out_file")"
-  echo "out=$out"
+  _out_var_ref="$(cat "$_out_file")"
+  # echo "out=$_out_var_ref"
   trap - EXIT
   rm_out_file
-
-  eval "${out_var_name}=\"${out}\""
 }
 
 
 prompt_for_custom_choices_strict() {
-  local out_var_name="$1"
-  local prompt_str="$2"
+  local _out_var_name="$1"
+  local _prompt_str="$2"
   shift 2
-  _prompt_for_custom_choices_impl "$out_var_name" -p "$prompt_str" --strict -r 1 -dc "$@" || exit
+  _prompt_for_custom_choices_impl "$_out_var_name" -p "$_prompt_str" --strict -r 1 -dc "$@" || exit
 }
 
 
 prompt_for_custom_choices_strict_loop() {
-  local out_var_name="$1"
-  local prompt_str="$2"
+  local _out_var_name="$1"
+  local _prompt_str="$2"
   shift 2
-  _prompt_for_custom_choices_impl "$out_var_name" -p "$prompt_str" --strict -r 0 -dc "$@" || exit
+  _prompt_for_custom_choices_impl "$_out_var_name" -p "$_prompt_str" --strict -r 0 -dc "$@" || exit
 }
 
 
 prompt_for_custom_choices() {
-  local out_var_name="$1"
-  local prompt_str="$2"
+  local _out_var_name="$1"
+  local _prompt_str="$2"
   shift 2
-  _prompt_for_custom_choices_impl "$out_var_name" -p "$prompt_str" -r 1 -dc "$@" || exit
+  _prompt_for_custom_choices_impl "$_out_var_name" -p "$_prompt_str" -r 1 -dc "$@" || exit
 }
 
 
 prompt_for_custom_choices_loop() {
-  local out_var_name="$1"
-  local prompt_str="$2"
+  local _out_var_name="$1"
+  local _prompt_str="$2"
   shift 2
-  _prompt_for_custom_choices_impl "$out_var_name" -p "$prompt_str" -r 0 -dc "$@" || exit
+  _prompt_for_custom_choices_impl "$_out_var_name" -p "$_prompt_str" -r 0 -dc "$@" || exit
 }
 
 
 prompt_for_mandatory_parameter_impl() {
-  local out_var_name="$1"
-  local param="$2"
-  local default_value_re="^[a-zA-Z0-9_\.]+$"
-  local value_re=${3:-"$default_value_re"}
+  local _out_var_name="$1"
+  local _param="$2"
+  local _default_value_re="^[a-zA-Z0-9_\.]+$"
+  local _value_re=${3:-"$_default_value_re"}
+  local _default_value="${4:-}"
 
-  read -p "$param: " $out_var_name
-  local value="$(eval echo \$$out_var_name)"
-  if ! echo "$value" | grep -Eq "$value_re"; then
-    1>&2 echo "ERROR: Variable \`$param\`'s value of \`$value\` is not allowed to contain characters not in the set: \`$value_re\`."
+  read -e -r -p "${_param}: " -i "$_default_value" "${_out_var_name?}"
+  if ! echo "${!_out_var_name}" | grep -Eq "$_value_re"; then
+    1>&2 echo "ERROR: Variable '$_param''s value of '${!_out_var_name}' is not allowed to contain characters not in the set: '$_value_re'."
     return 1
   fi
 }
 
 
 prompt_for_mandatory_parameter() {
-  if ! prompt_for_mandatory_parameter_impl "$1" "$2" "${3:-}"; then
+  if ! prompt_for_mandatory_parameter_impl "$@"; then
     exit 1
   fi
 }
 
 
 prompt_for_mandatory_parameter_loop() {
-  while ! prompt_for_mandatory_parameter_impl "$1" "$2" "${3:-}"; do
+  while ! prompt_for_mandatory_parameter_impl "$@"; do
     true
   done
 }
 
 
 prompt_for_optional_parameter_impl() {
-  local out_var_name="$1"
-  local param="$2"
-  local default_value_re="^[a-zA-Z0-9_\.]*$"
-  local value_re=${3:-"$default_value_re"}
-  echo -n "$param: "
-  read $out_var_name
-  local value="$(eval echo \$$out_var_name)"
-  if ! echo "$value" | grep -Eq "$value_re"; then
-    1>&2 echo "ERROR: Variable \`$param\`'s value of \`$value\` is not allowed to contain characters not in the set: \`$value_re\`."
+  local _out_var_name="$1"
+  local _param="$2"
+  local _default_value_re="^[a-zA-Z0-9_\.]*$"
+  local _value_re=${3:-"$_default_value_re"}
+  local _default_value="${4:-}"
+  read -e -r -p "${_param}: " -i "$_default_value" "${_out_var_name?}"
+  if ! echo "${!_out_var_name}" | grep -Eq "$_value_re"; then
+    1>&2 echo "ERROR: Variable '$_param''s value of '${!_out_var_name}' is not allowed to contain characters not in the set: '$_value_re'."
     return 1
   fi
 }
 
 
 prompt_for_optional_parameter() {
-  if ! prompt_for_optional_parameter_impl "$1" "$2" "${3:-}"; then
+  if ! prompt_for_optional_parameter_impl "$@"; then
     exit 1
   fi
 }
@@ -207,13 +206,13 @@ prompt_for_optional_parameter() {
 
 
 prompt_for_optional_parameter_loop() {
-  while ! prompt_for_optional_parameter_impl "$1" "$2" "${3:-}"; do
+  while ! prompt_for_optional_parameter_impl "$@"; do
     true
   done
 }
 
 get_user_full_name_regexpr() {
-  # local value_re="^[a-zA-Z0-9\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u00ff\s_]+$"
+  # local _value_re="^[a-zA-Z0-9\u00C0-\u00D6\u00D8-\u00f6\u00f8-\u00ff\s_]+$"
   # TODO: Review this if at some point non latin alphabets are required.
   echo "^[a-zA-Z0-9$(get_latin_accented_chars)_ -]+$"
 }

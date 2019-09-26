@@ -270,7 +270,7 @@ ensure_no_gpg_identity_present() {
 
   if is_gpg_identity_present "$gpg_home_dir" "$email" "$passphrase"; then
     2>&1 echo "ERROR: User with gpghomedir of '$gpg_home_dir' already has a gpg identity for email '$email'."
-    2>&1 echo "  Please rm the gpg identity by running ('factory-secrets-gpg-rm-identity \"$email\"') and re-run this."
+    2>&1 echo "  Please rm the gpg identity by running ('factory-gpg-rm-identity \"$email\"') and re-run this."
     2>&1 echo "  The following keys were in the way:"
     2>&1 print_gpg_public_keys "$gpg_home_dir" "$email" | awk '{print "    " $0}'
 

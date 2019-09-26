@@ -3,7 +3,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 # Source both dependencies.
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
-. "$common_factory_install_libexec_dir/git.sh"
+. "$common_factory_install_libexec_dir/factory_git.sh"
 
 
 
@@ -304,5 +304,5 @@ EOF
   echo "Current device is now set to '$user_id'."
 
   echo "Checking for other required states."
-  ensure_minimal_git_config_prompt_and_setup_if_not
+  configure_git_minimally
 }
