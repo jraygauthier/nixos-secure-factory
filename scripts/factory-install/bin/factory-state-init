@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-install-get-libexec-dir")"
+. "$factory_install_libexec_dir/cli_factory_state.sh"
+
+init_factory_state_cli "$@"

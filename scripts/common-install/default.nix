@@ -5,6 +5,7 @@
 , gnupg
 , gopass
 , git
+, bashInteractive
 }:
 
 stdenv.mkDerivation rec {
@@ -62,6 +63,11 @@ stdenv.mkDerivation rec {
         --prefix PYTHONPATH : "$out/share/${pname}/python-lib" \
         --prefix PYTHONPATH : "${pythonPathDeps}"
     done
+  '';
+
+  # Principally required for read -e -i 'Default value'.
+  preFixup = ''
+    PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
   '';
 
   shellHook = ''

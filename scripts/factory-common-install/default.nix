@@ -16,13 +16,13 @@
 , mr
 , xclip
 , diffutils
+, bashInteractive
 }:
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
   pname = "nixos-factory-common-install";
   name = "${pname}-${version}";
-
 
   src = ./.;
 
@@ -102,6 +102,10 @@ stdenv.mkDerivation rec {
         --prefix PYTHONPATH : "$out/share/${pname}/python-lib" \
         --prefix PYTHONPATH : "${pythonPathDeps}"
     done
+  '';
+
+  preFixup = ''
+    PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
   '';
 
   shellHook = ''

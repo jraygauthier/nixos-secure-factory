@@ -161,6 +161,8 @@ prompt_for_mandatory_parameter_impl() {
   local _value_re=${3:-"$_default_value_re"}
   local _default_value="${4:-}"
 
+  # echo "_default_value='$_default_value'"
+
   read -e -r -p "${_param}: " -i "$_default_value" "${_out_var_name?}"
   if ! echo "${!_out_var_name}" | grep -Eq "$_value_re"; then
     1>&2 echo "ERROR: Variable '$_param''s value of '${!_out_var_name}' is not allowed to contain characters not in the set: '$_value_re'."

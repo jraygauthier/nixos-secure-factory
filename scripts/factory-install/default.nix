@@ -4,6 +4,7 @@
 , mr
 , yq
 , python3
+, bashInteractive
 }:
 
 stdenv.mkDerivation rec {
@@ -58,6 +59,11 @@ stdenv.mkDerivation rec {
         --prefix PATH : "${stdenv.lib.makeBinPath buildInputs}" \
         --prefix PATH : "$out/share/${pname}/bin"
     done
+  '';
+
+  # Principally required for read -e -i 'Default value'.
+  preFixup = ''
+    PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
   '';
 
   meta = {
