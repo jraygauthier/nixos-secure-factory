@@ -171,14 +171,23 @@ get_gopass_factory_only_device_full_store_key_for() {
 
 _exists_gopass_device_secret() {
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
-  factory-gopass ls -f | grep -q "${full_store_key}"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$@")" || return 1
+
+  local all_secrets
+  all_secrets="$(factory-gopass ls -f)" || return 1
+
+  # echo "$all_secrets" | grep "${full_store_key}"
+
+  local binary_ext=".b64"
+  local text_ext=""
+  echo "$all_secrets" | grep -E "^${full_store_key}${binary_ext}$" > /dev/null \
+    || echo "$all_secrets" | grep -E "^${full_store_key}${text_ext}$" > /dev/null
 }
 
 
 _ensure_exists_gopass_device_secret() {
   local full_store_key
-  full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
+  full_store_key="$(_get_gopass_device_full_store_key_for "$@")" || return 1
   if ! _exists_gopass_device_secret "$@"; then
     echo "ERROR: _ensure_exists_gopass_device_secret: Secret '${full_store_key}' does not exits!"
     return 1
@@ -189,10 +198,13 @@ _ensure_exists_gopass_device_secret() {
 _exists_gopass_device_text_secret() {
   _ensure_exists_gopass_device_secret "$@" || return 1
 
+  local all_secrets
+  all_secrets="$(factory-gopass ls -f)" || return 1
+
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$@")"
-  local binary_ext="b64"
-  ! factory-gopass ls -f | grep -q "${full_store_key}.${binary_ext}"
+  local text_ext=""
+  echo "$all_secrets" | grep -E "^${full_store_key}${text_ext}$" > /dev/null
 }
 
 
