@@ -427,5 +427,5 @@ EOF
   update_device_json_from_current_yaml
 
   # TODO: Consider moving this at a higher level and
-  # also mouting the device store via 'mount_gopass_device'.
+  # also mouting the device store via 'mount_gopass_factory_cdevice_substores'.
 }

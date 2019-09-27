@@ -262,7 +262,7 @@ mount_factory_secret_vaults_cli() {
 
   if ! $shallow; then
     print_title_lvl2 "Mounting per device substores"
-    mount_all_gopass_device_substores
+    mount_all_gopass_factory_device_substores
   fi
 }
 
@@ -277,7 +277,7 @@ umount_factory_secret_vaults_cli() {
 
   if ! $shallow; then
     print_title_lvl2 "Unmounting per device substores"
-    umount_all_gopass_device_substores
+    umount_all_gopass_factory_device_substores
   fi
 
   print_title_lvl2 "Unmounting factory secret vaults themselves"

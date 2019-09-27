@@ -8,7 +8,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/gopass.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
-. "$common_factory_install_libexec_dir/app_current_device_gopass_vault.sh"
+. "$common_factory_install_libexec_dir/app_current_device_gopass_vaults.sh"
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_factory_secrets.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
@@ -30,25 +30,23 @@ umount_device_secure_dir_impl() {
 
 
 mount_device_secret_vaults() {
-  print_title_lvl4 "umount_device_secret_vaults"
+  print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  mount_gopass_device
+  mount_gopass_factory_cdevice_substores
 }
 
 
 umount_device_secret_vaults() {
-  print_title_lvl4 "umount_device_secret_vaults"
+  print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  deauthorize_gopass_device_from_device_private_substore
-  umount_gopass_device
+  umount_gopass_factory_cdevice_substores
 }
 
 
 rm_no_prompt_device_secret_vaults() {
-  print_title_lvl4 "rm_no_prompt_device_secret_vaults"
+  print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  rm_no_prompt_gopass_device
-  rm_no_prompt_gopass_factory_only_device
+  rm_no_prompt_gopass_factory_cdevice_substores
 }
 
 wipe_device_secure_dir_content() {
@@ -153,12 +151,21 @@ _check_device_secret_files() {
 }
 
 
+_cat_device_factory_only_secret_file() {
+  local rel_secret_file="$1"
+  local created_secrets_root
+  created_secrets_root="$(get_device_created_secrets_secure_dir)" || return 1
+  local secret_file="${created_secrets_root}/${rel_secret_file}"
+  cat "$secret_file"
+}
+
+
 _store_device_factory_only_secret_files() {
   local rel_expected_secrets_files="$1"
   local created_secrets_root
-  created_secrets_root="$(get_device_created_secrets_secure_dir)"
+  created_secrets_root="$(get_device_created_secrets_secure_dir)" || return 1
   for rf in $rel_expected_secrets_files; do
-    in_f="${created_secrets_root}/${rf}"
+    local in_f="${created_secrets_root}/${rf}"
     store_gopass_factory_only_device_bin_file_secret "$rf" "$in_f" || exit 1
     # if _is_text_file "$in_f"; then
     #   store_gopass_factory_only_device_text_file_secret "$rf" "$in_f" || exit 1
@@ -396,6 +403,10 @@ store_device_root_user_gpg_identity() {
   _store_device_secret_files "$(list_rel_expected_root_user_gpg_laptop_keypair_files)"
   _store_device_factory_only_secret_files "$(list_rel_expected_root_user_gpg_master_keypair_files)"
 
+  print_title_lvl4 "Make this device gpg identity current\n"
+  _cat_device_factory_only_secret_file "$(get_rel_gpg_public_key_filename)" \
+    | import_gpg_public_key_from_stdin_and_set_as_current
+
   # list_rel_expected_root_user_gpg_master_keypair_files
 }
 
@@ -410,6 +421,8 @@ load_device_root_user_gpg_identity() {
   _load_device_factory_only_secret_files \
     "$(list_rel_expected_root_user_gpg_master_keypair_files)" \
     "$(get_rel_root_user_gpg_homedir)"
+
+
 }
 
 
@@ -524,14 +537,14 @@ check_device_secrets_prim() {
 
 import_missing_gpg_keys_from_gopass_vaults() {
   print_title_lvl2 "Importing missing gpg keys from the gopass vaults"
-  import_authorized_gopass_device_substores_gpg_keys_to_factory_keyring
+  import_authorized_gopass_cdevice_substores_gpg_keys_to_factory_keyring
 }
 
 
 grant_access_device_secrets_prim() {
   print_title_lvl2 "Granting device access to its private vault"
   mount_device_secret_vaults
-  authorize_gopass_device_to_device_private_substore
+  authorize_gopass_cdevice_to_device_private_substore
 }
 
 
@@ -632,19 +645,19 @@ copy_device_ssh_identity_to_clipboard_cli() {
 
 
 deauthorize_user_from_device_vault_cli() {
-  deauthorize_gopass_device_from_device_private_substore "$@"
+  deauthorize_gopass_cdevice_from_device_private_substore "$@"
 }
 
 
 authorize_user_to_device_vault_cli() {
-  authorize_gopass_device_to_device_private_substore "$@"
+  authorize_gopass_cdevice_to_device_private_substore "$@"
 }
 
 
 deauthorize_user_from_device_factory_only_vaults_cli() {
   user_gpg_id="$1"
 
-  deauthorize_gopass_device_from_device_private_substore "$user_gpg_id"
+  deauthorize_gopass_cdevice_from_device_private_substore "$user_gpg_id"
 
   1>&2 echo "TODO: Implement de-auth to factory only vault."
   false
@@ -659,7 +672,7 @@ authorize_user_to_device_factory_only_vaults_cli() {
     return 1
   fi
 
-  authorize_gopass_device_to_device_private_substore "$user_gpg_id"
+  authorize_gopass_cdevice_to_device_private_substore "$user_gpg_id"
 
   1>&2 echo "TODO: Implement auth to factory only vault."
   false
@@ -667,7 +680,7 @@ authorize_user_to_device_factory_only_vaults_cli() {
 
 
 list_device_substore_authorized_gpg_ids_w_email_cli() {
-  list_authorized_gopass_device_substores_peers_gpg_ids_w_email
+  list_authorized_gopass_cdevice_substores_peers_gpg_ids_w_email
 }
 
 

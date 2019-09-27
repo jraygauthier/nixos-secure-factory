@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
-. "$common_factory_install_libexec_dir/factory_git.sh"
+. "$common_factory_install_libexec_dir/app_factory_git.sh"
 . "$common_factory_install_libexec_dir/app_factory_info_store.sh"
 
 

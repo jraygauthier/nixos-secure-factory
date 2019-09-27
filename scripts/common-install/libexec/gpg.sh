@@ -176,10 +176,10 @@ transfer_gpg_secret_and_public_keys_from_keyring_to_keyring() {
 
   "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export-secret-keys --armor "$matched_key" | \
     "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import - || return 1
-  "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export-ownertrust | grep -E -e '^#' -e "^${matched_key}" | \
-    "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import-ownertrust - || return 1
   "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export --armor "$matched_key" | \
     "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import - || return 1
+  "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export-ownertrust | grep -E -e '^#' -e "^${matched_key}" | \
+    "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import-ownertrust - || return 1
 }
 
 
@@ -198,8 +198,8 @@ transfer_gpg_public_key_from_keyring_to_keyring() {
   # echo "matched_key='$matched_key'"
 
   # TODO: decide whether to move owner trust too. Won't that require a password?
-  "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export-ownertrust | grep -E -e '^#' -e "^${matched_key}" | \
-    "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import-ownertrust - || return 1
   "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export --armor "$matched_key" | \
     "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import - || return 1
+  "$source_gpg_exe" "${_source_gpg_args_a[@]}" --export-ownertrust | grep -E -e '^#' -e "^${matched_key}" | \
+    "$target_gpg_exe" "${_target_gpg_args_a[@]}" --import-ownertrust - || return 1
 }

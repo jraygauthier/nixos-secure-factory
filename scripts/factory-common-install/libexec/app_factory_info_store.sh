@@ -3,6 +3,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 # Source both dependencies.
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
+. "$common_factory_install_libexec_dir/fields.sh"
 
 
 

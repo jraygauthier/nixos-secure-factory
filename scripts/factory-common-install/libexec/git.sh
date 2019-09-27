@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/prompt.sh"
-
+. "$common_factory_install_libexec_dir/fields.sh"
 
 get_valid_git_email_from_config() {
   local user_email
