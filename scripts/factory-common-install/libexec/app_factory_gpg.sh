@@ -10,6 +10,16 @@ run_factory_gpg() {
 }
 
 
+run_factory_gpgconf() {
+  run_sandboxed_gpgconf "$@"
+}
+
+
+run_factory_gpg_agent() {
+  run_sandboxed_gpg_agent "$@"
+}
+
+
 list_factory_gpg_public_key_ids_w_email() {
   # Nothing as first argument defaults to current user home gpg dir.
   list_gpg_public_key_ids_w_email "" "${1:-}"

@@ -39,12 +39,28 @@ get_default_gpg_home_dir() {
   fi
 }
 
-
-run_sandboxed_gpg() {
+_run_sandboxed_gpg_pkg_exe() {
+  local gpg_pkg_exe="${1?}"
+  shift 1
   local gpg_home_dir
   gpg_home_dir="$(get_default_gpg_home_dir)"
   GNUPGHOME="$gpg_home_dir" \
-    nix-gpg "$@"
+    "$gpg_pkg_exe" "$@"
+}
+
+
+run_sandboxed_gpg() {
+  _run_sandboxed_gpg_pkg_exe "nix-gpg" "$@"
+}
+
+
+run_sandboxed_gpgconf() {
+  _run_sandboxed_gpg_pkg_exe "nix-gpgconf" "$@"
+}
+
+
+run_sandboxed_gpg_agent() {
+_run_sandboxed_gpg_pkg_exe "nix-gpg-agent" "$@"
 }
 
 
