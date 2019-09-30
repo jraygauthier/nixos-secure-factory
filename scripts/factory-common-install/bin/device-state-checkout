@@ -3,55 +3,5 @@ set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/prompt.sh"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
-device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-search_str="$1"
-
-
-all_devices="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
-# matching_devices="$(echo "$all_devices" | grep "$search_str")"
-
-# echo "all_devices=\"$all_devices\""
-# echo "matching_devices=\"$matching_devices\""
-
-if ! matching_devices="$(echo "$all_devices" | grep "$search_str")"; then
-  echo "ERROR: No device dirname match specified search string: \`$search_str\`."
-  printf -- "\n"
-  printf -- "Available devices\n"
-  printf -- "------------------\n\n"
-  echo "$all_devices"
-  printf -- "\n"
-  exit 1
-fi
-
-match_count=$(echo "$matching_devices" | wc -l)
-# echo "match_count=$match_count"
-
-if test $match_count -gt 1; then
-  # TODO: We might instead want to provide an interractive readline.
-  echo "ERROR: Too many dirname match for the specified search string: \`$search_str\`."
-  printf -- "\n"
-  printf -- "Matching devices\n"
-  printf -- "-----------------\n\n"
-  echo "$matching_devices"
-  printf -- "\n"
-  exit 1
-fi
-
-device_id="$(echo "$matching_devices" | head -n 1)"
-
-yaml_str="$(cat "$device_cfg_repo_root_dir/device/$device_id/device.json" | yq -y '.')"
-printf -- "\n"
-printf -- "Device info\n"
-printf -- "-----------\n\n"
-
-printf -- "$yaml_str\n\n"
-
-
-if ! prompt_for_user_approval; then
-  exit 1
-fi
-
-echo "Writing device configuration to \`$device_cfg_repo_root_dir/.current-device.yaml\`."
-echo "$yaml_str" > "$device_cfg_repo_root_dir/.current-device.yaml"
-echo "Current device is now set to \`$device_id\`."
+checkout_device_state_cli "$@"
