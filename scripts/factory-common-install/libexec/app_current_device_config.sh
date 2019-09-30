@@ -88,7 +88,7 @@ grant_factory_ssh_access_to_production_device() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 
-  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$factory_user_id" "$device_user"
+  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
 
   local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
   local rel_ssh_dir_from_root="device-ssh/authorized"
@@ -101,7 +101,9 @@ grant_factory_ssh_access_to_production_device() {
       --arg factory_user_id "$factory_user_id" \
       --arg device_user "$device_user" \
       '.[$device_user][$factory_user_id].public_key_file' \
-      < "$json_path")" && test "" != "$rel_pub_key_path_from_json"; then
+      < "$json_path")" \
+        && test "" != "$rel_pub_key_path_from_json" \
+        && test "null" != "$rel_pub_key_path_from_json"; then
     echo "Factory user already had access to the device. Will update the ssh public key."
     echo_eval "rm -f '$device_ssh_authorized_dir/$rel_pub_key_path_from_json'"
   fi
@@ -144,6 +146,16 @@ grant_factory_ssh_access_to_production_device() {
 
   print_title_lvl3 "Content of '$rel_json_path_from_root'"
   echo "$json_content"
+}
+
+
+deny_factory_ssh_access_to_production_device_cli() {
+  deny_factory_ssh_access_to_production_device "${1:-}" "${2:-}"
+}
+
+
+grant_factory_ssh_access_to_production_device_cli() {
+  grant_factory_ssh_access_to_production_device "${1:-}" "${2:-}"
 }
 
 
