@@ -136,7 +136,7 @@ get_ssh_public_key_path() {
 copy_ssh_public_key_to_clipboard() {
   local id_path_pub
   id_path_pub="$(get_ssh_public_key_path "$@")"
-  xclip -selection clipboard "$id_path_pub"
+  DISPLAY="${DISPLAY:-":0"}" xclip -selection clipboard "$id_path_pub"
   echo "'$id_path_pub' has been placed in your clipboard. Paste it where you need."
   printf -- "\n"
 }

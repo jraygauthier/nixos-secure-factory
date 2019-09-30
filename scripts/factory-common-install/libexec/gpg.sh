@@ -713,7 +713,8 @@ copy_gpg_public_key_to_clipboard() {
   local selected_public_key
   selected_public_key="$(nix-gpg --homedir "$gpg_home_dir" --armor --export "$selected_public_key_id")"
 
-  echo "$selected_public_key" | xclip -selection clipboard
+  echo "$selected_public_key" \
+    | DISPLAY="${DISPLAY:-":0"}" xclip -selection clipboard
   echo "'$selected_public_key_id' for gpg_email_or_id '$gpg_email_or_id' has been placed in your clipboard. Paste it where you need."
   printf -- "\n"
 }

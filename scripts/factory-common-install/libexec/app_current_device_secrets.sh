@@ -639,7 +639,8 @@ copy_device_ssh_identity_to_clipboard_cli() {
   local full_store_key
   full_store_key="$(get_gopass_device_full_store_key_for "$store_key")"
 
-  cat_gopass_device_bin_secret "$store_key" "ssh_pub_key" | xclip -selection clipboard
+  cat_gopass_device_bin_secret "$store_key" "ssh_pub_key" \
+    | DISPLAY="${DISPLAY:-":0"}" xclip -selection clipboard
   echo "Device public key at '$full_store_key' has been placed in your clipboard. Paste it where you need."
 }
 

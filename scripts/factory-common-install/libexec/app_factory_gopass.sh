@@ -165,7 +165,7 @@ _process_gpg_id_input_from_either_args_or_clipboard() {
   # TODO: Support stdin?
 
   local clipboard_input
-  clipboard_input="$(xclip -o -selection clipboard)"
+  clipboard_input="$(DISPLAY="${DISPLAY:-":0"}" xclip -o -selection clipboard)"
 
   if [[ "" == "$clipboard_input" ]]; then
     1>&2 echo "ERROR: Empty clipboard."
