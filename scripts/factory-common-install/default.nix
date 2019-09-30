@@ -5,6 +5,7 @@
 , nixos-device-system-config
 , openssh
 , yq
+, jq
 , sshfs-fuse
 , pwgen
 , mkpasswd
@@ -48,6 +49,7 @@ stdenv.mkDerivation rec {
     # version might not work on non-nixos.
     openssh # ssh, sftp, scp, ssh-keygen
     yq # yaml manipulations
+    jq # json manipulations
     sshfs-fuse
     pwgen
     mkpasswd
