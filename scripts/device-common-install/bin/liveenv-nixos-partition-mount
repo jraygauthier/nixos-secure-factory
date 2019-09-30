@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-mountpoint -q /mnt/ && \
-  { echo "ERROR: Nixos partition should not be mounted on \`/mnt\` for this script to work."; exit 1; }
+if mountpoint -q "/mnt/"; then
+  2>&1 echo "WARNING: liveenv-nixos-partition-mount: Nixos partition already mounted at '/mnt'. Nothing to do"
+  return 1
+fi
 
 mkdir -p /mnt
 mount /dev/disk/by-label/nixos /mnt

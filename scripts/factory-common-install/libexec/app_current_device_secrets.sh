@@ -20,12 +20,12 @@ common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 
 
 mount_device_secure_dir_impl() {
-  run_cmd_as_device_root "liveenv-mount-device-secure-dir"
+  run_cmd_as_device_root "liveenv-device-secure-dir-mount"
 }
 
 
 umount_device_secure_dir_impl() {
-  run_cmd_as_device_root "liveenv-umount-device-secure-dir"
+  run_cmd_as_device_root "liveenv-device-secure-dir-umount"
 }
 
 
@@ -583,7 +583,7 @@ create_and_deploy_device_secrets_cli() {
   # update_device_gpg_identity_in_factory_keyring_and_store
   grant_access_device_secrets_prim
   if is_device_run_from_nixos_liveenv; then
-    mount_liveenv_nixos_partitions
+    mount_livenv_nixos_partition_if_required
   fi
   deploy_device_secrets_prim "$@"
   install_device_secrets_prim
@@ -606,7 +606,7 @@ deploy_device_secrets_cli() {
   print_title_lvl1 "Deploying current device secrets to the device"
   load_device_secrets_prim "$@"
   if is_device_run_from_nixos_liveenv; then
-    mount_liveenv_nixos_partitions
+    mount_livenv_nixos_partition_if_required
   fi
   deploy_device_secrets_prim "$@"
   install_device_secrets_prim
@@ -618,7 +618,7 @@ deploy_no_install_device_secrets_cli() {
   print_title_lvl1 "Deploying current device secrets to the device without installing"
   load_device_secrets_prim "$@"
   if is_device_run_from_nixos_liveenv; then
-    mount_liveenv_nixos_partitions
+    mount_livenv_nixos_partition_if_required
   fi
   deploy_device_secrets_prim "$@"
   # wipe_device_secure_dir_content

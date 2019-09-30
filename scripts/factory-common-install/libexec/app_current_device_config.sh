@@ -306,7 +306,7 @@ _build_and_deploy_initial_device_config_impl() {
   grant_factory_ssh_access_to_production_device ""
   local system_closure
   _build_current_device_config_system_closure "system_closure" "$config_name" "$@"
-  mount_liveenv_nixos_partitions
+  mount_livenv_nixos_partition_if_required
   send_initial_system_closure_to_device "$system_closure"
   install_initial_system_closure_to_device "$system_closure"
 }

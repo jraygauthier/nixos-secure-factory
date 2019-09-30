@@ -17,15 +17,26 @@ EOF
 
 
 
-
+are_liveenv_nixos_partitions_already_mounted() {
+  run_cmd_as_device_root "liveenv-nixos-partition-already-mounted"
+}
 
 mount_liveenv_nixos_partitions() {
   print_title_lvl1 "Mounting nixos partitions in the liveenv"
-  run_cmd_as_device_root "liveenv-mount-nixos-partition"
+  run_cmd_as_device_root "liveenv-nixos-partition-mount"
 }
 
 
 umount_liveenv_nixos_partitions() {
   print_title_lvl1 "Unmounting nixos partitions in the liveenv"
-  run_cmd_as_device_root "liveenv-umount-nixos-partition"
+  run_cmd_as_device_root "liveenv-nixos-partition-umount"
+}
+
+mount_livenv_nixos_partition_if_required() {
+  print_title_lvl1 "Mounting nixos partitions in the liveenv if required"
+  if are_liveenv_nixos_partitions_already_mounted; then
+    echo "Partitions already mounted."
+    return 0
+  fi
+  run_cmd_as_device_root "liveenv-nixos-partition-mount"
 }

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+
+if ! mountpoint -q "/mnt/"; then
+  return 1
+fi
+
+if parted /dev/sda -- print | grep -q ESP; then
+  if ! mountpoint -q "/mnt/boot"; then
+    1>&2 echo "WARNING: liveenv-nixos-partition-already-mounted: missing expected '/mnt/boot' mount."
+  fi
+fi
+
+if ! [[ "2" -eq "$(swapon -s | wc -l)" ]]; then
+  1>&2 echo "WARNING: liveenv-nixos-partition-already-mounted: no active swap partition detected."
+fi

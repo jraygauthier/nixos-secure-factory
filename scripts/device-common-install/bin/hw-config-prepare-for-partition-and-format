@@ -3,6 +3,6 @@ set -euf -o pipefail
 device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-device-common-install-get-libexec-dir")"
 . "$device_common_install_libexec_dir/tools.sh"
 
-liveenv-umount-nixos-partition
+liveenv-nixos-partition-umount
 hw-config-remove-lvm
 
