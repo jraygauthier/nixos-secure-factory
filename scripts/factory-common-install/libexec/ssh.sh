@@ -72,6 +72,17 @@ build_ssh_port_args_for_ssh_port() {
 }
 
 
+build_ssh_port_args_for_ssh_port_a() {
+  local -n _out_args_a="$1"
+  local ssh_port="${2:-}"
+  if [[ "${ssh_port:-}" == "" ]]; then
+    _out_args_a=() # No args, use default port.
+  else
+    _out_args_a=( "-p" "$ssh_port" )
+  fi
+}
+
+
 build_scp_port_args_for_ssh_port() {
   local ssh_port="${1:-}"
   if [[ "${ssh_port:-}" == "" ]]; then

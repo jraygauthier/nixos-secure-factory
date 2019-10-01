@@ -51,36 +51,46 @@ read_or_prompt_for_current_device__ssh_port() {
 
 enter_ssh_as_user() {
   local user="$1"
+  shift 1
 
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
 
-  echo " -> ssh${ssh_port_args} root@${device_hostname}"
-  ssh${ssh_port_args} "${user}@${device_hostname}"
+  local ssh_port_args_a=()
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args_a" "$device_ssh_port"
+
+  local ssh_args_a=( "${ssh_port_args_a[@]}" "$@" "${user}@${device_hostname}")
+
+  echo " -> ssh" "${ssh_args_a[@]}"
+  ssh "${ssh_args_a[@]}"
 }
 
 
 enter_ssh_as_root() {
-  enter_ssh_as_user "root"
+  enter_ssh_as_user "root" "$@"
 }
 
 
 run_cmd_as_user() {
   local user="$1"
   local cmd="$2"
+  shift 2
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
-  # echo "ssh${ssh_port_args} root@${device_hostname} '$cmd'"
-  ssh${ssh_port_args} "${user}@${device_hostname}" "$cmd"
+  local ssh_port_args_a=()
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args_a" "$device_ssh_port"
+
+  local ssh_args_a=( "${ssh_port_args_a[@]}" "$@" "${user}@${device_hostname}" "$cmd")
+
+  # 1>&2 echo "ssh" "${ssh_args_a[@]}"
+  ssh "${ssh_args_a[@]}"
 }
 
 
 run_cmd_as_device_root() {
-  run_cmd_as_user "root" "$1"
+  run_cmd_as_user "root" "$@"
 }
 
 
