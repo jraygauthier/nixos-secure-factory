@@ -55,10 +55,10 @@ ensure_no_ssh_identity_present() {
   local id_path_pub="${id_path}.pub"
 
   if is_ssh_identity_present "$@"; then
-    2>&1 echo "ERROR: User already has ssh identity named '$id_name'."
-    2>&1 echo "  Please rm the following files manually (\`factory-ssh-rm-identity\`) and re-run this:"
+    1>&2 echo "ERROR: User already has ssh identity named '$id_name'."
+    1>&2 echo "  Please rm the following files manually (\`factory-ssh-rm-identity\`) and re-run this:"
     for id_f in ${id_path_pub} ${id_path}; do
-      2>&1 echo "   -> '$id_f'"
+      1>&2 echo "   -> '$id_f'"
     done
 
     exit 1

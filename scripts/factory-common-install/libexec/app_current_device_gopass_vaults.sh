@@ -189,7 +189,7 @@ _ensure_exists_gopass_device_secret() {
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$@")" || return 1
   if ! _exists_gopass_device_secret "$@"; then
-    echo "ERROR: _ensure_exists_gopass_device_secret: Secret '${full_store_key}' does not exits!"
+    1>&2 echo "ERROR: _ensure_exists_gopass_device_secret: Secret '${full_store_key}' does not exits!"
     return 1
   fi
 }

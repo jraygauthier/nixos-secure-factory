@@ -2,7 +2,7 @@
 set -euf -o pipefail
 
 (test -d /mnt && mountpoint /mnt) || \
-  { echo "ERROR: Nixos partition should be mounted on \`/mnt\` for this script to work."; exit 1; }
+  { 1>&2 echo "ERROR: Nixos partition should be mounted on \`/mnt\` for this script to work."; exit 1; }
 
 # We will only show the config with the filesystems. However,
 # we do not want the generated file system as it refers to

@@ -2,6 +2,6 @@
 set -euf -o pipefail
 
 (test -d /mnt && mountpoint /mnt) || \
-  { echo "ERROR: Nixos partition should be mounted on \`/mnt\` for this script to work."; exit 1; }
+  { 1>&2 echo "ERROR: Nixos partition should be mounted on \`/mnt\` for this script to work."; exit 1; }
 
 nixos-generate-config --root /mnt --show-hardware-config

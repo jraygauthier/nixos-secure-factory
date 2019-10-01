@@ -121,7 +121,7 @@ _parse_user_search_path_overrides_args() {
           _out_nix_build_fwd_flags+=("$i" "$j" "$k")
           ;;
         *)
-          echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
+          1>&2 echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
           return 1
           ;;
       esac

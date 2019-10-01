@@ -197,7 +197,7 @@ get_required_current_device_root_dir() {
   device_dirname="$(get_required_current_device_dirname)"
   local out_root_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; return 1; }
+    { 1>&2 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
@@ -209,7 +209,7 @@ get_required_current_device_type_config_root_dir() {
   type="$(get_required_current_device_type)"
   out_root_dir="$device_cfg_repo_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; return 1; }
+    { 1>&2 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
@@ -221,7 +221,7 @@ get_required_current_device_type_factory_install_root_dir() {
   type="$(get_required_current_device_type)"
   out_root_dir="$device_type_defs_root_dir/device-type/$type"
   test -d "$out_root_dir" || \
-    { 2>&1 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; return 1; }
+    { 1>&2 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
 }
 
@@ -446,7 +446,7 @@ checkout_device_state_cli() {
   # echo "matching_devices=\"$matching_devices\""
 
   if ! matching_devices="$(echo "$all_devices" | grep "$search_str")"; then
-    echo "ERROR: No device dirname match specified search string: \`$search_str\`."
+    1>&2 echo "ERROR: No device dirname match specified search string: \`$search_str\`."
     printf -- "\n"
     printf -- "Available devices\n"
     printf -- "------------------\n\n"
@@ -461,7 +461,7 @@ checkout_device_state_cli() {
 
   if test "$match_count" -gt "1"; then
     # TODO: We might instead want to provide an interractive readline.
-    echo "ERROR: Too many dirname match for the specified search string: \`$search_str\`."
+    1>&2 echo "ERROR: Too many dirname match for the specified search string: \`$search_str\`."
     printf -- "\n"
     printf -- "Matching devices\n"
     printf -- "-----------------\n\n"

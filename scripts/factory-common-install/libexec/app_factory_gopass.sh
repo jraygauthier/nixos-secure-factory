@@ -236,7 +236,7 @@ _parse_factory_user_authorization_args() {
               && echo "$i" | grep -E -q "$gpg_id_or_email_regexp"; then
             _out_gpg_id="$i"
           else
-            echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
+            1>&2 echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"
             return 1
           fi
           ;;
