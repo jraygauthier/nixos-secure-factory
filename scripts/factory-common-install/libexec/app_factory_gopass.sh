@@ -154,7 +154,7 @@ authorize_factory_user_peers_to_gopass_store() {
 
 
 
-_process_gpg_id_input_from_either_args_or_clipboard() {
+process_gpg_id_input_from_either_args_or_clipboard() {
   if [[ "x" == "${1:+x}" ]]; then
     local arg_input
     arg_input="$1"
@@ -262,8 +262,7 @@ deauthorize_factory_user_gpg_id_from_gopass_factory_vaults_cli() {
   print_title_lvl2 "Initializing and mounting gopass vaults"
   mount_factory_gopass_secrets_stores
 
-  local gpg_id_or_email
-  gpg_id_or_email="$(_process_gpg_id_input_from_either_args_or_clipboard "$gpg_id_or_email")" || return 1
+  gpg_id_or_email="$(process_gpg_id_input_from_either_args_or_clipboard "$gpg_id_or_email")" || return 1
   echo "gpg_id_or_email='$gpg_id_or_email'"
 
   local matching_gpg_id=""
@@ -320,8 +319,7 @@ authorize_factory_user_gpg_id_to_gopass_factory_vaults_cli() {
 
   print_title_lvl2 "Identifying unique gpg id from user input"
 
-  local gpg_id_or_email
-  gpg_id_or_email="$(_process_gpg_id_input_from_either_args_or_clipboard "$gpg_id_or_email")" || return 1
+  gpg_id_or_email="$(process_gpg_id_input_from_either_args_or_clipboard "$gpg_id_or_email")" || return 1
   echo "gpg_id_or_email='$gpg_id_or_email'"
 
   local matching_gpg_id=""

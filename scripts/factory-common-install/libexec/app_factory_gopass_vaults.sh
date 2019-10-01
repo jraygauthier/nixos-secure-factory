@@ -164,6 +164,39 @@ _configure_factory_gopass_secrets_stores() {
 }
 
 
+is_factory_only_gopass_secrets_store_already_mount() {
+  local sdir
+  sdir="$(get_gopass_factory_only_vault_repo_dir)"
+  factory-gopass mounts | grep -q "(${sdir})"
+}
+
+
+mount_factory_only_gopass_secrets_store_if_required() {
+  print_title_lvl4 "Mounting factory only gopass secret stores"
+
+  if ! is_factory_only_gopass_secrets_store_already_mount; then
+    echo "Already mounted."
+    return 0
+  fi
+
+  init_factory_gopass_main_store_and_config
+
+  local gpg_key_id
+  read_or_prompt_for_factory_info__user_gpg_default_id "gpg_key_id"
+
+  local sid
+  sid="$(get_gopass_factory_only_vault_id)"
+  local sdir
+  sdir="$(get_gopass_factory_only_vault_repo_dir)"
+
+  echo_eval "factory-gopass mounts add -i '$gpg_key_id'" \
+    "'$sid'" \
+    "'$sdir'"
+
+  configure_gopass_store "$sid"
+}
+
+
 mount_factory_gopass_secrets_stores() {
   print_title_lvl4 "Mounting factory gopass secret stores"
 

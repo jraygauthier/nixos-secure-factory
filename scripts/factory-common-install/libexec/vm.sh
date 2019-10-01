@@ -8,8 +8,8 @@ _DEFAULT_VM_NAME="nixos_virtual_box_vm_default"
 
 ensure_virtualbox_installed() {
   if ! command -v VBoxManage > /dev/null; then
-    1>&2 echo "ERROR: Cannot find the required \`VBoxManage\` application."
-    exit 1
+    1>&2 echo "ERROR: Cannot find the required 'VBoxManage' application."
+    return 1
   fi
 }
 
@@ -31,14 +31,18 @@ list_vbox_installed_extensions() {
   extensions="$(VBoxManage list extpacks | \
     grep -E -e '^Pack no. [0-9]+:' | \
     cut -d':' -f2 | \
-    trim_leading_ws)"
+    trim_leading_ws)" || return 1
   echo "$extensions"
 }
 
+
 ensure_virtualbox_installed_with_required_extensions() {
   ensure_virtualbox_installed
-  list_vbox_installed_extensions | \
-    grep -q -e 'Oracle VM VirtualBox Extension Pack'
+  if ! list_vbox_installed_extensions \
+      | grep -q -e 'Oracle VM VirtualBox Extension Pack'; then
+    1>&2 echo "ERROR: Cannot find required 'VirtualBox Exension Pack'."
+    return 1
+  fi
 }
 
 
@@ -54,7 +58,7 @@ ensure_vbox_vm_not_exists() {
 
   if is_vbox_vm_already_created "$vm_name"; then
     1>&2 echo "ERROR: VBox vm with name \`$vm_name\` already exists."
-    exit 1
+    return 1
   fi
 }
 
@@ -65,7 +69,7 @@ ensure_vbox_vm_exists() {
 
   if ! is_vbox_vm_already_created "$vm_name"; then
     1>&2 echo "ERROR: VBox vm with name \`$vm_name\` cannot be found."
-    exit 1
+    return 1
   fi
 }
 
@@ -251,7 +255,7 @@ read_livecd_iso_filename_from_default_url() {
   echo "read_livecd_iso_filename_from_default_url: <${DEFAULT_LIVECD_ISO_URL}>"
   if ! nix-prefetch-url "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH"; then
     1>&2 echo "ERROR: Was unable to complete download of \`<${DEFAULT_LIVECD_ISO_URL}>\` nixos livcd iso."
-    exit 1
+    return 1
   fi
   local filename="$(nix-prefetch-url --print-path "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH" | tail -n 1)"
   # TODO: Consider pinning the store path by creating a symlink at the root of this repo (
@@ -297,7 +301,7 @@ list_vbox_vm_storage_controller_ide_attached_media_by_uuid() {
 
   if ! echo "$out" | grep -q -E '^[0-9a-zA-Z_-]+$'; then
     1>&2 echo "ERROR: list_vbox_vm_storage_controller_ide_attached_media: Unexpected \`out=\` value: ${out}"
-    exit 1
+    return 1
   fi
   echo "$out"
 }
