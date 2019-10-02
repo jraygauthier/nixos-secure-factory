@@ -248,16 +248,42 @@ configure_vbox_vm_shared_repo_device_nixos_config() {
 }
 
 
+_make_nixos_sf_download_dir_if_required() {
+  local home_cache_dir="$HOME/.cache"
+  [[ -d "$home_cache_dir" ]] || mkdir -m 755 "$home_cache_dir"
+
+  local nsf_cache_dir="$home_cache_dir/nixos-secure-factory"
+  [[ -d "$nsf_cache_dir" ]] || mkdir -m 700 "$nsf_cache_dir"
+
+  local nsf_cache_download_dir="$nsf_cache_dir/download"
+  [[ -d "$nsf_cache_download_dir" ]] || mkdir -m 700 "$nsf_cache_download_dir"
+}
+
+
+_get_nixos_sf_download_dir() {
+  _make_nixos_sf_download_dir_if_required
+  echo "$HOME/.cache/nixos-secure-factory/download"
+}
+
+
 read_livecd_iso_filename_from_default_url() {
   local out_varname="$1"
   local DEFAULT_LIVECD_ISO_URL="https://releases.nixos.org/nixos/19.03/nixos-19.03.173077.28e64db237d/nixos-minimal-19.03.173077.28e64db237d-x86_64-linux.iso"
   local DEFAULT_LIVECD_ISO_URL_HASH="12g2znf2g5x8bcfxf50lnvjjbvmn8sl4ywf2wycfq2nykpqcp69w"
   echo "read_livecd_iso_filename_from_default_url: <${DEFAULT_LIVECD_ISO_URL}>"
-  if ! nix-prefetch-url "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH"; then
+
+  local nsf_download_dir
+  nsf_download_dir="$(_get_nixos_sf_download_dir)"
+
+  if ! TMPDIR="$nsf_download_dir" \
+      nix-prefetch-url "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH"; then
     1>&2 echo "ERROR: Was unable to complete download of \`<${DEFAULT_LIVECD_ISO_URL}>\` nixos livcd iso."
     return 1
   fi
-  local filename="$(nix-prefetch-url --print-path "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH" | tail -n 1)"
+
+  local filename
+  filename="$(TMPDIR="$nsf_download_dir" \
+    nix-prefetch-url --print-path "$DEFAULT_LIVECD_ISO_URL" "$DEFAULT_LIVECD_ISO_URL_HASH" | tail -n 1)"
   # TODO: Consider pinning the store path by creating a symlink at the root of this repo (
   #       registered as a root of the Nix garbage collector same as "result" when building).
   #       We might event want to put all this stuff to a ".nix" file and built it
@@ -505,22 +531,27 @@ start_vbox_vm_headless_entering_screen_on_virtual_serial_console() {
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
   ensure_vbox_vm_stopped "$vm_name"
 
-  baudrate="115200"
+  local baudrate="115200"
 
-  socket_path="/tmp/${vm_name}-ttyS0-socket"
-  pty_path="/tmp/${vm_name}-ttyS0-pty"
+  local tmp_dir
+  tmp_dir="$(mktemp -d)"
+
+  local socket_path="$tmp_dir/${vm_name}-ttyS0-socket"
+  local pty_path="$tmp_dir/${vm_name}-ttyS0-pty"
+  rm -f "$socket_path" "$pty_path"
 
   insert_vbox_vm_livecd_iso_into_empty_dvd_drive "$vm_name"
   configure_vbox_vm_uart1_as_client_to_unix_socket "$vm_name" "$socket_path"
 
-  rm -f "$socket_path" "$pty_path"
-  socat PTY,link=${pty_path},raw,echo=0,wait-slave UNIX-LISTEN:${socket_path} &
+  # touch "$socket_path"
+  socat "PTY,link=${pty_path},raw,echo=0,wait-slave" "UNIX-LISTEN:${socket_path}" &
+  local socat_pid="$!"
 
   (sleep 3.5; VBoxManage startvm "$vm_name" --type headless) &
 
   screen "$pty_path" "$baudrate"
 
-  pkill socat
+  kill -s "SIGINT" "$socat_pid"
 }
 
 
