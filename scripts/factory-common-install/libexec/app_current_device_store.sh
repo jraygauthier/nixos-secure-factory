@@ -118,8 +118,60 @@ get_current_device_hostname() {
 }
 
 
+get_resolved_current_device_hostname() {
+  local out
+  out="$(get_current_device_hostname)" || return 1
+
+  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
+  if [[ "$out" == "auto" ]]; then
+    out="localhost"
+  fi
+
+  echo "$out"
+}
+
+
+get_required_current_device_hostname() {
+  local out
+  out="$(get_resolved_current_device_hostname)" || return 1
+
+  if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
+    1>&2 echo "ERROR: ${FUNCNAME[0]}: Empty or null device hostname."
+    return 1
+  fi
+
+  echo "$out"
+}
+
+
 get_current_device_ssh_port() {
   get_value_from_current_device_yaml_or_if_null_then_replace_with '."ssh-port"' ""
+}
+
+
+get_resolved_current_device_ssh_port() {
+  local out
+  out="$(get_current_device_ssh_port)" || return 1
+
+  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
+  if [[ "$out" == "auto" ]]; then
+    out="2222"
+  fi
+
+  echo "$out"
+}
+
+
+get_required_current_device_ssh_port() {
+  local out
+  out="$(get_resolved_current_device_ssh_port)" || return 1
+
+  if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
+    1>&2 echo "ERROR: ${FUNCNAME[0]}: Empty or null device ssh port."
+    return 1
+  fi
+
+  echo "$out"
 }
 
 

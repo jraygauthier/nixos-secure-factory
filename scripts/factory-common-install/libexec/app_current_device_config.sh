@@ -238,6 +238,8 @@ _send_system_closure_to_device_impl() {
 
 send_initial_system_closure_to_device() {
   print_title_lvl2 "Sending initial system closure to device"
+  local device_hostname
+  read_or_prompt_for_current_device__hostname "device_hostname"
   local remote="ssh://root@${device_hostname}?remote-store=local?root=${_REMOTE_LIVEENV_NIX_STORE_ROOT}"
   _send_system_closure_to_device_impl "$1" "$remote"
 }
@@ -245,6 +247,8 @@ send_initial_system_closure_to_device() {
 
 send_system_closure_to_device() {
   print_title_lvl2 "Sending system closure to device"
+  local device_hostname
+  read_or_prompt_for_current_device__hostname "device_hostname"
   local remote="ssh://root@${device_hostname}"
   _send_system_closure_to_device_impl "$1" "$remote"
 }

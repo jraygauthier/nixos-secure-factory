@@ -3,7 +3,7 @@ set -euf -o pipefail
 
 if mountpoint -q "/mnt/"; then
   2>&1 echo "WARNING: liveenv-nixos-partition-mount: Nixos partition already mounted at '/mnt'. Nothing to do"
-  return 1
+  exit 1
 fi
 
 mkdir -p /mnt

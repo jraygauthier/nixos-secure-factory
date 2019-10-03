@@ -13,12 +13,7 @@ read_or_prompt_for_current_device__hostname() {
   local out_varname="$1"
   local out="null"
   if is_current_device_specified; then
-    local out="$(get_current_device_hostname)"
-  fi
-
-  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
-  if [[ "$out" == "auto" ]]; then
-    out="localhost"
+    out="$(get_resolved_current_device_hostname)" || return 1
   fi
 
   if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
@@ -33,7 +28,7 @@ read_or_prompt_for_current_device__ssh_port() {
   local out_varname="$1"
   local out=""
   if is_current_device_specified; then
-    local out="$(get_current_device_ssh_port)"
+    out="$(get_resolved_current_device_ssh_port)" || return 1
   fi
 
   # TODO: auto -> retrieve from backend (e.g.: vbox backend).
@@ -53,9 +48,10 @@ enter_ssh_as_user() {
   local user="$1"
   shift 1
 
+  local device_hostname
+  local device_ssh_port
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
-
 
   local ssh_port_args_a=()
   build_ssh_port_args_for_ssh_port_a "ssh_port_args_a" "$device_ssh_port"
@@ -76,8 +72,10 @@ run_cmd_as_user() {
   local user="$1"
   local cmd="$2"
   shift 2
-  read_or_prompt_for_current_device__hostname "device_hostname"
-  read_or_prompt_for_current_device__ssh_port "device_ssh_port"
+  local device_hostname
+  device_hostname="$(get_required_current_device_hostname)" || return 1
+  local device_ssh_port
+  device_ssh_port="$(get_required_current_device_ssh_port)" || return 1
 
   local ssh_port_args_a=()
   build_ssh_port_args_for_ssh_port_a "ssh_port_args_a" "$device_ssh_port"
@@ -85,7 +83,13 @@ run_cmd_as_user() {
   local ssh_args_a=( "${ssh_port_args_a[@]}" "$@" "${user}@${device_hostname}" "$cmd")
 
   # 1>&2 echo "ssh" "${ssh_args_a[@]}"
+
   ssh "${ssh_args_a[@]}"
+  # TODO: Consider these options:
+  # local connect_timeout_s=3
+  # ssh -o "ConnectTimeout=${connect_timeout_s}" "${ssh_args_a[@]}"
+  # local timeout_s="3"
+  # timeout -v "$timeout_s" ssh "${ssh_args_a[@]}"
 }
 
 
