@@ -18,6 +18,8 @@
 , xclip
 , diffutils
 , bashInteractive
+, nix-prefetch-git
+, nix-prefetch-github
 }:
 
 stdenv.mkDerivation rec {
@@ -70,6 +72,9 @@ stdenv.mkDerivation rec {
 
     xclip
     diffutils
+
+    nix-prefetch-git
+    nix-prefetch-github
   ];
 
   postPatch = ''
