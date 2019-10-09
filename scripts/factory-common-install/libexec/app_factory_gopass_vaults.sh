@@ -466,9 +466,7 @@ is_factory_user_gopass_gpg_id() {
 
   # 1>&2 echo "$email_user_name"
   # 1>&2 echo "$email_domain"
-
-  ! [[ "$email_domain" == "$device_domain" ]] \
-    && ! echo "$device_names" | grep -q "${email_user_name}"
+  ! echo "$device_names" | grep -q "${email_user_name}"
 }
 
 
