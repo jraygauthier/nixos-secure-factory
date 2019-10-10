@@ -22,6 +22,7 @@
 , bashInteractive
 , nix-prefetch-git
 , nix-prefetch-github
+, tightvnc
 }:
 
 stdenv.mkDerivation rec {
@@ -60,6 +61,7 @@ stdenv.mkDerivation rec {
     pwgen
     mkpasswd
 
+    tightvnc # provide vncviewer
     screen
     socat
     picocom
