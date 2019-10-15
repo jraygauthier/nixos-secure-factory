@@ -1,6 +1,8 @@
 { stdenv
 , lib
 , makeWrapper
+, coreutils
+, gnugrep
 , nixos-common-install-scripts
 , nixos-device-system-config
 , openssh
@@ -45,6 +47,8 @@ stdenv.mkDerivation rec {
   buildInputs = [
     nixos-common-install-scripts
     nixos-device-system-config
+    coreutils
+    gnugrep
     mr # Simplifies working with multiple repos.
 
     # TODO: Consider removing the openssh dep as the nix

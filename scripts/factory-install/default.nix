@@ -1,5 +1,7 @@
 { stdenv
 , makeWrapper
+, coreutils
+, gnugrep
 , nixos-factory-common-install-scripts
 , mr
 , yq
@@ -27,6 +29,8 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     nixos-factory-common-install-scripts
+    coreutils
+    gnugrep
     mr # Simplifies working with multiple repos.
     yq
     (python3.withPackages (pp: with pp; [

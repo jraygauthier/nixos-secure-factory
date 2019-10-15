@@ -1,6 +1,7 @@
 { stdenv
 , nixos-device-common-install-scripts
 , makeWrapper
+, coreutils
 , gnugrep
 , usbutils
 , procps
@@ -26,6 +27,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     nixos-device-common-install-scripts
     # For the common lib *.sh.
+    coreutils
     gnugrep
     usbutils
     procps

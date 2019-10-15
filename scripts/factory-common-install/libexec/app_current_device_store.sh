@@ -348,7 +348,7 @@ prompt_for_device_optional__ssh_port() {
 
 
 prompt_for_device_optional__uart_pty() {
-  local value_re="^[a-zA-Z0-9.-/]*$"
+  local value_re="^[a-zA-Z0-9\.-\/]*$"
   echo -e "\"uart_pty\": the path to the uart pty connected to the device (e.g.: '/dev/ttyS0'). Default is 'none'"
   prompt_for_optional_parameter_loop "$1" "uart_pty" "$value_re"
 }

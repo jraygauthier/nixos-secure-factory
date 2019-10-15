@@ -1,5 +1,7 @@
 { stdenv
 , makeWrapper
+, coreutils
+, gnugrep
 }:
 
 stdenv.mkDerivation rec {
@@ -11,6 +13,8 @@ stdenv.mkDerivation rec {
 
   nativeBuildInputs = [ makeWrapper ];
   buildInputs = [
+    coreutils
+    gnugrep
   ];
 
   postPatch = ''

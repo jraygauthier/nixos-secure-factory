@@ -2,6 +2,8 @@
 , lib
 , makeWrapper
 , nixos-common-scripts
+, coreutils
+, gnugrep
 , gnupg
 , gopass
 , git
@@ -28,6 +30,8 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     nixos-common-scripts
+    coreutils
+    gnugrep
     gnupg
     gopass
     git
