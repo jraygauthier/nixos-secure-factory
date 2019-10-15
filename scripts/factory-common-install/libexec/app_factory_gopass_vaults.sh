@@ -447,13 +447,6 @@ is_factory_user_gopass_gpg_id() {
   fi
 
   local gpg_id_or_email="$1"
-  local device_names
-  if [[ "x" == "${2:+x}" ]]; then
-    # Allow to optimize by retrieving the listing outside of the loop.
-    device_names="$2"
-  else
-    device_names="$(list_all_device_names_from_gopass_factory_vaults_and_device_config)"
-  fi
 
   local email_user_name
   email_user_name="$(get_email_for_gpg_id "$gpg_id_or_email" | awk -F'@' '{ print $1 }')" || return 1
@@ -466,6 +459,21 @@ is_factory_user_gopass_gpg_id() {
 
   # 1>&2 echo "$email_user_name"
   # 1>&2 echo "$email_domain"
+  if ! [[ "$email_domain" == "$device_domain" ]]; then
+    # Factory user email domain not equal to that of devices. This
+    # is clearly not a device. We can thus shortcircuit the
+    # potentially costly below check.
+    return 0 # true
+  fi
+
+  local device_names
+  if [[ "x" == "${2:+x}" ]]; then
+    # Allow to optimize by retrieving the listing outside of the loop.
+    device_names="$2"
+  else
+    device_names="$(list_all_device_names_from_gopass_factory_vaults_and_device_config)"
+  fi
+
   ! echo "$device_names" | grep -q "${email_user_name}"
 }
 
