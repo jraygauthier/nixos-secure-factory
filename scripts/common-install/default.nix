@@ -75,7 +75,7 @@ stdenv.mkDerivation rec {
   '';
 
   shellHook = ''
-    export PATH="${src}/bin:''${binPathDeps:+:}$binPathDeps''${PATH:+:}$PATH"
+    export PATH="${src}/bin''${binPathDeps:+:}$binPathDeps''${PATH:+:}$PATH"
     export PYTHONPATH="${src}/python-lib''${pythonPathDeps:+:}$pythonPathDeps''${PYTHONPATH:+:}$PYTHONPATH"
   '';
 

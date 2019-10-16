@@ -52,7 +52,7 @@ EOF
 }
 
 
-_get_json_field_from_file() {
+_get_yaml_or_json_field_from_file() {
   local filename="${1?}"
   local field_jq_path="${2?}"
 
@@ -61,13 +61,32 @@ _get_json_field_from_file() {
     return 1
   fi
 
+  local file_bn
+  file_bn="$(basename "$filename")"
+
+  local parser_exe="jq"
+  local file_type_text="Json"
+  if [[ "$file_bn" != "$(basename "$file_bn" yaml)" ]]; then
+    # Parse using yq when the file has the yaml extension. Otherwise
+    # we will fallback to strict json parser.
+    parser_exe="yq"
+    file_type_text="Yaml"
+  fi
+
   local out
-  if ! out="$(jq -e -r "$field_jq_path" < "$filename")"; then
-    1>&2 echo "ERROR: Json field '$field_jq_path' not found in file '$filename'."
+  if ! out="$(${parser_exe} -e -r "$field_jq_path" < "$filename")"; then
+    1>&2 echo "ERROR: ${file_type_text} field '$field_jq_path' not found in file '$filename'."
     return 1
   fi
 
   echo "$out"
+}
+
+
+_get_optional_yaml_or_json_field_from_file() {
+  local filename="${1?}"
+  local field_jq_path="${2?}"
+  2>/dev/null _get_yaml_or_json_field_from_file "$filename" "$field_jq_path"
 }
 
 
@@ -100,16 +119,24 @@ _update_nix_src_json_using_builtin_fetchgit() {
   local fetcher_type="builtins.fetchGit"
 
   local url
-  url="$(_get_json_field_from_file "$in_src" '.url')" || \
+  url="$(_get_yaml_or_json_field_from_file "$in_src" '.url')" || \
     return 1
   local ref
-  ref="$(_get_json_field_from_file "$in_src" '.ref')" || \
+  ref="$(_get_yaml_or_json_field_from_file "$in_src" '.ref')" || \
     return 1
 
-  local rev="refs/heads/$ref"
+  # User is allow to specify a fixed rev in which case the mandatory ref
+  # is only used as a way to comment the provenance of the specified rev.
+  # There is unfortunatly no simple / efficent way to validate the the
+  # specified rev belong to the specified ref.
+  local fetch_rev
+  if ! fetch_rev="$(_get_optional_yaml_or_json_field_from_file "$in_src" '.rev')"; then
+    fetch_rev="refs/heads/$ref"
+  fi
+
   local store_path
   local fetch_info_json
-  _run_nix_prefetch_git "store_path" "fetch_info_json" "$url" "$rev"
+  _run_nix_prefetch_git "store_path" "fetch_info_json" "$url" "$fetch_rev"
 
   # echo "store_path='$store_path'"
   # echo "fetch_info_json='$fetch_info_json'"
@@ -128,6 +155,10 @@ _update_nix_src_json_using_builtin_fetchgit() {
   # echo "sha256='$sha256'"
   # echo "date='$date'"
 
+  local jq_out_expr
+  jq_out_expr='.type = $type | .url = $url | .ref = $ref | .rev = $rev | .sha256 = $sha256 | .date = $date'
+
+
   local updated_src_json
   if ! updated_src_json="$(echo "{}" | jq -e \
         --arg type "$fetcher_type" \
@@ -136,7 +167,79 @@ _update_nix_src_json_using_builtin_fetchgit() {
         --arg rev "$rev" \
         --arg sha256 "$sha256" \
         --arg date "$date" \
-        '.type = $type | .url = $url | .ref = $ref | .rev = $rev | .sha256 = $sha256 | .date = $date')"; then
+        "$jq_out_expr")"; then
+    1>&2 echo "ERROR: Error creating updated source json content."
+    return 1
+  fi
+
+  if ! echo "$updated_src_json" > "$out_src"; then
+    1>&2 echo "ERROR: Error writing updated source to '$out_src'."
+    return 1
+  fi
+
+  echo "Sources succesfully updated."
+  echo "'$out_src' now is:"
+  echo "$updated_src_json"
+}
+
+
+_get_json_field_from_nix_prefetch_github_output() {
+  local json_str="${1?}"
+  local field_jq_path="${2?}"
+  _get_json_field_from_in_memory_src "$json_str" "$field_jq_path" "nix-prefetch-github's output"
+}
+
+
+_update_nix_src_json_using_fetch_from_github() {
+  local in_src="${1?}"
+  local out_src="${2?}"
+
+  local fetcher_type="fetchFromGitHub"
+
+  local owner
+  owner="$(_get_yaml_or_json_field_from_file "$in_src" '.owner')" || \
+    return 1
+  local repo
+  repo="$(_get_yaml_or_json_field_from_file "$in_src" '.repo')" || \
+    return 1
+  local ref
+  ref="$(_get_yaml_or_json_field_from_file "$in_src" '.ref')" || \
+    return 1
+
+  # User is allow to specify a fixed rev in which case the mandatory ref
+  # is only used as a way to comment the provenance of the specified rev.
+  # There is unfortunatly no simple / efficent way to validate the the
+  # specified rev belong to the specified ref.
+  local fetch_rev
+  if ! fetch_rev="$(_get_optional_yaml_or_json_field_from_file "$in_src" '.rev')"; then
+    fetch_rev="refs/heads/$ref"
+  fi
+
+  local fetch_info_json
+  fetch_info_json="$(nix-prefetch-github --no-prefetch --rev "$fetch_rev" "$owner" "$repo")"
+
+  local rev
+  rev="$(_get_json_field_from_nix_prefetch_github_output "$fetch_info_json" '.rev')" || \
+    return 1
+  local sha256
+  sha256="$(_get_json_field_from_nix_prefetch_github_output "$fetch_info_json" '.sha256')" || \
+    return 1
+
+  # echo "rev='$rev'"
+  # echo "sha256='$sha256'"
+
+  local jq_out_expr
+  jq_out_expr='.type = $type | .owner = $owner | .repo = $repo | .ref = $ref | .rev = $rev | .sha256 = $sha256'
+
+  local updated_src_json
+  if ! updated_src_json="$(echo "{}" | jq -e \
+        --arg type "$fetcher_type" \
+        --arg owner "$owner" \
+        --arg repo "$repo" \
+        --arg ref "$ref" \
+        --arg rev "$rev" \
+        --arg sha256 "$sha256" \
+        "$jq_out_expr")"; then
     1>&2 echo "ERROR: Error creating updated source json content."
     return 1
   fi
@@ -157,16 +260,15 @@ update_nix_src_json() {
   local out_src="${2?}"
 
   local fetcher_type
-  fetcher_type="$(_get_json_field_from_file "$in_src" '.type')" \
+  fetcher_type="$(_get_yaml_or_json_field_from_file "$in_src" '.type')" \
     || return 1
 
   # echo "fetcher_type='$fetcher_type'"
-  # echo "url='$url'"
-  # echo "ref='$ref'"
-
 
   if [[ "$fetcher_type" == "builtins.fetchGit" ]]; then
     _update_nix_src_json_using_builtin_fetchgit "$in_src" "$out_src"
+  elif [[ "$fetcher_type" == "fetchFromGitHub" ]]; then
+    _update_nix_src_json_using_fetch_from_github "$in_src" "$out_src"
   else
     1>&2 echo "ERROR: Unsupported fetcher type '$fetcher_type'."
     return 1
