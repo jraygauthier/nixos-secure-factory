@@ -45,13 +45,6 @@ is_factory_install_device_type_definitions_root_dir() {
 }
 
 
-is_factory_install_repo_writable_root_dir() {
-  local root_dir=${1:-$PWD}
-  is_factory_install_repo_root_dir "$root_dir" &&
-  test -w "$root_dir"
-}
-
-
 get_device_cfg_repo_root_dir() {
   # TODO: What occurs when `PKG_NIXOS_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR`
   # does not exists? Shouldn't we take this information from `.factory-info.yaml`?
