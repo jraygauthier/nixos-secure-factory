@@ -67,6 +67,11 @@ print_title_lvlx() {
 }
 
 
+print_cmd_args() {
+  printf "%q\n" "$@" | paste -s -d' '
+}
+
+
 echo_eval() {
   echo "\$" "$@"
   eval "$@"

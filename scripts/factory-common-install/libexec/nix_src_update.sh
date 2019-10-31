@@ -10,19 +10,16 @@ _run_nix_prefetch_git() {
   local channel_url="$3"
   local channel_branch="$4"
 
-  local fetch_cmd_store
-  fetch_cmd_store=$(cat <<EOF
-nix-prefetch-git \
-  --url "$channel_url" \
-  --rev "$channel_branch" \
-  --no-deepClone
-EOF
-)
+  local prefetch_args=( \
+    "--url" "$channel_url" \
+    "--rev" "$channel_branch" \
+    "--no-deepClone" \
+  )
 
   # test -z "$prefetch_out"
-  echo "\$ $fetch_cmd_store"
+  printf "$ nix-prefetch-git %s\n" "$(print_cmd_args "${prefetch_args[@]}")"
   local prefetch_out
-  if ! prefetch_out="$(2>&1 $fetch_cmd_store)"; then
+  if ! prefetch_out="$(2>&1 nix-prefetch-git "${prefetch_args[@]}")"; then
     1>&2 echo "ERROR: Cannot fetch '$channel_url' repository content. Original error was:"
     1>&2 echo "$prefetch_out"
     return 1
@@ -190,6 +187,24 @@ _get_json_field_from_nix_prefetch_github_output() {
 }
 
 
+_get_github_rev_from_ref() {
+  local owner="${1?}"
+  local repo="${2?}"
+  local ref="${3?}"
+  local url="https://github.com/${owner}/${repo}.git"
+  local matching_ls_remote_lns
+  if ! matching_ls_remote_lns="$(\
+      git ls-remote --symref "$url" \
+        | grep -F "refs/heads/${ref}" \
+        | grep -E "refs/heads/${ref}$")"; then
+    1>&2 echo "ERROR: ${FUNCNAME[0]}: ref '$ref' not found in repository at url '$url'."
+    return 1
+  fi
+
+  echo "$matching_ls_remote_lns" | awk '{ print $1 }'
+}
+
+
 _update_nix_src_json_using_fetch_from_github() {
   local in_src="${1?}"
   local out_src="${2?}"
@@ -212,17 +227,34 @@ _update_nix_src_json_using_fetch_from_github() {
   # specified rev belong to the specified ref.
   local fetch_rev
   if ! fetch_rev="$(_get_optional_yaml_or_json_field_from_file "$in_src" '.rev')"; then
-    fetch_rev="refs/heads/$ref"
+    # Workaround for 'seppeljordan/nix-prefetch-github/issues/22' found in V2.3.1.
+    # TODO: Remove once fixed.
+    fetch_rev="$(_get_github_rev_from_ref "$owner" "$repo" "$ref")"
+    # fetch_rev="refs/heads/$ref"
   fi
 
-  local fetch_info_json
-  fetch_info_json="$(nix-prefetch-github --no-prefetch --rev "$fetch_rev" "$owner" "$repo")"
+  # echo "nix-prefetch-github version: $(nix-prefetch-github --version)"
+
+  local prefetch_args=( "--no-prefetch" "--rev" "$fetch_rev" "$owner" "$repo" )
+  printf "$ nix-prefetch-github %s\n" "$(print_cmd_args "${prefetch_args[@]}")"
+
+  local prefetch_stdout
+  if prefetch_stdout="$(nix-prefetch-github "${prefetch_args[@]}")"; then
+    true
+  else
+    # We print stdout as part of the error message. This is because of
+    # 'seppeljordan/nix-prefetch-github/issues/23'.
+    local error_code="$?"
+    printf "ERROR(%s): nix-prefetch-github failed with stdout: ''\n%s\n''\n" \
+      "$error_code" "$prefetch_stdout"
+    return 1
+  fi
 
   local rev
-  rev="$(_get_json_field_from_nix_prefetch_github_output "$fetch_info_json" '.rev')" || \
+  rev="$(_get_json_field_from_nix_prefetch_github_output "$prefetch_stdout" '.rev')" || \
     return 1
   local sha256
-  sha256="$(_get_json_field_from_nix_prefetch_github_output "$fetch_info_json" '.sha256')" || \
+  sha256="$(_get_json_field_from_nix_prefetch_github_output "$prefetch_stdout" '.sha256')" || \
     return 1
 
   # echo "rev='$rev'"
