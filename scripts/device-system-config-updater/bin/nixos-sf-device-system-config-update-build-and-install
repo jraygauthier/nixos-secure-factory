@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+secure_system_update_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-device-system-config-updater-get-libexec-dir")"
+. "$secure_system_update_libexec_dir/local_system_updater.sh"
+
+build_and_install_system_update "$@"

@@ -41,5 +41,5 @@ _run_device_cmd_as_user_w_tty_w_args() {
 
 
 update_device_system_cli() {
-  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-device-system-config-update" "$@"
+  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update" "$@"
 }
