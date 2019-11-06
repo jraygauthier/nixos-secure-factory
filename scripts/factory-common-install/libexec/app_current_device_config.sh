@@ -396,20 +396,3 @@ build_and_deploy_device_config() {
     _build_and_deploy_device_config_impl "$config_name" "${nix_build_fwd_flags[@]}"
   fi
 }
-
-
-update_device_config() {
-  # TODO: Implement.
-  local cmd
-  cmd=$(cat <<EOF
-false
-EOF
-)
-  run_cmd_as_device_root "$cmd"
-}
-
-
-update_device_os_cli() {
-  update_device_config
-  # TODO: Update secrets too.
-}
