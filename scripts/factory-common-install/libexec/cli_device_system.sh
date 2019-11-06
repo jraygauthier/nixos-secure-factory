@@ -43,3 +43,11 @@ _run_device_cmd_as_user_w_tty_w_args() {
 update_device_system_cli() {
   _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update" "$@"
 }
+
+update_device_system_now_cli() {
+  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update-now" "$@"
+}
+
+update_device_system_fetch_and_build_only() {
+  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update-fetch-and-build-system-closure-only" "$@"
+}

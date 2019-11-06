@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
+. "$common_factory_install_libexec_dir/cli_device_system.sh"
+
+update_device_system_fetch_and_build_only "$@"
