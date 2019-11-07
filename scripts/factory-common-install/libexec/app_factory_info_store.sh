@@ -4,7 +4,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
 . "$common_factory_install_libexec_dir/fields.sh"
-
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 
 get_factory_info_store_yaml_filename() {

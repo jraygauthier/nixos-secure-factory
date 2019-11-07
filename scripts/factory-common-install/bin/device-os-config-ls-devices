@@ -2,6 +2,8 @@
 set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
+
 device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
 all_dirnames="$(find "$device_cfg_repo_root_dir/device/" -mindepth 1 -maxdepth 1 | xargs -L 1 basename)"
 echo "$all_dirnames"

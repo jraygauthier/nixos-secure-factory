@@ -2,7 +2,9 @@
 set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
-device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
+
+device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"
 
 # echo "$yaml_str" > "$device_cfg_repo_root_dir/.current-device.yaml"
 

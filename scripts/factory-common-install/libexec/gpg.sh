@@ -6,7 +6,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/gpg.sh"
 . "$common_install_libexec_dir/device_secrets.sh"
-
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 get_gpg_sandbox_dir() {
   # TODO: Defaults to '~/.nixos-secure-factory/.gnupg'

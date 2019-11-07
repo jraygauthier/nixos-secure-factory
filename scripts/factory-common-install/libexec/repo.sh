@@ -2,7 +2,7 @@
 common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/vcs.sh"
-
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 update_repositories() {
   local repo_urls="$1"

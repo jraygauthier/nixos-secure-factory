@@ -2,6 +2,7 @@
 common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
 . "$device_system_update_libexec_dir/device_system_config.sh"
@@ -14,7 +15,7 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   local factory_user_id="$2"
 
   local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"
 
   local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
   local rel_ssh_dir_from_root="device-ssh/authorized"
@@ -86,7 +87,7 @@ grant_factory_ssh_access_to_production_device() {
   fi
 
   local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"
 
   _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
 

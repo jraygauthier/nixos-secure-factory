@@ -223,29 +223,29 @@ configure_vbox_vm_main_storage_aspect() {
 }
 
 
-remove_vbox_vm_shared_device_nixos_config() {
-  echo "remove_vbox_vm_shared_device_nixos_config"
-  local vm_name="${1:-${_DEFAULT_VM_NAME}}"
-  ensure_vbox_vm_exists "$vm_name"
-  local device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
-  local share_name="device_nixos_config"
-  if list_vbox_vm_shared_folders "$vm_name" | grep -q "$share_name"; then
-    VBoxManage sharedfolder remove "$vm_name" --name "$share_name"
-  fi
-}
+# remove_vbox_vm_shared_device_nixos_config() {
+#   echo "remove_vbox_vm_shared_device_nixos_config"
+#   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
+#   ensure_vbox_vm_exists "$vm_name"
+#   local shared_dir="$(get_shared_dir_from_config_file)"
+#   local share_name="device_nixos_config"
+#   if list_vbox_vm_shared_folders "$vm_name" | grep -q "$share_name"; then
+#     VBoxManage sharedfolder remove "$vm_name" --name "$share_name"
+#   fi
+# }
 
 
-configure_vbox_vm_shared_repo_device_nixos_config() {
-  echo "configure_vbox_vm_shared_repo_device_nixos_config"
-  local vm_name="${1:-${_DEFAULT_VM_NAME}}"
-  ensure_vbox_vm_exists "$vm_name"
-
-  local device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
-  local share_name="device_nixos_config"
-  remove_vbox_vm_shared_device_nixos_config "$vm_name"
-  VBoxManage sharedfolder add "$vm_name" --name "$share_name" --hostpath "$device_cfg_repo_root_dir" --automount
-  # "--transient": Can be used to mount the shared while the device is running.
-}
+# configure_vbox_vm_shared_repo_device_nixos_config() {
+#   echo "configure_vbox_vm_shared_repo_device_nixos_config"
+#   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
+#   ensure_vbox_vm_exists "$vm_name"
+#
+#   local shared_dir="$(get_shared_dir_from_config_file)"
+#   local share_name="device_nixos_config"
+#   remove_vbox_vm_shared_device_nixos_config "$vm_name"
+#   VBoxManage sharedfolder add "$vm_name" --name "$share_name" --hostpath "$shared_dir" --automount
+#   # "--transient": Can be used to mount the shared while the device is running.
+# }
 
 
 _make_nixos_sf_download_dir_if_required() {
@@ -434,7 +434,7 @@ configure_vbox_vm() {
 
   configure_vbox_vm_network_aspect_using_nat "$vm_name"
   configure_vbox_vm_main_storage_aspect "$vm_name"
-  configure_vbox_vm_shared_repo_device_nixos_config "$vm_name"
+  # configure_vbox_vm_shared_repo_device_nixos_config "$vm_name"
   configure_vbox_vm_storage_controller_ide_with_empty_drive "$vm_name"
   configure_vbox_vm_uart1_disconnected "$vm_name"
 }
@@ -466,7 +466,7 @@ destroy_vbox_vm_keeping_main_hd() {
   ensure_vbox_vm_exists "$vm_name"
 
   remove_vbox_vm_storage_controller_sata "$vm_name"
-  remove_vbox_vm_shared_device_nixos_config "$vm_name"
+  # remove_vbox_vm_shared_device_nixos_config "$vm_name"
   remove_vbox_vm_media_from_dvd_drive "$vm_name"
   unregister_vbox_vm_hd "$vm_name"
 

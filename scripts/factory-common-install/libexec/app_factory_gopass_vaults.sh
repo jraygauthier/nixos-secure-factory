@@ -7,6 +7,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/gpg.sh"
 . "$common_factory_install_libexec_dir/gopass.sh"
 . "$common_factory_install_libexec_dir/app_factory_info_store.sh"
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 
 get_gopass_device_vault_id() {

@@ -6,7 +6,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/gpg.sh"
 . "$common_factory_install_libexec_dir/git.sh"
-
+. "$common_factory_install_libexec_dir/workspace_paths.sh"
 
 # permissions
 
