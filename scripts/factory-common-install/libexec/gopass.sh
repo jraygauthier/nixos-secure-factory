@@ -23,13 +23,13 @@ get_gopass_sandbox_dir() {
   ws_dir="$(get_nixos_secure_factory_workspace_dir)"
   local default_sandbox_gopass_home_dir="$ws_dir/.gopass-home"
 
-  local gopass_home_sanbox_dir="${PKG_NIXOS_FACTORY_COMMON_INSTALL_SANDBOXED_GOPASS_HOME_DIR:-$default_sandbox_gopass_home_dir}"
+  local gopass_home_sanbox_dir="${PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_SANDBOXED_GOPASS_HOME_DIR:-$default_sandbox_gopass_home_dir}"
   echo "$gopass_home_sanbox_dir"
 }
 
 
 is_gopass_home_sandboxed() {
-  local gopass_home_sanbox_disable_value="${PKG_NIXOS_FACTORY_COMMON_INSTALL_SANDBOXED_GOPASS_HOME_DISABLE:-0}"
+  local gopass_home_sanbox_disable_value="${PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_SANDBOXED_GOPASS_HOME_DISABLE:-0}"
   # 1>&2 echo "gopass_home_sanbox_disable_value='$gopass_home_sanbox_disable_value'"
   ! test "1" == "${gopass_home_sanbox_disable_value:-0}"
 }

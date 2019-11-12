@@ -106,13 +106,20 @@ device configurations. Specific device factories are required to:
 
     2 mandatory env var should be set there:
 
-     1. `PKG_NIXOS_FACTORY_COMMON_INSTALL_DEVICE_TYPE_DEFINITIONS_DIR`
+     1. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_TYPE_FACTORY_INSTALL_DEFS_DIR`
 
-        Should points to the root of your local of `my_factory_install`.
+        Should points to the root of the factory install device type
+        definitions (e.g.: `my_factory_install/device-type`).
 
-     2. `PKG_NIXOS_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR`
+     2. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR`
 
         Should points to the root of your local of `my_device_config`.
+
+     3. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_TYPE_DEFS_DIR`
+
+        Should point to the location of the device configuration type defintions
+        dir. (e.g.: `my_device_config/device-type`).
+
 
     It is recommanded that the following helpers are provided under
     `./scripts/factory-install/bin`:

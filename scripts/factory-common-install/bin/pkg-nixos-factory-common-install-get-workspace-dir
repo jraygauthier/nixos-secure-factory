@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-if test -z ${PKG_NIXOS_FACTORY_COMMON_INSTALL_WORKSPACE_DIR+x}; then
+if test -z ${PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_WORKSPACE_DIR+x}; then
   script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
   user_home_ws_dir="$HOME/.nixos-secure-factory"
 
@@ -23,6 +23,6 @@ if test -z ${PKG_NIXOS_FACTORY_COMMON_INSTALL_WORKSPACE_DIR+x}; then
 
   default_ws_dir="$default_default_ws_dir"
 else
-  default_ws_dir="$PKG_NIXOS_FACTORY_COMMON_INSTALL_WORKSPACE_DIR"
+  default_ws_dir="$PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_WORKSPACE_DIR"
 fi
 echo "$default_ws_dir"

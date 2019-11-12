@@ -245,9 +245,9 @@ store_current_device_gpg_id() {
 
 get_required_current_device_root_dir() {
   local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)" || return 1
   local device_dirname
-  device_dirname="$(get_required_current_device_dirname)"
+  device_dirname="$(get_required_current_device_dirname)" || return 1
   local out_root_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   test -d "$out_root_dir" || \
     { 1>&2 echo "ERROR: current device root dir at \`$out_root_dir\` does not exists."; return 1; }
@@ -256,11 +256,11 @@ get_required_current_device_root_dir() {
 
 
 get_required_current_device_type_config_root_dir() {
-  local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  local device_cfg_type_defs_dir
+  device_cfg_type_defs_dir="$(get_device_cfg_type_definitions_root_dir)" || return 1
   local type
-  type="$(get_required_current_device_type)"
-  out_root_dir="$device_cfg_repo_root_dir/device-type/$type"
+  type="$(get_required_current_device_type)" || return 1
+  out_root_dir="$device_cfg_type_defs_dir/$type"
   test -d "$out_root_dir" || \
     { 1>&2 echo "ERROR: current device type config root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
@@ -268,11 +268,11 @@ get_required_current_device_type_config_root_dir() {
 
 
 get_required_current_device_type_factory_install_root_dir() {
-  local device_type_defs_root_dir
-  device_type_defs_root_dir="$(get_factory_install_device_type_definitions_root_dir)"
+  local device_type_defs_dir
+  device_type_defs_dir="$(get_factory_install_device_type_definitions_root_dir)"
   local type
-  type="$(get_required_current_device_type)"
-  out_root_dir="$device_type_defs_root_dir/device-type/$type"
+  type="$(get_required_current_device_type)" || return 1
+  out_root_dir="$device_type_defs_dir/$type"
   test -d "$out_root_dir" || \
     { 1>&2 echo "ERROR: current device type factory install root dir at \`$out_root_dir\` does not exists."; return 1; }
   echo "$out_root_dir"
@@ -304,10 +304,10 @@ update_device_json_from_current_yaml() {
 
 
 list_available_device_types() {
-  local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  local device_cfg_type_defs_dir
+  device_cfg_type_defs_dir="$(get_device_cfg_type_definitions_root_dir)" || return 1
 
-  find "$device_cfg_repo_root_dir/device-type" -mindepth 1 -maxdepth 1 | xargs -r -l1 basename
+  find "$device_cfg_type_defs_dir" -mindepth 1 -maxdepth 1 | xargs -r -l1 basename
 }
 
 
