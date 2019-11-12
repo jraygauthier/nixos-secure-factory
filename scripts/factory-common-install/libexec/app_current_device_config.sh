@@ -14,13 +14,9 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
   local device_user="$1"
   local factory_user_id="$2"
 
-  local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"
-
-  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
-  local rel_ssh_dir_from_root="device-ssh/authorized"
-  local rel_json_path_from_root="$rel_ssh_dir_from_root/per-user-authorized-keys.json"
-  local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
+  local device_ssh_authorized_dir
+  device_ssh_authorized_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
+  local json_path="$device_ssh_authorized_dir/per-user-authorized-keys.json"
 
   local rel_pub_key_path_from_json
   if rel_pub_key_path_from_json="$(
@@ -45,21 +41,21 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
 
   json_content="$(
     echo "$previous_json_content" | \
-    jq \
+    jq -S \
     --arg factory_user_id "$factory_user_id" \
     --arg device_user "$device_user" \
     'del(.[$device_user][$factory_user_id])')"
 
-  echo "Removing '$factory_user_id' factory user from '$rel_json_path_from_root'."
+  echo "Removing '$factory_user_id' factory user from '$json_path'."
   echo "echo '\$json_content' > '$json_path'"
   echo "$json_content" > "$json_path"
 
-  print_title_lvl4 "Content of '$rel_json_path_from_root'"
+  print_title_lvl4 "Content of '$json_path'"
   echo "$json_content"
 }
 
 
-deny_factory_ssh_access_to_production_device() {
+deauthorize_ssh_access_to_all_production_devices() {
   print_title_lvl2 "Denying factory user access to production devices via ssh"
 
   # All users by default.
@@ -75,7 +71,7 @@ deny_factory_ssh_access_to_production_device() {
 
 
 # shellcheck disable=2120 # Optional arguments.
-grant_factory_ssh_access_to_production_device() {
+authorize_ssh_access_to_all_production_devices() {
   print_title_lvl2 "Granting factory user access to production devices via ssh"
 
   # All users by default.
@@ -86,15 +82,11 @@ grant_factory_ssh_access_to_production_device() {
     factory_user_id="$(get_required_factory_info__user_id)"
   fi
 
-  local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"
-
   _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
 
-  local device_ssh_authorized_dir="$device_cfg_repo_root_dir/device-ssh/authorized"
-  local rel_ssh_dir_from_root="device-ssh/authorized"
-  local rel_json_path_from_root="$rel_ssh_dir_from_root/per-user-authorized-keys.json"
-  local json_path="$device_cfg_repo_root_dir/$rel_json_path_from_root"
+  local device_ssh_authorized_dir
+  device_ssh_authorized_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
+  local json_path="$device_ssh_authorized_dir/per-user-authorized-keys.json"
 
   local rel_pub_key_path_from_json
   if rel_pub_key_path_from_json="$(
@@ -116,8 +108,7 @@ grant_factory_ssh_access_to_production_device() {
   factory_pub_key_basename="$(basename "$factory_pub_key_filename")"
 
   local rel_pub_key_path_from_json="./public-keys/${factory_user_id}_${factory_pub_key_basename}"
-  local rel_pub_key_path_from_root="$rel_ssh_dir_from_root/$rel_pub_key_path_from_json"
-  local pub_key_path="$device_cfg_repo_root_dir/$rel_pub_key_path_from_root"
+  local pub_key_path="$device_ssh_authorized_dir/$rel_pub_key_path_from_json"
 
   local previous_json_content=""
   if test -f "$json_path"; then
@@ -129,34 +120,32 @@ grant_factory_ssh_access_to_production_device() {
 
   local json_content
   json_content="$(
-    echo "$previous_json_content" | jq \
+    echo "$previous_json_content" | jq -S \
     --arg factory_user_id "$factory_user_id" \
     --arg device_user "$device_user" \
     --arg rel_pub_key_path_from_json "$rel_pub_key_path_from_json" \
     '.[$device_user][$factory_user_id].public_key_file = $rel_pub_key_path_from_json')"
 
-  rel_pub_key_path_from_root="$rel_ssh_dir_from_root/$rel_pub_key_path_from_json"
-
   echo "Copying '$factory_pub_key_filename'  to '$pub_key_path'."
   echo_eval "cp -p '$factory_pub_key_filename' '$pub_key_path'"
 
   # Update the file with the new content.
-  echo "Updating '$rel_json_path_from_root' with new keys at '$rel_pub_key_path_from_root'."
+  echo "Updating '$json_path' with new keys at '$pub_key_path'."
   echo "echo '\$json_content' > '$json_path'"
   echo "$json_content" > "$json_path"
 
-  print_title_lvl3 "Content of '$rel_json_path_from_root'"
+  print_title_lvl3 "Content of '$json_path'"
   echo "$json_content"
 }
 
 
-deny_factory_ssh_access_to_production_device_cli() {
-  deny_factory_ssh_access_to_production_device "${1:-}" "${2:-}"
+deauthorize_ssh_access_to_all_production_devices_cli() {
+  deauthorize_ssh_access_to_all_production_devices "${1:-}" "${2:-}"
 }
 
 
-grant_factory_ssh_access_to_production_device_cli() {
-  grant_factory_ssh_access_to_production_device "${1:-}" "${2:-}"
+authorize_ssh_access_to_all_production_devices_cli() {
+  authorize_ssh_access_to_all_production_devices "${1:-}" "${2:-}"
 }
 
 
@@ -171,7 +160,7 @@ _build_current_device_config() {
   device_id="$(get_required_current_device_id)" || return 1
 
   local device_cfg_repo_root_dir
-  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)"
+  device_cfg_repo_root_dir="$(get_device_cfg_repo_root_dir)" || return 1
 
   local config_filename="$device_cfg_repo_root_dir/${config_name}.nix"
 
@@ -308,7 +297,8 @@ _build_and_deploy_initial_device_config_impl() {
   shift 1
 
   # Make sure current factory user has access to device via ssh.
-  grant_factory_ssh_access_to_production_device ""
+  # TODO: Limit access to only the current device.
+  authorize_ssh_access_to_all_production_devices ""
   local system_closure
   _build_current_device_config_system_closure "system_closure" "$config_name" "$@"
   mount_livenv_nixos_partition_if_required

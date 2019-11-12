@@ -2,4 +2,4 @@
 set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/app_current_device_config.sh"
-grant_factory_ssh_access_to_production_device_cli "$@"
+deauthorize_ssh_access_to_all_production_devices_cli "$@"

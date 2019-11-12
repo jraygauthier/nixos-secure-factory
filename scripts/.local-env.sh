@@ -14,6 +14,7 @@ device_cfg_repo_root_dir="$(cd "$CURRENT_REPOSITORY_SCRIPTS_DIR/../demo-nixos-co
 # device_cfg_repo_root_dir="$factory_install_repo_root_dir"
 export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR="$device_cfg_repo_root_dir"
 export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_TYPE_DEFS_DIR="$device_cfg_repo_root_dir/device-type"
+export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR="$device_cfg_repo_root_dir/device-ssh/authorized"
 
 # Should help with developping scripts.
 scripts_dir="$CURRENT_REPOSITORY_SCRIPTS_DIR"

@@ -120,6 +120,16 @@ device configurations. Specific device factories are required to:
         Should point to the location of the device configuration type defintions
         dir. (e.g.: `my_device_config/device-type`).
 
+     4. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR`
+
+        Should point to a writable location in the device configuration (e.g.:
+        `my_factory_install/device-ssh/authorized`) where the factory tools will
+        be able to create its authorization json file
+        `per-user-authorized-keys.json` and manage the authorized users're
+        public keys under the `./public-keys` subdirectory.
+
+        You configuration will then be able to exploit this information
+        to grant access to the public keys listed in the json file.
 
     It is recommanded that the following helpers are provided under
     `./scripts/factory-install/bin`:
