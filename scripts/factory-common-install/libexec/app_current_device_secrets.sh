@@ -295,6 +295,19 @@ load_device_root_user_ssh_identity() {
 }
 
 
+print_device_root_user_ssh_public_key() {
+  mount_device_secret_vaults > /dev/null
+
+  local store_key
+  store_key="$(get_rel_root_user_ssh_rsa_public_key)"
+
+  local full_store_key
+  full_store_key="$(get_gopass_device_full_store_key_for "$store_key")"
+
+  cat_gopass_device_bin_secret "$store_key"
+}
+
+
 check_device_root_user_ssh_identity() {
   print_title_lvl3 "Checking device root user ssh identity"
 
@@ -385,7 +398,8 @@ create_device_root_user_gpg_identity() {
   local user_name="root"
   local passphrase=""
 
-  local secure_dir="$(get_factory_secure_dir_impl)"
+  local secure_dir
+  secure_dir="$(get_factory_secure_dir_impl)"
   local gpg_tmp_dir="$secure_dir/gpg_device_root_user"
   rm -rf "$gpg_tmp_dir"
 
@@ -645,7 +659,6 @@ copy_device_ssh_identity_to_clipboard_cli() {
     | DISPLAY="${DISPLAY:-":0"}" xclip -selection clipboard
   echo "Device public key at '$full_store_key' has been placed in your clipboard. Paste it where you need."
 }
-
 
 deauthorize_user_from_device_vault_cli() {
   deauthorize_gopass_cdevice_from_device_private_substore "$@"
