@@ -15,6 +15,7 @@
 , sshfs-fuse
 , usermount
 , bashInteractive
+, bc
 }:
 
 stdenv.mkDerivation rec {
@@ -42,6 +43,7 @@ stdenv.mkDerivation rec {
     # nix
     # nixos-install
     # nixos-generate-config
+    bc
   ];
 
   postPatch = ''
