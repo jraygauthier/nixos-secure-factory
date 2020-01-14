@@ -496,68 +496,6 @@ select_unique_factory_user_gopass_gpg_id() {
 }
 
 
-import_gpg_public_key_files() {
-  declare -A pks_aa=()
-  local pk
-  for pk in "$@"; do
-    local gpg_id
-    gpg_id="$(list_gpg_id_from_armored_pub_key_stdin < "$pk")"
-    pks_aa+=( ["$gpg_id"]="$pk" )
-  done
-
-  for pk_gpg_id in "${!pks_aa[@]}"; do
-    local pk="${pks_aa["$pk_gpg_id"]}"
-    local gpg_id_w_email
-    gpg_id_w_email="$(list_gpg_id_w_email_from_armored_pub_key_stdin < "$pk")"
-    echo "Importing '$gpg_id_w_email' into factory keyring."
-    printf "$ factory-gpg --import '%s'\n" "$pk"
-    factory-gpg --import "$pk"
-  done
-}
-
-
-list_gpg_id_w_email_from_key_files() {
-  declare -A pks_aa=()
-  local pk
-  for pk in "$@"; do
-    local gpg_id
-    gpg_id="$(list_gpg_id_from_armored_pub_key_stdin < "$pk")"
-    pks_aa+=( ["$gpg_id"]="$pk" )
-  done
-
-  for pk_gpg_id in "${!pks_aa[@]}"; do
-    local pk="${pks_aa["$pk_gpg_id"]}"
-    local gpg_id_w_email
-    gpg_id_w_email="$(list_gpg_id_w_email_from_armored_pub_key_stdin < "$pk")"
-    echo "$gpg_id_w_email"
-  done
-}
-
-
-_list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files() {
-  local auth_gpg_ids="$1"
-  local pubkey_files="$2"
-
-  declare -A auth_gpg_ids_a=()
-  while read -r auth_id; do
-    auth_gpg_ids_a+=( ["$auth_id"]="null" )
-  done < <(echo "$auth_gpg_ids")
-
-  local pubkey_bn
-  local previous_pubkey
-  while read -r pubkey; do
-    pubkey_bn="$(basename "$pubkey")"
-    previous_pubkey="${auth_gpg_ids_a["$pubkey_bn"]-undefined}"
-    if [[ "null" == "$previous_pubkey" ]] \
-        || [[ "${#pubkey}" -lt "${#previous_pubkey}" ]]; then
-      auth_gpg_ids_a["$pubkey_bn"]="$pubkey"
-    fi
-  done < <(echo "$pubkey_files")
-
-  printf "%s\n" "${auth_gpg_ids_a[@]}"
-}
-
-
 list_all_peers_pub_key_files_from_gopass_vaults() {
   local device_secrets_repo_root
   device_secrets_repo_root="$(get_gopass_device_vault_repo_dir)"
@@ -609,64 +547,35 @@ import_all_authorized_peers_public_key_files_from_gopass_vaults() {
 list_factory_user_peers_pub_keys_from_gopass_vaults() {
   # local device_secrets_repo_root_pubkeys_dir
   # device_secrets_repo_root_pubkeys_dir="$(get_gopass_device_vault_repo_dir)/.public-keys"
-
-  local factory_secrets_repo_root_pubkeys_dir
-  factory_secrets_repo_root_pubkeys_dir="$(get_gopass_factory_only_vault_repo_dir)/.public-keys"
-
-  if ! [[ -d "$factory_secrets_repo_root_pubkeys_dir" ]]; then
-    1>&2 echo "ERROR: list_factory_user_peers_pub_keys_from_gopass_vaults:"
-    1>&2 echo " -> Cannot find '$factory_secrets_repo_root_pubkeys_dir'"
-    return 1
-  fi
-
-  # "$device_secrets_repo_root_pubkeys_dir" \
-  local pubkey_dirs=( \
-    "$factory_secrets_repo_root_pubkeys_dir" )
-
-  [[ "${#pubkey_dirs[@]}" -eq 0 ]] || \
-    find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1
+  local vault_dir
+  vault_dir="$(get_gopass_factory_only_vault_repo_dir)" || return 1
+  list_gopass_vault_pub_keys_files_at "$vault_dir" "."
 }
 
 
 list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults() {
-  local factory_secrets_repo_root_gpg_id_file
-  factory_secrets_repo_root_gpg_id_file="$(get_gopass_factory_only_vault_repo_dir)/.gpg-id"
-
-  if ! [[ -f "$factory_secrets_repo_root_gpg_id_file" ]]; then
-    1>&2 echo "ERROR: list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults:"
-    1>&2 echo " -> Cannot find '$factory_secrets_repo_root_gpg_id_file'"
-    return 1
-  fi
-
-  (! [[ -f "$factory_secrets_repo_root_gpg_id_file" ]] \
-      || cat "$factory_secrets_repo_root_gpg_id_file") \
-    | sort | uniq
+  local vault_dir
+  vault_dir="$(get_gopass_factory_only_vault_repo_dir)" || return 1
+  list_gopass_vault_gpg_ids_at "$vault_dir" "."
 }
 
 
 list_authorized_factory_user_peers_pub_keys_from_gopass_vaults() {
-  local auth_gpg_ids
-  auth_gpg_ids="$(list_authorized_factory_user_peers_gpg_ids_from_gopass_vaults)" || return 1
-  local pubkey_files
-  pubkey_files="$(list_factory_user_peers_pub_keys_from_gopass_vaults)" || return 1
-  _list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files \
-    "$auth_gpg_ids" "$pubkey_files"
+  local vault_dir
+  vault_dir="$(get_gopass_factory_only_vault_repo_dir)" || return 1
+  list_gopass_vault_authorized_pub_keys_at "$vault_dir" "."
 }
 
 
 import_authorized_factory_user_peers_public_keys_from_gopass_vaults() {
-  local peers_gpg_pub_keys
-  mapfile -t peers_gpg_pub_keys < <(list_authorized_factory_user_peers_pub_keys_from_gopass_vaults) \
-    || return 1
-
-  import_gpg_public_key_files "${peers_gpg_pub_keys[@]}"
+  local vault_dir
+  vault_dir="$(get_gopass_factory_only_vault_repo_dir)" || return 1
+  import_gopass_vault_authorized_pub_keys_at "$vault_dir" "."
 }
 
 
 list_authorized_factory_user_peers_gpg_ids_w_email_from_gopass_vaults() {
-  local peers_gpg_pub_keys
-  mapfile -t peers_gpg_pub_keys < <(list_authorized_factory_user_peers_pub_keys_from_gopass_vaults) \
-    || return 1
-
-  list_gpg_id_w_email_from_key_files "${peers_gpg_pub_keys[@]}"
+  local vault_dir
+  vault_dir="$(get_gopass_factory_only_vault_repo_dir)" || return 1
+  list_gopass_vault_authorized_gpg_ids_w_email_at "$vault_dir" "."
 }

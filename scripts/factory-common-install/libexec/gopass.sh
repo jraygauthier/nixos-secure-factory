@@ -88,3 +88,136 @@ configure_gopass_root_store() {
   run_sandboxed_gopass config --store "$store_id" autosync false
   run_sandboxed_gopass config --store "$store_id" autoimport false
 }
+
+
+_list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files() {
+  local auth_gpg_ids="$1"
+  local pubkey_files="$2"
+
+  declare -A auth_gpg_ids_a=()
+  while read -r auth_id; do
+    auth_gpg_ids_a+=( ["$auth_id"]="null" )
+  done < <(echo "$auth_gpg_ids")
+
+  # First encountered public key is used. Subsequent
+  # occurences are diregarded.
+  local pubkey_bn
+  local previous_pubkey
+  while read -r pubkey; do
+    pubkey_bn="$(basename "$pubkey")"
+    previous_pubkey="${auth_gpg_ids_a["$pubkey_bn"]-undefined}"
+    if [[ "null" == "$previous_pubkey" ]] \
+        || [[ "${#pubkey}" -lt "${#previous_pubkey}" ]]; then
+      auth_gpg_ids_a["$pubkey_bn"]="$pubkey"
+    fi
+  done < <(echo "$pubkey_files")
+
+  printf "%s\n" "${auth_gpg_ids_a[@]}"
+}
+
+
+list_gopass_vault_pub_keys_files_at() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  local pubkeys_dir
+  pubkeys_dir="$vault_dir/$rel_dir_to_substore/.public-keys"
+
+  if ! pubkeys_dir="$(realpath "$pubkeys_dir")" \
+      || ! [[ -d "$pubkeys_dir" ]]; then
+    1>&2 echo "ERROR: list_gopass_vault_pub_keys_files_at:"
+    1>&2 echo " -> Cannot find '$pubkeys_dir'"
+    return 1
+  fi
+
+  # "$device_secrets_repo_root_pubkeys_dir" \
+  local pubkey_dirs=( \
+    "$pubkeys_dir" )
+
+  [[ "${#pubkey_dirs[@]}" -eq 0 ]] || \
+    find "${pubkey_dirs[@]}" -mindepth 1 -maxdepth 1
+}
+
+
+list_gopass_vault_pub_keys_files_at_w_parents() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  list_gopass_vault_pub_keys_files_at \
+    "$vault_dir" "$rel_dir_to_substore"
+
+  local parent_dirs=()
+  local parent_dir
+  parent_dir="$rel_dir_to_substore"
+  while ! [[ "." == "$parent_dir" ]] && ! [[ "" == "$parent_dir" ]]; do
+    parent_dir="$(dirname "$rel_dir_to_substore")"
+    parent_dirs=( "${parent_dirs[@]}" "$parent_dir")
+  done
+
+  for parent_dir in "${parent_dirs[@]}"; do
+    list_gopass_vault_pub_keys_files_at \
+      "$vault_dir" "$parent_dir" || return 1
+  done
+}
+
+
+list_gopass_vault_gpg_ids_at() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  local gpg_id_file
+  gpg_id_file="$vault_dir/$rel_dir_to_substore/.gpg-id"
+
+  if ! gpg_id_file="$(realpath "$gpg_id_file")" \
+      || ! [[ -f "$gpg_id_file" ]]; then
+    1>&2 echo "ERROR: list_gopass_vault_gpg_ids_at:"
+    1>&2 echo " -> Cannot find '$gpg_id_file'"
+    return 1
+  fi
+
+  (! [[ -f "$gpg_id_file" ]] \
+      || cat "$gpg_id_file") \
+    | sort | uniq
+}
+
+
+list_gopass_vault_authorized_pub_keys_at() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  local auth_gpg_ids
+  auth_gpg_ids="$(list_gopass_vault_gpg_ids_at \
+    "$vault_dir" "$rel_dir_to_substore")" || return 1
+  local pubkey_files
+  pubkey_files="$(list_gopass_vault_pub_keys_files_at_w_parents \
+    "$vault_dir" "$rel_dir_to_substore")" || return 1
+  _list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files \
+    "$auth_gpg_ids" "$pubkey_files"
+}
+
+
+import_gopass_vault_authorized_pub_keys_at() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  local peers_gpg_pub_keys
+  mapfile -t peers_gpg_pub_keys < <(list_gopass_vault_authorized_pub_keys_at \
+      "$vault_dir" "$rel_dir_to_substore") \
+    || return 1
+
+  import_gpg_public_key_files "${peers_gpg_pub_keys[@]}"
+}
+
+
+list_gopass_vault_authorized_gpg_ids_w_email_at() {
+  local vault_dir="${1?}"
+  local rel_dir_to_substore="${2?}"
+
+  local peers_gpg_pub_keys
+  mapfile -t peers_gpg_pub_keys < <(list_gopass_vault_authorized_pub_keys_at \
+      "$vault_dir" "$rel_dir_to_substore") \
+    || return 1
+
+  list_gpg_id_w_email_from_key_files "${peers_gpg_pub_keys[@]}"
+}
+

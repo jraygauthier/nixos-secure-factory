@@ -884,3 +884,41 @@ get_unique_gpg_id_from_armored_pub_key_stdin() {
 import_from_armored_pub_key_stdin() {
   cat - | factory-gpg --import
 }
+
+
+list_gpg_id_w_email_from_key_files() {
+  declare -A pks_aa=()
+  local pk
+  for pk in "$@"; do
+    local gpg_id
+    gpg_id="$(list_gpg_id_from_armored_pub_key_stdin < "$pk")"
+    pks_aa+=( ["$gpg_id"]="$pk" )
+  done
+
+  for pk_gpg_id in "${!pks_aa[@]}"; do
+    local pk="${pks_aa["$pk_gpg_id"]}"
+    local gpg_id_w_email
+    gpg_id_w_email="$(list_gpg_id_w_email_from_armored_pub_key_stdin < "$pk")"
+    echo "$gpg_id_w_email"
+  done
+}
+
+
+import_gpg_public_key_files() {
+  declare -A pks_aa=()
+  local pk
+  for pk in "$@"; do
+    local gpg_id
+    gpg_id="$(list_gpg_id_from_armored_pub_key_stdin < "$pk")"
+    pks_aa+=( ["$gpg_id"]="$pk" )
+  done
+
+  for pk_gpg_id in "${!pks_aa[@]}"; do
+    local pk="${pks_aa["$pk_gpg_id"]}"
+    local gpg_id_w_email
+    gpg_id_w_email="$(list_gpg_id_w_email_from_armored_pub_key_stdin < "$pk")"
+    echo "Importing '$gpg_id_w_email' into factory keyring."
+    printf "$ factory-gpg --import '%s'\n" "$pk"
+    factory-gpg --import "$pk"
+  done
+}
