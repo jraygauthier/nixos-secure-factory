@@ -1,0 +1,10 @@
+{
+  "identifier": "demo-virtual-box-vm",
+  "type": "virtual-box-vm",
+  "backend": "virtual_box",
+  "hostname": "auto",
+  "ssh-port": "auto",
+  "uart-pty": "auto",
+  "email": "demo-virtual-box-vm@gmail.com",
+  "gpg-id": "demo-virtual-box-vm@gmail.com"
+}

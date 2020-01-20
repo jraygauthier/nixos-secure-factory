@@ -23,6 +23,14 @@ get_email_address_regexpr() {
 }
 
 
+get_email_domain_regexpr() {
+  echo "^[a-zA-Z0-9\.$(get_latin_accented_chars)_-]+$"
+}
+
+get_file_basename_regexpr() {
+  echo "^[a-zA-Z0-9\._-]+$"
+}
+
 get_gpg_id_or_email_regexpr() {
   get_email_address_regexpr
 }

@@ -212,6 +212,30 @@ prompt_for_factory_info_mandatory__user_gpg_default_id() {
 }
 
 
+prompt_for_factory_info_mandatory__device_defaults_email_domain() {
+  local value_re
+  value_re="$(get_email_domain_regexpr)"
+  echo -e "\"device_defaults_email_domain\" \u2208 \`${value_re}\`: A default email domain used to build emails from device ids."
+  prompt_for_mandatory_parameter_loop "$1" "device_defaults_email_domain" "$value_re"
+}
+
+
+prompt_for_factory_info_mandatory__gopass_factory_only_vault_repo_name() {
+  local value_re
+  value_re="$(get_file_basename_regexpr)"
+  echo -e "\"gopass_factory_only_vault_repo_name\" \u2208 \`${value_re}\`: The name of the gopass repository (in the workspace) where factory only secrets will be stored."
+  prompt_for_mandatory_parameter_loop "$1" "gopass_factory_only_vault_repo_name" "$value_re"
+}
+
+
+prompt_for_factory_info_mandatory__gopass_default_device_vault_repo_name() {
+  local value_re
+  value_re="$(get_file_basename_regexpr)"
+  echo -e "\"gopass_default_device_vault_repo_name\" \u2208 \`${value_re}\`: The name of the default gopass repository (in the workspace) where device secrets will be stored."
+  prompt_for_mandatory_parameter_loop "$1" "gopass_default_device_vault_repo_name" "$value_re"
+}
+
+
 prompt_for_factory_info_mandatory__x() {
   local out_var_name="$1"
   local param="$2"
@@ -266,6 +290,9 @@ user_id
 user_full_name
 user_email
 user_gpg_default_id
+device_defaults_email_domain
+gopass_factory_only_vault_repo_name
+gopass_default_device_vault_repo_name
 EOF
 )
 
@@ -273,11 +300,21 @@ EOF
     prompt_for_factory_info_mandatory__x "$param" "$param"
   done
 
+  local gopass_factory_only_vault_id
+  gopass_factory_only_vault_id="$(basename "$gopass_factory_only_vault_repo_name")"
+  local gopass_default_device_vault_id
+  gopass_default_device_vault_id="$(basename "$gopass_default_device_vault_repo_name")"
+
   local _JQ_FILTER=$(cat <<EOF
 .user.id = \$user_id | \
 .user."full-name" = \$user_full_name | \
 .user.email = \$user_email | \
-.user.gpg."default-id" = \$user_gpg_default_id
+.user.gpg."default-id" = \$user_gpg_default_id | \
+.gopass."factory-only-vault".id = \$gopass_factory_only_vault_id | \
+.gopass."factory-only-vault"."repo-name" = \$gopass_factory_only_vault_repo_name | \
+.gopass."default-device-vault".id = \$gopass_default_device_vault_id | \
+.gopass."default-device-vault"."repo-name" = \$gopass_default_device_vault_repo_name | \
+."device-defaults"."email-domain" = \$device_defaults_email_domain
 EOF
 )
 
@@ -287,6 +324,11 @@ EOF
     --arg user_full_name "$user_full_name" \
     --arg user_email "$user_email" \
     --arg user_gpg_default_id "$user_gpg_default_id" \
+    --arg gopass_factory_only_vault_id "$gopass_factory_only_vault_id" \
+    --arg gopass_factory_only_vault_repo_name "$gopass_factory_only_vault_repo_name" \
+    --arg gopass_default_device_vault_id "$gopass_default_device_vault_id" \
+    --arg gopass_default_device_vault_repo_name "$gopass_default_device_vault_repo_name" \
+    --arg device_defaults_email_domain "$device_defaults_email_domain" \
     "$_JQ_FILTER")
 
   printf -- "\n"
