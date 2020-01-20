@@ -32,7 +32,7 @@ device configurations. Specific device factories are required to:
 
         Note that it is possible but not advised for production setups to embbed
         the device configuration as part of `my_factory_install`. This is the
-        approach taking for `./demo-nixos-config`.
+        approach taken for `./demo-nixos-config`.
 
      3. `my_factory_secrets`: A private *git* repository containing the secrets
         that only the factory technicians / developers should have access to.

@@ -4,6 +4,7 @@
 /scripts/device-common-install/result
 /scripts/factory-install/result
 /device-type/*/scripts/install/result
+/demo-nixos-config/result
 **/__pycache__/
 **/.mypy_cache/
 **/.pytest_cache/

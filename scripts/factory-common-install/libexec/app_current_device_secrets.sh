@@ -551,6 +551,7 @@ check_device_secrets_prim() {
 
 import_missing_gpg_keys_from_gopass_vaults() {
   print_title_lvl2 "Importing missing gpg keys from the gopass vaults"
+  mount_device_secret_vaults
   import_authorized_gopass_cdevice_substores_gpg_keys_to_factory_keyring
 }
 
