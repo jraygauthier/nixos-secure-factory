@@ -126,6 +126,11 @@ authorize_ssh_access_to_all_production_devices() {
     --arg rel_pub_key_path_from_json "$rel_pub_key_path_from_json" \
     '.[$device_user][$factory_user_id].public_key_file = $rel_pub_key_path_from_json')"
 
+  local pub_keys_dir
+  pub_keys_dir="$(dirname "$pub_key_path")"
+
+  echo "Creating public keys directory at '$pub_keys_dir'"
+  mkdir -p "$pub_keys_dir"
   echo "Copying '$factory_pub_key_filename'  to '$pub_key_path'."
   echo_eval "cp -p '$factory_pub_key_filename' '$pub_key_path'"
 

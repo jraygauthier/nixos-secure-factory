@@ -1,0 +1,10 @@
+{
+  "identifier": "another-demo-virtual-box-vm",
+  "type": "virtual-box-vm",
+  "backend": "virtual_box",
+  "hostname": "auto",
+  "ssh-port": "auto",
+  "uart-pty": "auto",
+  "email": "another-demo-virtual-box-vm@gmail.com",
+  "gpg-id": "BBC8F046A7E47B2C9D325D30EAFCBBEA44A1FADC"
+}
