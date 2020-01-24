@@ -268,8 +268,8 @@ _get_nixos_sf_download_dir() {
 
 read_livecd_iso_filename_from_default_url() {
   local out_varname="$1"
-  local DEFAULT_LIVECD_ISO_URL="https://releases.nixos.org/nixos/19.03/nixos-19.03.173077.28e64db237d/nixos-minimal-19.03.173077.28e64db237d-x86_64-linux.iso"
-  local DEFAULT_LIVECD_ISO_URL_HASH="12g2znf2g5x8bcfxf50lnvjjbvmn8sl4ywf2wycfq2nykpqcp69w"
+  local DEFAULT_LIVECD_ISO_URL="https://releases.nixos.org/nixos/19.09/nixos-19.09.1936.e6391b4389e/nixos-minimal-19.09.1936.e6391b4389e-x86_64-linux.iso"
+  local DEFAULT_LIVECD_ISO_URL_HASH="0byihd7l0fdqxhfxs0rsfa1k91lvvg6fdbv6cry39gl96izixbnl"
   echo "read_livecd_iso_filename_from_default_url: <${DEFAULT_LIVECD_ISO_URL}>"
 
   local nsf_download_dir
@@ -287,7 +287,7 @@ read_livecd_iso_filename_from_default_url() {
   # TODO: Consider pinning the store path by creating a symlink at the root of this repo (
   #       registered as a root of the Nix garbage collector same as "result" when building).
   #       We might event want to put all this stuff to a ".nix" file and built it
-  #       with --out-link "nixos-minimal-19.03-x86_64-linux.iso". This would allow us to instead
+  #       with --out-link "nixos-minimal-my-version-my-platform-linux.iso". This would allow us to instead
   #       build it to a dir which would allow us to see a shorter name in vbox ui.
   #       Alternativement, to might even be directly retrieved as a dependancy of this project
   #       and our scritps wrapped with it ("wrapProgram"). Note that this last solution
