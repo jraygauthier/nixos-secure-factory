@@ -25,6 +25,21 @@
 , tightvnc
 }:
 
+let
+
+bashCompletionLib = import ../../.nix/lib/bash-completions.nix {
+  inherit lib;
+};
+
+pythonWPackackages = python3.withPackages (pp: with pp; [
+  pytest
+  ipython
+  click
+  pyyaml
+]);
+
+in
+
 stdenv.mkDerivation rec {
   version = "0.0.0";
   pname = "nixos-factory-common-install";
@@ -32,7 +47,12 @@ stdenv.mkDerivation rec {
 
   src = ./.;
 
-  nativeBuildInputs = [ makeWrapper ];
+  nativeBuildInputs = [
+    makeWrapper
+    # Required as we have python shebangs that needs to be patched
+    # with a python that has the proper libraries.
+    pythonWPackackages
+  ];
 
   propagatedUserEnvPkgs = [
     nixos-common-install-scripts
@@ -65,11 +85,7 @@ stdenv.mkDerivation rec {
     screen
     socat
     picocom
-    (python3.withPackages (pp: with pp; [
-        pytest
-        ipython
-      ])
-    )
+    pythonWPackackages
 
     # TODO: Consider this. Not certain if nix would be capable
     # of introducing this dependency on non nix system as it
@@ -115,10 +131,12 @@ stdenv.mkDerivation rec {
         --prefix PYTHONPATH : "$out/share/${pname}/python-lib" \
         --prefix PYTHONPATH : "${pythonPathDeps}"
     done
-  '';
 
-  preFixup = ''
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
+
+    ${bashCompletionLib.installClickExesBashCompletion [
+      "device-state-checkout"
+    ]}
   '';
 
   shellHook = ''
@@ -133,4 +151,5 @@ stdenv.mkDerivation rec {
     '';
   };
 
+  passthru.pname = pname;
 }

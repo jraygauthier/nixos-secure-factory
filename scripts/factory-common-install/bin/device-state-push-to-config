@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
-. "$common_factory_install_libexec_dir/app_current_device_store.sh"
+. "$common_factory_install_libexec_dir/cli_device_state.sh"
 update_device_json_from_current_yaml
 
 

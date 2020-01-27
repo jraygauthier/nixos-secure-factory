@@ -2,7 +2,7 @@
 , makeWrapper
 , coreutils
 , gnugrep
-, nixos-factory-common-install-scripts
+, nixos-factory-common-install
 , mr
 , yq
 , python3
@@ -20,7 +20,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ makeWrapper ];
 
   propagatedUserEnvPkgs = [
-    nixos-factory-common-install-scripts
+    nixos-factory-common-install
   ];
 
   propagatedBuildInputs = [
@@ -28,7 +28,7 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    nixos-factory-common-install-scripts
+    nixos-factory-common-install
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.
@@ -77,4 +77,5 @@ stdenv.mkDerivation rec {
     '';
   };
 
+  passthru.pname = pname;
 }
