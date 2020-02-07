@@ -175,6 +175,14 @@ device configurations. Specific device factories are required to:
     `hw-config-partition-and-format` is simply the customized way a *device* of
     a particular *device type* gets partitioned and formated.
 
+Todo
+----
+
+A listing of some things that can be done to improve this project, including
+some ideas:
+
+[TODO.md](./TODO.md)
+
 
 [gopass]: https://github.com/gopasspw/gopass
 [nixos]: https://nixos.org/
