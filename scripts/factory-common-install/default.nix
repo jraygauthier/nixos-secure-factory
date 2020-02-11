@@ -27,7 +27,7 @@
 
 let
 
-bashCompletionLib = import ../../.nix/lib/bash-completions.nix {
+bashCompletionLib = import ../../lib/bash-completions.nix {
   inherit lib;
 };
 

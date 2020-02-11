@@ -1,5 +1,5 @@
 {
-  # Where to find the per src channels (e.g.: ../pkgs/pinned-src).
+  # Where to find the per src channels (e.g.: ../pinned-src).
   pinnedSrcsDir
   # Where to find the dependencies / other local repos.
   # Usually alongside this repository. Default to null.

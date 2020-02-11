@@ -4,7 +4,7 @@ with nixpkgs;
 
 let
   release = import ./release.nix { inherit nixpkgs; };
-  envLib = import ../../.nix/lib/env.nix {
+  envLib = import ../../lib/env.nix {
     inherit lib bash-completion;
   };
   env = buildEnv {
