@@ -1,0 +1,8 @@
+{
+  "type": "fetchFromGitHub",
+  "owner": "NixOS",
+  "repo": "nixpkgs",
+  "ref": "release-19.09",
+  "rev": "2633e93f3ec2315ed548db75bc6af8cf418563e5",
+  "sha256": "01fw307f3zj2rk82xdsx0wahylv61104ap00bn2yqldh63800ciw"
+}

@@ -1,0 +1,6 @@
+channel:
+  system-config:
+    ref: master
+    type: git
+    url: https://github.com/jraygauthier/nixos-secure-factory.git
+    sub-dir: demo-nixos-config

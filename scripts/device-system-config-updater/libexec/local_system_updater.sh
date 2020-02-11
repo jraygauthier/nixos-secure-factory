@@ -337,6 +337,7 @@ _build_system_config_dir_update() {
   build_nix_search_path_args_from_system_cfg_dir "nix_build_args" "$system_config_dir_inner_0"
 
   nix_build_args+=("--argstr" "device_identifier" "$device_id")
+  # TODO: No longer needed. Deprecated. Remove at some point.
   nix_build_args+=("--argstr" "device_system_config_src_dir" "$system_config_src_dir_inner_1")
   nix_build_args+=("--argstr" "device_system_config_dir" "$system_config_dir_inner_0")
 

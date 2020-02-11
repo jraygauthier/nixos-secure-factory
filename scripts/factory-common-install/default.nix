@@ -5,6 +5,7 @@
 , gnugrep
 , nixos-common-install-scripts
 , nixos-device-system-config
+, nixos-sf-device-system-config-updater
 , openssh
 , yq
 , jq
@@ -97,6 +98,8 @@ stdenv.mkDerivation rec {
 
     nix-prefetch-git
     nix-prefetch-github
+
+    nixos-sf-device-system-config-updater
   ];
 
   postPatch = ''
