@@ -8,20 +8,24 @@
   # A filter allowing custom removal of local src files.
   # Identity filter by default.
 , localSrcFilter ? pname: localSrc: pinnedSrc: localSrc
-, nixpkgs ? import <nixpkgs> {}
+  # Optional package set in case the pinned channel helpers
+  # requires some dependencies. By default / for most uses,
+  # it shouldn't.
+, nixpkgs ? null
 }:
 
 let
-  pinnedPkgs = nixpkgs;
-  lib = pinnedPkgs.lib;
+  pkgs = if null == nixpkgs then {} else nixpkgs;
+
+  optionalAttrs = cond: as: if cond then as else {};
 
   callFnWith = autoArgs: fn: args:
     let
-      f = if lib.isFunction fn then fn else (import fn);
-      auto = builtins.intersectAttrs (lib.functionArgs f) autoArgs;
+      f = if builtins.isFunction fn then fn else (import fn);
+      auto = builtins.intersectAttrs (builtins.functionArgs f) autoArgs;
     in (f (auto // args));
 
-  callFn = callFnWith pinnedPkgs;
+  callFn = callFnWith pkgs;
 
   getPinnedSrc = pname:
       let
@@ -31,7 +35,7 @@ in
 
 {
   inherit getPinnedSrc;
-} // lib.attrsets.optionalAttrs (workspaceDir != null) rec {
+} // optionalAttrs (workspaceDir != null) rec {
   /*
     The following are only available when a workspace directory is specified.
     Basically, `getLocalOrPinnedSrc` allow one to retrieve the a local
