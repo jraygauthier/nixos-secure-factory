@@ -12,8 +12,7 @@ let
         device configuration using 'device-os-config-ssh-authorize'.
       '';
     in
-    assert builtins.trace errMsg
-           builtins.pathExists perUserAuthKeysJsonFile;
+    assert builtins.pathExists perUserAuthKeysJsonFile || builtins.trace errMsg true;
     builtins.fromJSON (builtins.readFile perUserAuthKeysJsonFile);
 
   allUsersAuthKeyFiles = getUserKeyFileFromPerUserAuthKeys "" perUserAuthKeys;

@@ -1,10 +1,7 @@
-{ device_identifier ? null # TODO: Deprecated. Remove.
-, deviceIdentifier ? device_identifier # TODO: Make mandatory once above removed.
+{ deviceIdentifier
 , extraNixSearchPath ? {}
 , workspaceDir ? null
 }:
-
-assert null != deviceIdentifier;
 
 let
   libSrc = import ./lib/src.nix { inherit workspaceDir; };
