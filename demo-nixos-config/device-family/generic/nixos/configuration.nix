@@ -4,7 +4,17 @@ let
   sshAuthLib = import ../../../lib/ssh-auth.nix { inherit lib; };
   inherit (sshAuthLib) getUserKeyFileFromPerUserAuthKeys;
   perUserAuthKeysJsonFile = ../../../device-ssh/authorized/per-user-authorized-keys.json;
-  perUserAuthKeys = builtins.fromJSON (builtins.readFile perUserAuthKeysJsonFile);
+  perUserAuthKeys =
+    let
+      errMsg = ''
+        Missing '${builtins.toString perUserAuthKeysJsonFile}' file.
+        Please authorize at least one user access to the
+        device configuration using 'device-os-config-ssh-authorize'.
+      '';
+    in
+    assert builtins.trace errMsg
+           builtins.pathExists perUserAuthKeysJsonFile;
+    builtins.fromJSON (builtins.readFile perUserAuthKeysJsonFile);
 
   allUsersAuthKeyFiles = getUserKeyFileFromPerUserAuthKeys "" perUserAuthKeys;
   rootAuthKeyFiles = allUsersAuthKeyFiles ++ getUserKeyFileFromPerUserAuthKeys "root" perUserAuthKeys;

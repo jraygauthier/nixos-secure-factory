@@ -2,9 +2,9 @@
 , lib
 , nix-gitignore
 , writeTextFile
-, device_identifier
-, extra_nix_search_path
-, device_info_json_file
+, deviceIdentifier
+, extraNixSearchPath
+, deviceInfoJsonPath
 , nixpkgs_src
 , nixpkgs
 , nixos-secure-factory
@@ -13,16 +13,16 @@
 let
   # Use the provided json file if available. Otherwise, fallback on
   # the internally kept file (most likely a test / developer device).
-  deviceInfoJson = if device_info_json_file != null
-    then device_info_json_file
-    else ./. + "/device/${device_identifier}/device.json";
+  deviceInfoJson = if deviceInfoJsonPath != null
+    then deviceInfoJsonPath
+    else ./. + "/device/${deviceIdentifier}/device.json";
   deviceInfo = builtins.fromJSON (builtins.readFile deviceInfoJson);
   deviceType = deviceInfo.type;
   deviceIdentifier = deviceInfo.identifier;
 
   nixos_src = nixpkgs_src;
 
-  nixSearchPath = extra_nix_search_path // {
+  nixSearchPath = extraNixSearchPath // {
     nixpkgs = nixpkgs_src;
     nixos = nixos_src;
     inherit nixos-secure-factory;

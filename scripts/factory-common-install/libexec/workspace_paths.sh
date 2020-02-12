@@ -115,9 +115,32 @@ get_device_cfg_ssh_auth_root_dir() {
 }
 
 
+_is_path_writable() {
+  local path="${1?}"
+  if [[ -e "$path" ]]; then
+    [[ -w "$path" ]]
+    return "$?"
+  fi
+
+  # If it does not exist, we attempt to recursively find
+  # if the first found existing parent location is writable.
+  local rp
+  rp="$(realpath -m "$path")"
+  local pp
+  pp="$(dirname "$rp")"
+  if [[ "." == "$pp" ]]; then
+    _is_path_writable "$(pwd)"
+  elif [[ "${#pp}" -gt 1 ]]; then
+    _is_path_writable "$pp"
+  else
+    false
+  fi
+}
+
+
 is_writable_device_cfg_ssh_auth_root_dir() {
-  is_device_cfg_ssh_auth_root_dir "$root_dir" && \
-  test -w "$root_dir"
+  is_device_cfg_ssh_auth_root_dir "$root_dir" \
+    && _is_path_writable "$root_dir"
 }
 
 
@@ -125,7 +148,7 @@ get_writable_device_cfg_ssh_auth_root_dir() {
   local root_dir
   root_dir="$(get_device_cfg_ssh_auth_root_dir)"
   # 1>&2 echo "root_dir=$root_dir"
-  if ! is_writable_device_cfg_ssh_auth_root_dir "$root_dir"; then
+  if  ! is_writable_device_cfg_ssh_auth_root_dir "$root_dir"; then
     1>&2 printf -- "ERROR: Env var'PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR' "
     1>&2 printf -- "should be set to point to a writable version of the device config ssh "
     1>&2 printf -- "authorization directory\n"

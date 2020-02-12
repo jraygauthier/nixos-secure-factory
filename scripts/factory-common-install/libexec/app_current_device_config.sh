@@ -48,6 +48,7 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
 
   echo "Removing '$factory_user_id' factory user from '$json_path'."
   echo "echo '\$json_content' > '$json_path'"
+  mkdir -p "$device_ssh_authorized_dir"
   echo "$json_content" > "$json_path"
 
   print_title_lvl4 "Content of '$json_path'"

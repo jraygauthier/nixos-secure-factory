@@ -1,11 +1,14 @@
-{ device_identifier
-, extra_nix_search_path ? {}
-, device_info_json_file ? null
+{ device_identifier ? null # TODO: Deprecated. Remove.
+, deviceIdentifier ? device_identifier # TODO: Make mandatory once above removed.
+, extraNixSearchPath ? {}
 , workspaceDir ? null
 }:
 
+assert null != deviceIdentifier;
+
 let
   libSrc = import ./lib/src.nix { inherit workspaceDir; };
+  deviceInfoJsonPath = null;
   nixpkgs_src = <nixpkgs>;
   nixpkgs = import nixpkgs_src {};
   inherit (nixpkgs) nix-gitignore;
@@ -18,6 +21,6 @@ let
 in
 
 nixpkgs.pkgs.callPackage ./. {
-  inherit device_identifier extra_nix_search_path device_info_json_file;
+  inherit deviceIdentifier extraNixSearchPath deviceInfoJsonPath;
   inherit nixpkgs_src nixpkgs nixos-secure-factory;
 }

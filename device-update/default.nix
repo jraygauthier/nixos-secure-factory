@@ -3,13 +3,11 @@
 , makeWrapper
 , jq
 , nixos-sf-device-system-config-updater
-, device_identifier
-, device_system_config_dir
+, deviceIdentifier
+, deviceSystemConfigDir
 }:
 
 let
-  # systemConfigPkg = nixos-device-system-config;
-  systemConfigDir = device_system_config_dir;
   # TODO: Retrieve this from wrapped package instead.
   systemConfigEtcCfgDirName = "nixos-device-system-config";
 
@@ -45,7 +43,7 @@ stdenv.mkDerivation rec {
 
     mkdir -p "$out/etc"
     # TODO: Should we copy instead?
-    ln -s -T "${systemConfigDir}/etc/${systemConfigEtcCfgDirName}" "$out/etc/${systemConfigEtcCfgDirName}"
+    ln -s -T "${deviceSystemConfigDir}/etc/${systemConfigEtcCfgDirName}" "$out/etc/${systemConfigEtcCfgDirName}"
 
     mkdir -p "$out/${pkgCfgDir}"
     mkdir -p "$out/bin"
@@ -53,7 +51,7 @@ stdenv.mkDerivation rec {
     cat << 'EOF' > "$out/bin/current-system-config-update-build-and-install"
     #! ${stdenv.shell}
     action="''${1:-boot}"
-    ${updateBuildAndInstallExe} "${device_system_config_dir}" "$action"
+    ${updateBuildAndInstallExe} "${deviceSystemConfigDir}" "$action"
     EOF
 
     chmod a+x "$out/bin/current-system-config-update-build-and-install"
