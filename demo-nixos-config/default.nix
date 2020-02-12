@@ -18,7 +18,7 @@ let
     else ./. + "/device/${deviceIdentifier}/device.json";
   deviceInfo = builtins.fromJSON (builtins.readFile deviceInfoJson);
   deviceType = deviceInfo.type;
-  deviceIdentifier = deviceInfo.identifier;
+  deviceId = deviceInfo.identifier;
 
   nixos_src = nixpkgs_src;
 
@@ -35,15 +35,15 @@ let
         [
           ./nixos/modules/system/etc/nixos-secure-factory-device.nix
           ./device-type/${deviceType}/nixos/configuration.nix
-          ${if builtins.pathExists (./. + "/device/${deviceIdentifier}/nixos/configuration.nix")
+          ${if builtins.pathExists (./. + "/device/${deviceId}/nixos/configuration.nix")
           then ''
-            ./device/${deviceIdentifier}/nixos/configuration.nix
+            ./device/${deviceId}/nixos/configuration.nix
           ''
           else ""
           }
         ];
 
-      system.nixosSecureFactoryDevice.identifier = "${deviceIdentifier}";
+      system.nixosSecureFactoryDevice.identifier = "${deviceId}";
       system.nixosSecureFactoryDevice.type = "${deviceType}";
     }
   '';};
@@ -63,8 +63,8 @@ stdenv.mkDerivation rec {
   src = nix-gitignore.gitignoreSourcePure ../.gitignore ./.;
 
   postPatch = ''
-    mkdir -p "./device/${deviceIdentifier}"
-    cp "${deviceInfoJson}" "device/${deviceIdentifier}/device.json"
+    mkdir -p "./device/${deviceId}"
+    cp "${deviceInfoJson}" "device/${deviceId}/device.json"
   '';
 
   buildInputs = [
@@ -75,7 +75,7 @@ stdenv.mkDerivation rec {
     mkdir -p "$out/${pkgCfgDir}/device"
     mkdir -p "$out/${nixSearchPathDir}"
 
-    cp -R -t "$out/${pkgCfgDir}/device" "./device/${deviceIdentifier}"
+    cp -R -t "$out/${pkgCfgDir}/device" "./device/${deviceId}"
 
     ln -s -T "$out/${pkgCfgDir}/device" "$out/${pkgCfgDir}/current-device"
 
