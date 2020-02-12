@@ -83,7 +83,7 @@ build_device_config_dir() {
   # Remaing arguments passed directly to 'nix build'.
 
   build_nixos_config_dir "$out_var_name" "$config_filename" \
-    --argstr device_identifier "$device_id" \
+    --argstr "deviceIdentifier" "$device_id" \
     "$@"
 
   echo "build_device_config_dir end"
