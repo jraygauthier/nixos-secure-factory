@@ -5,7 +5,7 @@
 , deviceIdentifier
 , extraNixSearchPath
 , deviceInfoJsonPath
-, nixpkgs_src
+, nixpkgsSrc
 , nixpkgs
 , nixos-secure-factory
 }:
@@ -20,10 +20,10 @@ let
   deviceType = deviceInfo.type;
   deviceId = deviceInfo.identifier;
 
-  nixos_src = nixpkgs_src;
+  nixos_src = nixpkgsSrc;
 
   nixSearchPath = extraNixSearchPath // {
-    nixpkgs = nixpkgs_src;
+    nixpkgs = nixpkgsSrc;
     nixos = nixos_src;
     inherit nixos-secure-factory;
   };
@@ -77,7 +77,7 @@ stdenv.mkDerivation rec {
 
     cp -R -t "$out/${pkgCfgDir}/device" "./device/${deviceId}"
 
-    ln -s -T "$out/${pkgCfgDir}/device" "$out/${pkgCfgDir}/current-device"
+    ln -s -T "$out/${pkgCfgDir}/device/${deviceId}" "$out/${pkgCfgDir}/current-device"
 
     # The files usually found along the configuration in a nixos-sf project.
     config_std_deps=( \

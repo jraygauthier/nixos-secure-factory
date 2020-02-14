@@ -6,8 +6,8 @@
 let
   libSrc = import ./lib/src.nix { inherit workspaceDir; };
   deviceInfoJsonPath = null;
-  nixpkgs_src = <nixpkgs>;
-  nixpkgs = import nixpkgs_src {};
+  nixpkgsSrc = <nixpkgs>;
+  nixpkgs = import nixpkgsSrc {};
   inherit (nixpkgs) nix-gitignore;
   nixos-secure-factory =
     nix-gitignore.gitignoreSourcePure [
@@ -19,5 +19,5 @@ in
 
 nixpkgs.pkgs.callPackage ./. {
   inherit deviceIdentifier extraNixSearchPath deviceInfoJsonPath;
-  inherit nixpkgs_src nixpkgs nixos-secure-factory;
+  inherit nixpkgsSrc nixpkgs nixos-secure-factory;
 }
