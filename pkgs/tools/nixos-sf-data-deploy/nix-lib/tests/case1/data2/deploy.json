@@ -1,0 +1,11 @@
+{
+  "imports": [
+    "../data3"
+  ],
+  "rules": {
+    "/var/lib/test/subdir/file4.txt": {
+      "type": "file",
+      "source": "./subdir/file4.txt"
+    }
+  }
+}

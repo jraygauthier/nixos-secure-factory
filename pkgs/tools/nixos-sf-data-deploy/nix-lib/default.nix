@@ -1,8 +1,18 @@
 
-{ nixpkgs ? <nixpkgs> }:
+{ lib
+, writeShellScript
+, runCommand
+, coreutils
+, makeWrapper
+, jq
+}:
 
 let
-  inherit (nixpkgs) lib writeShellScript runCommand coreutils makeWrapper jq;
+  toAsbPath = fn:
+    assert builtins.isPath fn || builtins.isString fn;
+    if builtins.isPath fn then fn else
+      if lib.strings.hasPrefix "/" fn then (/. + fn)
+        else abort "Expected an absolute path but instead received: '${fn}'.";
 
   resolveAsbFilepath = bundleDir: fn:
     assert builtins.isPath bundleDir;
@@ -21,7 +31,7 @@ let
         builtins.map rulesFillMissing xs;
       rulesAttr2List = x:
         lib.attrsets.mapAttrsToList (k: v:
-          rulesListFillMissing (v // {
+          rulesFillMissing (v // {
             target = k;
           })
         ) x;
@@ -32,64 +42,145 @@ let
         then rulesListFillMissing loadedRules
         else rulesAttr2List loadedRules;
 
-  loadDeployFileAt = absFn:
+  getBundleDefaultImports = bundleDir:
+      opts@{ defaultImportsFn }:
+    # defaultImportsFn bundleDir;
+    lib.lists.forEach (defaultImportsFn bundleDir)(x:
+    if builtins.isAttrs x
+      then assert x ? path
+            || builtins.trace "Missing 'path' attribute on default imports for '${toString bundleDir}'!";
+        x // {
+          path = toAsbPath x.path;
+          default-import = true;
+        }
+      else {
+        path = toAsbPath x;
+        allow-inexistent = true;
+        default-import = true;
+    });
+
+
+  getBundleImports = bundleDir: bundle: opts:
+    # TODO: Consider how to allow having an explicit import listing
+    #       which allows to explicitly defer to default imports.
+    #
+    #       IDEA: Could be by specifying a attrset instead of a
+    #             path / string which would allow special options.
+    #             `{ path = null, default-imports = true}`.
+    #
+    #             Could be by using some template expension scheme
+    #             within the string: `"${default-imports}"`.
+    #
+    #             Could be by using `null` as a sentinel value for
+    #             this purpose.
+    #
+    #       For the moment, when an explicit import list is
+    #       provided, it will be the reponsability of the importer
+    #       to import or not the import what would have been default
+    #       imported.
+    if bundle ? imports
+      then bundle.imports
+      else getBundleDefaultImports bundleDir opts;
+
+  mkDefaultBundle = bundleDir: opts: {
+    bundleDir = toAsbPath bundleDir;
+    imports = getBundleDefaultImports bundleDir opts;
+  };
+
+  loadDeployFileAt = absFn: opts:
     let
       fnCwd = builtins.dirOf absFn;
+      rawBundle = builtins.fromJSON (builtins.readFile absFn);
     in
-      builtins.fromJSON (builtins.readFile absFn) // { bundleDir = fnCwd; };
+      rawBundle // {
+        bundleDir = fnCwd;
+        imports = getBundleImports fnCwd rawBundle opts;
+      };
 
   resolveDataDeployFilename = bundleDir:
     resolveAsbFilepath bundleDir "./deploy.json";
 
-  loadBundleImports = bundleDir: importedPaths:
-    builtins.map (x: loadDataDeployBundle (resolveAsbFilepath bundleDir x)) importedPaths;
+  getImportPath = importDirective:
+    if builtins.isAttrs importDirective
+      then importDirective.path
+    else if builtins.isPath importDirective || builtins.isString importDirective
+      then importDirective
+    else abort "Unexpected import directive type: '${builtins.typeOf importDirective}'!";
 
-  loadDataDeployBundle = bundleDir:
+  allowInexistantImport = importDirective:
+    if ! builtins.isAttrs importDirective
+      then false
+    else if importDirective ? allow-inexistent && importDirective.allow-inexistent
+      then true
+    else false;
+
+  loadBundleImports = bundleDir: importedPaths: opts:
+    lib.lists.forEach importedPaths (x:
+      let
+        relDataPath = getImportPath x;
+        absDataPath = resolveAsbFilepath bundleDir relDataPath;
+      in
+        if allowInexistantImport x
+          then loadOptDataDeployBundleOrDefault absDataPath opts
+          else loadDataDeployBundle absDataPath opts
+    );
+
+  loadDataDeployBundle = bundleDir: opts:
     let
       absFn = resolveDataDeployFilename bundleDir;
     in
-      loadDeployFileAt absFn;
+      loadDeployFileAt absFn opts;
 
-  loadOptDataDeployBundleOrNull = bundleDir:
+  loadOptDataDeployBundleOrDefault = bundleDir: opts:
     let
       absFn = resolveDataDeployFilename bundleDir;
     in
       if builtins.pathExists absFn
-        then loadDeployFileAt absFn
-        else null;
+        then loadDeployFileAt absFn opts
+        else mkDefaultBundle bundleDir opts;
 
-  loadUnresolvedBundleListFrom = bundleDir: searchPaths: d:
+  loadUnresolvedBundleListFrom = bundleDir: searchPaths: d: opts:
     let
-      ds = if d ? imports then loadBundleImports bundleDir d.imports else [];
+      imports = getBundleImports bundleDir d opts;
+      ds =
+        if 0 == builtins.length imports
+          then []
+          else loadBundleImports bundleDir imports opts;
       rs = if d ? rules then (flattenRules d.rules) else [];
       accFn = acc: subD:
-        acc ++ loadUnresolvedBundleListFrom subD.bundleDir (searchPaths ++ [subD.bundleDir]) subD;
+        acc ++ loadUnresolvedBundleListFrom
+          subD.bundleDir (searchPaths ++ [subD.bundleDir]) subD opts;
     in
       (builtins.foldl' accFn [] ds) ++ [{
         inherit bundleDir searchPaths;
         rules = rs;
       }];
 
-  loadUnresolvedBundleListFromOpt = bundleDir: searchPaths: d:
-    if null == d then [] else loadUnresolvedBundleListFrom bundleDir searchPaths d;
+  loadUnresolvedBundleListFromOpt = bundleDir: searchPaths: d: opts:
+    if null == d
+      then []
+      else loadUnresolvedBundleListFrom bundleDir searchPaths d opts;
 
-  loadDataDeployUnresolvedBundleList = bundleDir: searchPaths:
+  loadDataDeployUnresolvedBundleList = bundleDir: searchPaths: opts:
       loadUnresolvedBundleListFrom bundleDir searchPaths (
-        loadDataDeployBundle bundleDir);
+        loadDataDeployBundle bundleDir) opts;
 
-  loadOptDataDeployUnresolvedBundleList = bundleDir: searchPaths:
-      loadUnresolvedBundleListFromOpt bundleDir searchPaths (
-        loadOptDataDeployBundleOrNull bundleDir);
+  loadOptDataDeployUnresolvedBundleList = bundleDir: searchPaths: opts:
+      loadUnresolvedBundleListFrom bundleDir searchPaths (
+        loadOptDataDeployBundleOrDefault bundleDir opts) opts;
 
-  resolveFlatRulesSources = unresolvedFlatRules: let
+  resolveFlatRulesSources = unresolvedFlatRules:
+    let
       resolve = x:
-      if "file" == x.type then {
-        inherit (x) target option permission type;
-        source = resolveSourceFile x.source x.searchPaths x.option;
-      } else if "mkdir" == x.type then {
-        inherit (x) target option permission type;
-      } else
-      builtins.abort "Unknown rule type: ${x.type}!";
+        if "file" == x.type then {
+          inherit (x) target option permission type;
+          source = resolveSourceFile x.source x.searchPaths x.option;
+        } else if "mkdir" == x.type then {
+          inherit (x) target option permission type;
+        } else if "rmfile" == x.type then {
+          inherit (x) target option type;
+        } else
+        builtins.abort "Unknown rule type: ${x.type}!";
     in
       filterOutInexistantSources (
         builtins.map resolve unresolvedFlatRules);
@@ -107,7 +198,8 @@ let
     lib.strings.concatStringsSep "\n" (
       builtins.map (x: "\"${builtins.toString x}\"") xs);
 
-  resolveSourceFile = source: searchPaths: opts: let
+  resolveSourceFile = source: searchPaths: opts:
+    let
       matches = resolveSourceFiles source searchPaths;
     in
       if builtins.length matches >= 1
@@ -123,10 +215,16 @@ let
   filterOutInexistantSources = flatRules: let
       pred = x:
         if "file" != x.type
-        then assert "mkdir" == x.type; true
+        then assert "mkdir" == x.type || "rmfile" == x.type; true
+        else true;
+        # TODO: Consider replacing with an rmfile instruction when
+        # cannot resolve the file's source or the file's source is
+        # null.
+        /*
         else if x ? searchPaths
         then null != resolveSourceFile x.source x.searchPaths x.option
         else null != x.source;
+        */
     in
       filterOutUnprocessedSourcesOptions(lib.lists.filter pred flatRules);
 
@@ -136,7 +234,7 @@ let
         k: v: k != "allow-inexistant-source") x.option;
     });
 
-  flattenDeviceDataBundleList = loadedBundleList:
+  flattenDataDeployBundleList = loadedBundleList:
     assert builtins.isList loadedBundleList;
     let
       extendRulesWithBundleInfo = x:
@@ -155,6 +253,14 @@ let
   mkResolvedBundleFromUnresolvedBundle = unresolvedBundle: {
     rules = resolveFlatRulesSources unresolvedBundle.rules;
   };
+
+  loadResolvedDataDeployBundle = bundleDir: opts:
+    mkResolvedBundleFromUnresolvedBundle(
+      flattenDataDeployBundleList (
+        loadOptDataDeployUnresolvedBundleList
+          bundleDir [bundleDir] opts
+      )
+    );
 
   filterOutOptionsWithDefaultValue = flatRules: let
       attrsFilter = k: v:
@@ -183,13 +289,25 @@ let
     filterOutEmptyAttrsetsNullOrDefaultValuesWithoutAddedMeaning(
       lib.lists.forEach (
           filterOutInexistantSources flatRules) (x:
-        if "file" == x.type then {
+        if "file" == x.type then
+          # When no source file, matching target should be removed.
+          # TODO: Consider a flag for explicitly preventing this.
+          if null == x.source then {
+            type = "rmfile";
+            target = x.target;
+            option = {};
+          } else {
+            inherit (x) target option permission type;
+            source = ".${x.target}";
+          }
+        else if "mkdir" == x.type then {
           inherit (x) target option permission type;
-          source = ".${x.target}";
-        } else if "mkdir" == x.type then {
-          inherit (x) target option permission type;
-        } else
-        builtins.abort "Unknown rule type: ${x.type}!"
+        }
+        else if "rmfile" == x.type then {
+          inherit (x) target option type;
+        }
+        else
+          builtins.abort "Unknown rule type: ${x.type}!"
       )
     );
 
@@ -197,9 +315,9 @@ let
     rules = bundleFlatRules resolvedBundle.rules;
   };
 
-  writeNixSrcVersionJson = srcName: version: nixpkgs.runCommand
+  writeNixSrcVersionJson = srcName: version: runCommand
       "${srcName}-version.json"
-      { buildInputs = [ nixpkgs.jq ]; } ''
+      { buildInputs = [ jq ]; } ''
     unformatedVersion="${builtins.toFile "unformatted-version" (builtins.toJSON version)}"
     cat "$unformatedVersion" | jq '.' > "$out"
   '';
@@ -208,7 +326,7 @@ let
     unformatedVersion = builtins.toFile basename (
       builtins.toJSON x);
     in
-      nixpkgs.runCommand basename {
+      runCommand basename {
           buildInputs = [ jq ];
         } ''
         cat "${unformatedVersion}" | jq '.' > "$out"
@@ -229,7 +347,7 @@ let
             mkdir -p "''${bundled_rootfs}${builtins.dirOf x.target}"
             cp "${x.source}" "''${bundled_rootfs}${x.target}"
           ''
-        else assert "mkdir" == x.type; []
+        else assert "mkdir" == x.type || "rmfile" == x.type; []
       )
     ));
 
@@ -237,107 +355,16 @@ let
     writeShellScript "nixos-sf-data-deploy-install-script" (
       printInstallScriptContent resolvedBundle);
 
-  writeRulesDeployToolsModuleScript =
-    writeShellScript "nixos-sf-data-deploy-install-script" ''
-      mkdir_w_inherited_access() {
-        local in_dir="''${1?}"
-
-        local to_be_created=()
-        if ! [[ -d "$in_dir" ]]; then
-          to_be_created=( "$in_dir" "''${to_be_created[@]}" )
-        fi
-
-        local p_dir
-        p_dir="$(dirname "$in_dir")"
-
-        while [[ "''${#p_dir}" -gt 1 ]] \
-            && ! [[ -d "$p_dir" ]]; do
-          to_be_created=( "$p_dir" "''${to_be_created[@]}" )
-          p_dir="$(dirname "$p_dir")"
-        done
-
-        if ! [[ -d "$p_dir" ]]; then
-          1>&2 echo "ERROR: find_first_existing_parent_dir: No parent dir for '$in_dir'."
-          return 1
-        fi
-
-        local oct_mode
-        oct_mode="$(stat -c '%a' "$p_dir")"
-        local uid
-        uid="$(stat -c '%u' "$p_dir")"
-        local gid
-        gid="$(stat -c '%g' "$p_dir")"
-
-        for d in "''${to_be_created[@]}"; do
-          local mkdir_args=( -m "$oct_mode" "$d" )
-          echo mkdir "''${mkdir_args[@]}"
-          mkdir "''${mkdir_args[@]}"
-          local chown_args=( "''${uid}:''${gid}" "$d" )
-          echo chown "''${chown_args[@]}"
-          chown "''${chown_args[@]}"
-        done
-      }
-
-      deploy_file_w_inherited_access() {
-        local src_file="''${1?}"
-        local tgt_file="''${2?}"
-
-        local tgt_dir
-        tgt_dir="$(dirname "$tgt_file")"
-        mkdir_w_inherited_access "$tgt_dir"
-
-        local oct_mode
-        oct_mode="$(stat -c '%a' "$tgt_dir")"
-        local uid
-        uid="$(stat -c '%u' "$tgt_dir")"
-        local gid
-        gid="$(stat -c '%g' "$tgt_dir")"
-
-        local cp_args=( "$src_file" "$tgt_file" )
-        echo cp "''${cp_args[@]}"
-        cp "''${cp_args[@]}"
-
-        local chmod_args=( "$oct_mode" "$tgt_file" )
-        echo chmod "''${chmod_args[@]}"
-        chmod "''${chmod_args[@]}"
-
-        local chown_args=( "''${uid}:''${gid}" "$tgt_file" )
-        echo chown "''${chown_args[@]}"
-        chown "''${chown_args[@]}"
-      }
-
-
-      change_mode() {
-        local tgt_file="''${1?}"
-        local new_mode="''${2?}"
-        local chmod_args=( "$new_mode" "$tgt_file" )
-        echo chmod "''${chmod_args[@]}"
-        chmod "''${chmod_args[@]}"
-      }
-
-
-      change_owner() {
-        local tgt_file="''${1?}"
-        local new_owner="''${2:-}"
-        local new_owner_group="''${3:-}"
-
-        previous_uid="$(stat -c '%u' "$tgt_file")"
-        local owner="''${new_owner:-"$previous_uid"}"
-
-        previous_gid="$(stat -c '%g' "$tgt_file")"
-        local group="''${new_owner_group:-"$previous_gid"}"
-
-        chown_args=( "''${owner}:''${group}" "$tgt_file" )
-        echo chown "''${chown_args[@]}"
-        chown "''${chown_args[@]}"
-      }
-      '';
+  deployToolsModuleScript = builtins.path {
+    path = ./deploy-tools.sh;
+    name = "nixos-sf-data-deploy-tools.sh";
+  };
 
   printDeployScriptContent = derivationResolvedBundle: ''
       set -euf -o pipefail
       bundled_rootfs="''${1?}"
       out_prefix="''${2:-}"
-      . "${writeRulesDeployToolsModuleScript}"
+      . "${deployToolsModuleScript}"
 
     '' + lib.strings.concatStringsSep "" (lib.lists.flatten (
       lib.lists.forEach derivationResolvedBundle.rules (x:
@@ -359,11 +386,15 @@ let
           # No other values supported yet.
           assert "always" == replaceExisting; (
             if "file" == x.type then
-              lib.lists.optional (null != x.source) ''
+              # Should have already been replaced by a "rmfile" directive.
+              assert null != x.source; [''
                 deploy_file_w_inherited_access "''${bundled_rootfs}/${x.source}" "''${out_prefix}${x.target}"
-              ''
+              '']
             else if "mkdir" == x.type then [''
                 mkdir_w_inherited_access "''${out_prefix}${x.target}"
+              '']
+            else if "rmfile" == x.type then [''
+                rm_file "''${out_prefix}${x.target}"
               '']
             else
               builtins.abort "Unknown rule type: ${x.type}!"
@@ -383,9 +414,8 @@ let
       printDeployScriptContent derivationResolvedBundle);
 
 
-  mkDataDeployDerivationFromUnresolvedBundle = unresolvedBundle:
+  mkDataDeployDerivationFromResolvedBundle = resolvedBundle:
     let
-      resolvedBundle = mkResolvedBundleFromUnresolvedBundle unresolvedBundle;
       rules = resolvedBundle.rules;
       derivationResolvedBundle = mkDerivationResolvedBundleFromResolvedBundle resolvedBundle;
       derivationResolvedBundleJson =
@@ -408,13 +438,34 @@ let
           "$out/bin/nixos-sf-data-deploy" \
           --add-flags "$bundled_rootfs"
       '';
+
+  mkDataDeployDerivationFromUnresolvedBundle = unresolvedBundle:
+    let
+      resolvedBundle = mkResolvedBundleFromUnresolvedBundle unresolvedBundle;
+    in
+      mkDataDeployDerivationFromResolvedBundle resolvedBundle;
+
+
+
+  mkDataDeployDerivation = dataDir: options:
+    let
+      bundle = loadResolvedDataDeployBundle dataDir options;
+      drv = mkDataDeployDerivationFromResolvedBundle bundle;
+    in
+      drv;
 in
 
 rec {
-  inherit loadDataDeployBundle loadOptDataDeployBundleOrNull;
-  inherit loadDataDeployUnresolvedBundleList loadOptDataDeployUnresolvedBundleList;
-  inherit flattenDeviceDataBundleList;
-  inherit mkResolvedBundleFromUnresolvedBundle mkDerivationResolvedBundleFromResolvedBundle;
-  inherit writeToPrettyJson writeResolvedBundleToPrettyJson;
-  inherit mkDataDeployDerivationFromUnresolvedBundle;
+  impl = {
+    inherit loadDataDeployBundle loadOptDataDeployBundleOrDefault;
+    inherit loadDataDeployUnresolvedBundleList loadOptDataDeployUnresolvedBundleList;
+    inherit flattenDataDeployBundleList;
+    inherit mkResolvedBundleFromUnresolvedBundle mkDerivationResolvedBundleFromResolvedBundle;
+    inherit loadResolvedDataDeployBundle;
+    inherit writeToPrettyJson writeResolvedBundleToPrettyJson;
+    inherit writeRulesInstallScript writeRulesDeployScript;
+    inherit mkDataDeployDerivationFromResolvedBundle mkDataDeployDerivationFromUnresolvedBundle;
+  };
+
+  inherit mkDataDeployDerivation;
 }

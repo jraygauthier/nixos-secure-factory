@@ -1,0 +1,40 @@
+{
+  "rules": [
+    {
+      "target": "/var/lib/test",
+      "type": "mkdir",
+      "permission": {
+        "mode": "u+rw"
+      }
+    },
+    {
+      "target": "/var/lib/test/subdir",
+      "type": "mkdir"
+    },
+    {
+      "target": "/var/lib/test/subdir/file1.txt",
+      "type": "file",
+      "source": "./subdir/file1.txt",
+      "permission": {
+        "mode": "u+rw"
+      },
+      "option": {
+        "allow-inexistant-source": true,
+        "replace-existing": "always"
+      }
+    },
+    {
+      "target": "/var/lib/test/subdir/file2.txt",
+      "type": "file",
+      "source": "./subdir/file2.txt"
+    },
+    {
+      "target": "/var/lib/test/subdir/file3.txt",
+      "type": "file",
+      "source": "./subdir/file3.txt",
+      "option": {
+        "allow-inexistant-source": true
+      }
+    }
+  ]
+}

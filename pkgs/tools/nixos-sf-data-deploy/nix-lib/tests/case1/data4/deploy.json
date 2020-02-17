@@ -1,0 +1,12 @@
+{
+  "rules": [
+    {
+      "target": "/var/lib/test/other-subdir/file5.txt",
+      "type": "file",
+      "source": "./subdir/file5.txt",
+      "option": {
+        "allow-inexistant-source": true
+      }
+    }
+  ]
+}

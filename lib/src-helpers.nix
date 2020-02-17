@@ -48,6 +48,20 @@ in
       in
     builtins.pathExists localSrc;
 
+  getRawLocalOrPinnedSrc = pname:
+      let
+        localSrc = workspaceDir + "/${pname}";
+        pinnedSrc = getPinnedSrc pname;
+        rawLocalSrc = rec {
+          src = localSrc;
+          version = {
+            type = "local";
+            url = builtins.toString localSrc;
+          };
+        };
+      in
+    if (existLocalSrc pname) then rawLocalSrc else pinnedSrc;
+
   getLocalOrPinnedSrc = pname:
       let
         localSrc = workspaceDir + "/${pname}";
@@ -57,7 +71,7 @@ in
             localSrcFilter pname localSrc pinnedSrc.src;
           version = {
             type = "local";
-            url = src;
+            url = builtins.toString localSrc;
           };
         };
       in
