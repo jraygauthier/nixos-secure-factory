@@ -4,7 +4,7 @@
 }:
 
 let
-  dataDeployLib = import ./nix-lib/release.nix {
+  dataDeployLib = import ../nixos-sf-data-deploy-lib/release.nix {
     inherit nixpkgs;
   };
   dataDeployDerivation = dataDeployLib.mkDataDeployDerivation dataBundleDir {

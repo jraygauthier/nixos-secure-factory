@@ -1,6 +1,8 @@
 /.current-device.yaml
 /.factory-info.yaml
-/result
+**/result
+**/result-*
+*.egg-info
 /scripts/device-common-install/result
 /scripts/factory-install/result
 /device-type/*/scripts/install/result

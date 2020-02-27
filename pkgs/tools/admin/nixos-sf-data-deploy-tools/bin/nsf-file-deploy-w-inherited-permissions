@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir")"
+. "$sh_lib_dir/deploy-tools.sh"
+deploy_file_w_inherited_permissions "$@"

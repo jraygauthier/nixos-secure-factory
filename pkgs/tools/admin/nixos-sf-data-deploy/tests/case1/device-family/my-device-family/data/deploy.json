@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+        "target": "/var/lib/my-service/.config/some-other-lib",
+        "type": "mkdir"
+    },
+    {
+        "target": "/var/lib/my-service/.config/some-other-lib/my.cfg",
+        "type": "file",
+        "source": "./lib-cfg/my-other.cfg",
+        "option": {
+          "allow-inexistant-source": true
+        }
+    }
+  ]
+}

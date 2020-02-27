@@ -5,6 +5,7 @@
 , coreutils
 , makeWrapper
 , jq
+, nixos-sf-data-deploy-tools
 }:
 
 let
@@ -43,7 +44,7 @@ let
         else rulesAttr2List loadedRules;
 
   getBundleDefaultImports = bundleDir:
-      opts@{ defaultImportsFn }:
+      bOpts@{ defaultImportsFn }:
     # defaultImportsFn bundleDir;
     lib.lists.forEach (defaultImportsFn bundleDir)(x:
     if builtins.isAttrs x
@@ -60,7 +61,7 @@ let
     });
 
 
-  getBundleImports = bundleDir: bundle: opts:
+  getBundleImports = bundleDir: bundle: bOpts:
     # TODO: Consider how to allow having an explicit import listing
     #       which allows to explicitly defer to default imports.
     #
@@ -80,21 +81,21 @@ let
     #       imported.
     if bundle ? imports
       then bundle.imports
-      else getBundleDefaultImports bundleDir opts;
+      else getBundleDefaultImports bundleDir bOpts;
 
-  mkDefaultBundle = bundleDir: opts: {
+  mkDefaultBundle = bundleDir: bOpts: {
     bundleDir = toAsbPath bundleDir;
-    imports = getBundleDefaultImports bundleDir opts;
+    imports = getBundleDefaultImports bundleDir bOpts;
   };
 
-  loadDeployFileAt = absFn: opts:
+  loadDeployFileAt = absFn: bOpts:
     let
       fnCwd = builtins.dirOf absFn;
       rawBundle = builtins.fromJSON (builtins.readFile absFn);
     in
       rawBundle // {
         bundleDir = fnCwd;
-        imports = getBundleImports fnCwd rawBundle opts;
+        imports = getBundleImports fnCwd rawBundle bOpts;
       };
 
   resolveDataDeployFilename = bundleDir:
@@ -114,60 +115,60 @@ let
       then true
     else false;
 
-  loadBundleImports = bundleDir: importedPaths: opts:
+  loadBundleImports = bundleDir: importedPaths: bOpts:
     lib.lists.forEach importedPaths (x:
       let
         relDataPath = getImportPath x;
         absDataPath = resolveAsbFilepath bundleDir relDataPath;
       in
         if allowInexistantImport x
-          then loadOptDataDeployBundleOrDefault absDataPath opts
-          else loadDataDeployBundle absDataPath opts
+          then loadOptDataDeployBundleOrDefault absDataPath bOpts
+          else loadDataDeployBundle absDataPath bOpts
     );
 
-  loadDataDeployBundle = bundleDir: opts:
+  loadDataDeployBundle = bundleDir: bOpts:
     let
       absFn = resolveDataDeployFilename bundleDir;
     in
-      loadDeployFileAt absFn opts;
+      loadDeployFileAt absFn bOpts;
 
-  loadOptDataDeployBundleOrDefault = bundleDir: opts:
+  loadOptDataDeployBundleOrDefault = bundleDir: bOpts:
     let
       absFn = resolveDataDeployFilename bundleDir;
     in
       if builtins.pathExists absFn
-        then loadDeployFileAt absFn opts
-        else mkDefaultBundle bundleDir opts;
+        then loadDeployFileAt absFn bOpts
+        else mkDefaultBundle bundleDir bOpts;
 
-  loadUnresolvedBundleListFrom = bundleDir: searchPaths: d: opts:
+  loadUnresolvedBundleListFrom = bundleDir: searchPaths: d: bOpts:
     let
-      imports = getBundleImports bundleDir d opts;
+      imports = getBundleImports bundleDir d bOpts;
       ds =
         if 0 == builtins.length imports
           then []
-          else loadBundleImports bundleDir imports opts;
+          else loadBundleImports bundleDir imports bOpts;
       rs = if d ? rules then (flattenRules d.rules) else [];
       accFn = acc: subD:
         acc ++ loadUnresolvedBundleListFrom
-          subD.bundleDir (searchPaths ++ [subD.bundleDir]) subD opts;
+          subD.bundleDir (searchPaths ++ [subD.bundleDir]) subD bOpts;
     in
       (builtins.foldl' accFn [] ds) ++ [{
         inherit bundleDir searchPaths;
         rules = rs;
       }];
 
-  loadUnresolvedBundleListFromOpt = bundleDir: searchPaths: d: opts:
+  loadUnresolvedBundleListFromOpt = bundleDir: searchPaths: d: bOpts:
     if null == d
       then []
-      else loadUnresolvedBundleListFrom bundleDir searchPaths d opts;
+      else loadUnresolvedBundleListFrom bundleDir searchPaths d bOpts;
 
-  loadDataDeployUnresolvedBundleList = bundleDir: searchPaths: opts:
+  loadDataDeployUnresolvedBundleList = bundleDir: searchPaths: bOpts:
       loadUnresolvedBundleListFrom bundleDir searchPaths (
-        loadDataDeployBundle bundleDir) opts;
+        loadDataDeployBundle bundleDir) bOpts;
 
-  loadOptDataDeployUnresolvedBundleList = bundleDir: searchPaths: opts:
+  loadOptDataDeployUnresolvedBundleList = bundleDir: searchPaths: bOpts:
       loadUnresolvedBundleListFrom bundleDir searchPaths (
-        loadOptDataDeployBundleOrDefault bundleDir opts) opts;
+        loadOptDataDeployBundleOrDefault bundleDir bOpts) bOpts;
 
   resolveFlatRulesSources = unresolvedFlatRules:
     let
@@ -198,13 +199,13 @@ let
     lib.strings.concatStringsSep "\n" (
       builtins.map (x: "\"${builtins.toString x}\"") xs);
 
-  resolveSourceFile = source: searchPaths: opts:
+  resolveSourceFile = source: searchPaths: rOpts:
     let
       matches = resolveSourceFiles source searchPaths;
     in
       if builtins.length matches >= 1
         then builtins.head matches
-        else if opts ? allow-inexistant-source && opts.allow-inexistant-source
+        else if rOpts ? allow-inexistant-source && rOpts.allow-inexistant-source
           then null
           else builtins.abort ''
             Cannot find source file "${source}" looking in
@@ -254,11 +255,11 @@ let
     rules = resolveFlatRulesSources unresolvedBundle.rules;
   };
 
-  loadResolvedDataDeployBundle = bundleDir: opts:
+  loadResolvedDataDeployBundle = bundleDir: bOpts:
     mkResolvedBundleFromUnresolvedBundle(
       flattenDataDeployBundleList (
         loadOptDataDeployUnresolvedBundleList
-          bundleDir [bundleDir] opts
+          bundleDir [bundleDir] bOpts
       )
     );
 
@@ -355,16 +356,10 @@ let
     writeShellScript "nixos-sf-data-deploy-install-script" (
       printInstallScriptContent resolvedBundle);
 
-  deployToolsModuleScript = builtins.path {
-    path = ./deploy-tools.sh;
-    name = "nixos-sf-data-deploy-tools.sh";
-  };
-
   printDeployScriptContent = derivationResolvedBundle: ''
       set -euf -o pipefail
       bundled_rootfs="''${1?}"
       out_prefix="''${2:-}"
-      . "${deployToolsModuleScript}"
 
     '' + lib.strings.concatStringsSep "" (lib.lists.flatten (
       lib.lists.forEach derivationResolvedBundle.rules (x:
@@ -388,24 +383,24 @@ let
             if "file" == x.type then
               # Should have already been replaced by a "rmfile" directive.
               assert null != x.source; [''
-                deploy_file_w_inherited_access "''${bundled_rootfs}/${x.source}" "''${out_prefix}${x.target}"
+                nsf-file-deploy-w-inherited-permissions "''${bundled_rootfs}/${x.source}" "''${out_prefix}${x.target}"
               '']
             else if "mkdir" == x.type then [''
-                mkdir_w_inherited_access "''${out_prefix}${x.target}"
+                nsf-dir-mk-w-inherited-permissions "''${out_prefix}${x.target}"
               '']
             else if "rmfile" == x.type then [''
-                rm_file "''${out_prefix}${x.target}"
+                nsf-file-rm "''${out_prefix}${x.target}"
               '']
             else
               builtins.abort "Unknown rule type: ${x.type}!"
           )
           ++ lib.lists.optional (null != permissions && permissions ? mode) ''
-            change_mode "''${out_prefix}${x.target}" "${permissions.mode}"
+            nsf-file-chmod "''${out_prefix}${x.target}" "${permissions.mode}"
           ''
           ++ lib.lists.optional (null != permissions
               && (permissions ? user || permissions ? group
                     || permissions ? uid || permissions ? gid)) ''
-            change_owner "''${out_prefix}${x.target}" "${owner}" "${ownerGroup}"
+            nsf-file-chown "''${out_prefix}${x.target}" "${owner}" "${ownerGroup}"
           ''
       )));
 
@@ -420,10 +415,15 @@ let
       derivationResolvedBundle = mkDerivationResolvedBundleFromResolvedBundle resolvedBundle;
       derivationResolvedBundleJson =
         writeResolvedBundleToPrettyJson "deploy.json" derivationResolvedBundle;
+
+      rulesInstallScriptDeps = [ coreutils ];
+      rulesDeployScriptDeps = [ nixos-sf-data-deploy-tools ];
+
     in
       runCommand "nixos-sf-data-deploy" {
-          nativeBuildInputs = [ makeWrapper ];
-          buildInputs = [ coreutils ];
+          nativeBuildInputs = [
+            makeWrapper
+          ] ++ rulesInstallScriptDeps;
         } ''
         mkdir -p "$out"
         bundled_rootfs="$out/share/nixos-sf-data-deploy/rootfs"
@@ -436,20 +436,13 @@ let
         makeWrapper \
           "${writeRulesDeployScript derivationResolvedBundle}" \
           "$out/bin/nixos-sf-data-deploy" \
+          --prefix PATH : ${lib.makeBinPath rulesDeployScriptDeps} \
           --add-flags "$bundled_rootfs"
       '';
 
-  mkDataDeployDerivationFromUnresolvedBundle = unresolvedBundle:
+  mkDataDeployDerivation = dataDir: bOpts:
     let
-      resolvedBundle = mkResolvedBundleFromUnresolvedBundle unresolvedBundle;
-    in
-      mkDataDeployDerivationFromResolvedBundle resolvedBundle;
-
-
-
-  mkDataDeployDerivation = dataDir: options:
-    let
-      bundle = loadResolvedDataDeployBundle dataDir options;
+      bundle = loadResolvedDataDeployBundle dataDir bOpts;
       drv = mkDataDeployDerivationFromResolvedBundle bundle;
     in
       drv;
@@ -464,7 +457,7 @@ rec {
     inherit loadResolvedDataDeployBundle;
     inherit writeToPrettyJson writeResolvedBundleToPrettyJson;
     inherit writeRulesInstallScript writeRulesDeployScript;
-    inherit mkDataDeployDerivationFromResolvedBundle mkDataDeployDerivationFromUnresolvedBundle;
+    inherit mkDataDeployDerivationFromResolvedBundle;
   };
 
   inherit mkDataDeployDerivation;

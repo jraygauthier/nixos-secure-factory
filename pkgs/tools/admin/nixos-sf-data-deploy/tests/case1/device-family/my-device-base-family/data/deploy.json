@@ -1,0 +1,23 @@
+{
+  "rules": [
+    {
+      "target": "/var/lib/my-service",
+      "type": "mkdir",
+      "permission": {
+        "mode": "u+rw"
+      }
+    },
+    {
+      "target": "/var/lib/my-service/.config/some-lib",
+      "type": "mkdir"
+    },
+    {
+      "target": "/var/lib/my-service/.config/some-lib/my.cfg",
+      "type": "file",
+      "source": "./lib-cfg/my.cfg",
+      "option": {
+        "allow-inexistant-source": true
+      }
+    }
+  ]
+}
