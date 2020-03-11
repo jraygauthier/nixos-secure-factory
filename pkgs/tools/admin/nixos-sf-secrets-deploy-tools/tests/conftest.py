@@ -2,7 +2,7 @@
 import os
 import pytest
 
-from nsft_system_utils.file import write_file_content
+from nsft_system_utils import write_file_content, get_os_users, get_os_groups
 
 
 @pytest.fixture(scope="module")
@@ -72,6 +72,7 @@ def tgt_tmp_dir_w_dummy_files(tgt_tmp_dir):
     os.mkdir(dir_ro, mode=0o555)
 
     return tgt_tmp_dir
+
 
 
 @pytest.fixture(scope="function")

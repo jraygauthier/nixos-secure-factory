@@ -13,15 +13,19 @@ let
   nixos-sf-test-lib = (
     import ../../../development/python-modules/nixos-sf-test-lib/release.nix { inherit pkgs; }).release;
 
-  testPython = python3.withPackages (pp: with pp; [
-    pytest
-    nixos-sf-test-lib
-  ]);
+  nixTestLib = nixos-sf-test-lib.nixLib;
 
-  devPython = python3.withPackages (pp: with pp; [
-    ipython
+  commonPythonPkgsFn = pp: with pp; [
     pytest
     nixos-sf-test-lib
+  ];
+
+  testPython = python3.withPackages commonPythonPkgsFn;
+
+  devPython = python3.withPackages (pp: with pp; commonPythonPkgsFn pp ++ [
+    ipython
+    mypy
+    flake8
   ]);
 
   libTestInputs = release.buildInputs;
@@ -32,12 +36,10 @@ let
 
   commonGitIgnores = [
     ../../../../.gitignore
-    ''
-      *.nix
-    ''
+    "*.nix\n"
   ];
 
-  mkTest = { testName, runTimeDeps, testPath, extraGitIgnores ? ""}:
+  mkPyTest = { testName, runTimeDeps, testPath, extraGitIgnores ? ""}:
     assert lib.isString testPath;
     stdenv.mkDerivation rec {
       pname = "${release.pname}-tests-${testName}";
@@ -98,7 +100,7 @@ rec {
   };
 
   tests = rec {
-    lib = mkTest rec {
+    lib = mkPyTest rec {
       testName = "lib";
       runTimeDeps = libTestInputs;
       testPath = "./tests/${testName}";
@@ -107,7 +109,7 @@ rec {
       '';
     };
 
-    installed = mkTest rec {
+    installed = mkPyTest rec {
       testName = "installed";
       runTimeDeps = installedTestInputs;
       testPath = "./tests/${testName}";
@@ -119,7 +121,7 @@ rec {
 
     nixos = import ./tests/nixos/test-system-installed-binaries.nix {
       inherit nixpkgs release nixos-sf-test-lib;
-      system = "x86_64-linux";
+      inherit (pkgs) system;
       inherit commonGitIgnores;
     };
 

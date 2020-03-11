@@ -2,8 +2,8 @@ import subprocess
 import pytest
 import os
 
-from nsft_system_utils import touch_file
-from nsft_shell_utils import call_shell_program, call_sh_module_fn
+from nsft_system_utils.file import touch_file
+from nsft_shell_utils.program import call_shell_program
 
 
 def test_call_shell_program_true():
@@ -18,7 +18,7 @@ def test_call_shell_program_false():
 
 def test_call_shell_program_echo():
     out = call_shell_program("echo", "Hello", "World")
-    assert [ "Hello World" ] == out
+    assert ["Hello World"] == out
 
 
 @pytest.fixture(scope="function")
@@ -33,12 +33,11 @@ def dummy_tmp_file(temp_dir):
     return dummy_file
 
 
-def test_call_shell_program_test_e_positive(dummy_tmp_file) -> None:
+def test_call_shell_program_test_e_success(dummy_tmp_file) -> None:
     out = call_shell_program("test", "-e", dummy_tmp_file)
     assert [] == out
 
 
-def test_call_shell_program_test_e_positive(temp_dir) -> None:
+def test_call_shell_program_test_e_failure(temp_dir) -> None:
     with pytest.raises(subprocess.CalledProcessError):
         call_shell_program("test", "-e", os.path.join(temp_dir, "does-not-exist.txt"))
-
