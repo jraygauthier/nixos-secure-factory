@@ -1,15 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ nixpkgs ? <nixpkgs>
+, pkgs ? import nixpkgs {} } @ args:
 
-with nixpkgs;
-
-let
-  release = import ./release.nix { inherit nixpkgs; };
-in
-
-mkShell rec {
-  name = "${release.pname}-shell";
-  inputsFrom = [
-    release
-  ];
-}
-
+(import ./release.nix args).shell.dev

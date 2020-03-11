@@ -21,9 +21,7 @@ stdenv.mkDerivation rec {
 
   src = nix-gitignore.gitignoreSourcePure [
     ../../../../.gitignore
-    ''
-      *.nix
-    ''
+    "*.nix\n"
     ] ./.;
 
   nativeBuildInputs = [ gnused dieHook ];

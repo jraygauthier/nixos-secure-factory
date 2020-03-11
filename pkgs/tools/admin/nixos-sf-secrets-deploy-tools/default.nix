@@ -1,5 +1,6 @@
 { lib
 , stdenv
+, nix-gitignore
 , gnused
 , dieHook
 , bash
@@ -15,7 +16,8 @@ let
     coreutils
     gawk
     gnupg
-    nixos-sf-data-deploy-tools ];
+    nixos-sf-data-deploy-tools
+  ];
   dataDeployShLibInstallDir =
     "${nixos-sf-data-deploy-tools}/share/${nixos-sf-data-deploy-tools.pname}/sh-lib";
 in
@@ -27,11 +29,16 @@ stdenv.mkDerivation rec {
 
   shLibInstallDir = "${placeholder "out"}/share/${pname}/sh-lib";
 
-  src = ./.;
+  src = nix-gitignore.gitignoreSourcePure [
+    ../../../../.gitignore
+    "*.nix\n"
+    ] ./.;
 
   nativeBuildInputs = [ gnused dieHook ];
   buildInputs = runtimeDeps;
   propagatedUserEnvPkgs = [ nixos-sf-data-deploy-tools ];
+
+  buildPhase = ":";
 
   installPhase = ''
     mkdir -p "${shLibInstallDir}"
@@ -67,13 +74,14 @@ stdenv.mkDerivation rec {
   '';
 
   passthru = {
-    inherit pname;
+    inherit pname version name;
   };
 
   meta = {
     description = ''
-      Some basic data deploy tools meant to be used as part of the
-      nixos-sf-data-deploy framework.
+      Some secrets deploy tools meant to be bundled by
+      nixos-sf-secret-deploy and meant to be executed
+      on the target machine.
     '';
   };
 }

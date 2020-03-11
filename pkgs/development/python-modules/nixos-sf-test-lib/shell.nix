@@ -1,6 +1,3 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} } @ args:
 
-import ./release.nix {
-  inherit pkgs;
-  fromNixShell = true;
-}
+(import ./release.nix args).shell.dev
