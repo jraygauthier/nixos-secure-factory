@@ -14,10 +14,16 @@ def _create_and_assign_proper_permissions_to_dir(
     mode: int
 ) -> None:
     if not target_dir.exists():
-        os.makedirs(target_dir, exist_ok=True)
+        target_dir.mkdir(parents=True, exist_ok=True)
 
     if mode != get_file_mode_simple(target_dir):
-        os.chmod(target_dir, mode)
+        target_dir.chmod(mode)
+
+
+def create_and_assign_proper_permissions_to_user_home_dir(
+        home_dir: Path
+) -> None:
+    _create_and_assign_proper_permissions_to_dir(home_dir, 0o700)
 
 
 def create_and_assign_proper_permissions_to_gpg_home_dir(

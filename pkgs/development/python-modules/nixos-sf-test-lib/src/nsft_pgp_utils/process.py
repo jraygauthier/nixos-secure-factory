@@ -150,3 +150,15 @@ def run_gpg(
 ) -> CompletedProcess:
     args = _mk_gpg_args(args, proc_ctx, auth_ctx)
     return subprocess.run(args, **kwargs)
+
+
+def check_gpg_output(
+        args: _OptArgs,
+        proc_ctx: OptGpgProcContextSoftT = None,
+        auth_ctx: OptGpgAuthContext = None,
+        **kwargs
+) -> str:
+    assert 'stdout' not in kwargs
+    assert 'check' not in kwargs
+    args = _mk_gpg_args(args, proc_ctx, auth_ctx)
+    return subprocess.run(args, check=True, stdout=PIPE, **kwargs).stdout
