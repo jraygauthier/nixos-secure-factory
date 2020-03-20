@@ -5,10 +5,10 @@ import pytest
 from nsft_pgp_utils.process import (
     GpgProcContext,
     GpgProcContextExp,
-    ensure_gpg_context,
+    ensure_gpg_proc_ctx,
 )
-from nsft_pgp_utils.secret_id import create_gpg_master_identity_with_signing_subkey
-from nsft_system_utils.file import write_file_content
+from nsft_pgp_utils.secret_id import create_gpg_secret_identity
+from nsft_system_utils.file import write_text_file_content
 
 
 def _mk_tmp_gpg_ctx(home_dir: str) -> GpgProcContextExp:
@@ -16,13 +16,13 @@ def _mk_tmp_gpg_ctx(home_dir: str) -> GpgProcContextExp:
     email = "user-gpg-home@tmp-dir.com"
     user_name = "UserGpgHome TempDir"
 
-    proc_ctx = ensure_gpg_context(GpgProcContext(exe="gpg", home_dir=gpg_home_dir))
-    create_gpg_master_identity_with_signing_subkey(
+    proc = ensure_gpg_proc_ctx(GpgProcContext(exe="gpg", home_dir=gpg_home_dir))
+    create_gpg_secret_identity(
         email, user_name,
         passphrase="",
-        proc_ctx=proc_ctx)
+        proc=proc)
 
-    return proc_ctx
+    return proc
 
 
 @pytest.fixture(scope="session")
@@ -41,7 +41,7 @@ def tmp_encrypter_gpg_ctx(
         tmpdir_factory, tmp_decrypter_public_key_file) -> GpgProcContextExp:
 
     home_dir = tmpdir_factory.mktemp("encrypter-home-user")
-    proc_ctx = _mk_tmp_gpg_ctx(home_dir)
+    proc = _mk_tmp_gpg_ctx(home_dir)
 
 
 
@@ -53,12 +53,12 @@ def src_pgp_tmp_dir(tmpdir_factory):
 @pytest.fixture(scope="module")
 def src_pgp_tmp_dir_w_dummy_files(src_pgp_tmp_dir):
     fn = src_pgp_tmp_dir.join("dummy.txt")
-    write_file_content(fn, [
+    write_text_file_content(fn, [
         "Dummy src file content.\n"
     ])
 
     fn_ro = src_pgp_tmp_dir.join("dummy-ro.txt")
-    write_file_content(fn_ro, [
+    write_text_file_content(fn_ro, [
         "Dummy src file content.\n"
     ])
 
@@ -83,12 +83,12 @@ def tgt_pgp_tmp_dir(tmpdir_factory):
 @pytest.fixture(scope="function")
 def tgt_pgp_tmp_dir_w_dummy_files(tgt_pgp_tmp_dir):
     fn = tgt_pgp_tmp_dir.join("dummy.txt")
-    write_file_content(fn, [
+    write_text_file_content(fn, [
         "Dummy src file content.\n"
     ])
 
     fn_ro = tgt_pgp_tmp_dir.join("dummy-ro.txt")
-    write_file_content(fn_ro, [
+    write_text_file_content(fn_ro, [
         "Dummy src file content.\n"
     ])
     os.chmod(fn_ro, mode=0o444)

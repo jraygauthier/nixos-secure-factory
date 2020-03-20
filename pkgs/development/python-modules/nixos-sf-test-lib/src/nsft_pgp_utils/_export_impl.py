@@ -2,8 +2,9 @@ from pathlib import Path
 
 from nsft_system_utils.permissions import change_file_permissions, FilePermissionsOpts
 
-from .process import run_gpg, OptGpgProcContextSoftT, check_gpg_output
-from .auth import OptGpgAuthContext
+from .process import run_gpg, check_gpg_output
+from .ctx_proc_types import OptGpgProcContextSoftT
+from .ctx_auth_types import OptGpgAuthContext
 
 
 def _create_gpg_parentdir_for_exported_file(
@@ -17,8 +18,8 @@ def _export_gpg_keys_by_id_to_file(
         option: str,
         out_file_path: Path,
         email_or_id: str,
-        auth_ctx: OptGpgAuthContext,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext,
+        proc: OptGpgProcContextSoftT = None
 ) -> Path:
     _create_gpg_parentdir_for_exported_file(out_file_path)
 
@@ -31,7 +32,7 @@ def _export_gpg_keys_by_id_to_file(
     ]
 
     run_gpg(
-        args, text=True, check=True, proc_ctx=proc_ctx, auth_ctx=auth_ctx)
+        args, text=True, check=True, proc=proc, auth=auth)
 
     change_file_permissions(
         out_file_path,
@@ -40,16 +41,35 @@ def _export_gpg_keys_by_id_to_file(
     return out_file_path
 
 
-def _is_empty_passphrase_gpg_auth(auth_ctx: OptGpgAuthContext) -> bool:
-    return auth_ctx is None or auth_ctx.passphrase is None or not auth_ctx.passphrase
+def _export_gpg_keys_by_id_to_str(
+        option: str,
+        email_or_id: str,
+        auth: OptGpgAuthContext,
+        proc: OptGpgProcContextSoftT = None
+) -> str:
+    args = [
+        "--batch",
+        option,
+        "--armor",
+        f"{email_or_id}"
+    ]
+
+    out_str = check_gpg_output(
+        args, text=True, proc=proc, auth=auth)
+
+    return out_str
+
+
+def _is_empty_passphrase_gpg_auth(auth: OptGpgAuthContext) -> bool:
+    return auth is None or auth.passphrase is None or not auth.passphrase
 
 
 def _export_gpg_secret_keys_by_id_to_file(
         option: str,
         out_file_path: Path,
         email_or_id: str,
-        auth_ctx: OptGpgAuthContext,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext,
+        proc: OptGpgProcContextSoftT = None
 ) -> Path:
     _create_gpg_parentdir_for_exported_file(out_file_path)
 
@@ -61,11 +81,11 @@ def _export_gpg_secret_keys_by_id_to_file(
         f"{email_or_id}"
     ]
 
-    if _is_empty_passphrase_gpg_auth(auth_ctx):
+    if _is_empty_passphrase_gpg_auth(auth):
         run_gpg(
-            args, text=True, check=True, proc_ctx=proc_ctx, auth_ctx=auth_ctx)
+            args, text=True, check=True, proc=proc, auth=auth)
     else:
-        assert auth_ctx is not None and auth_ctx.passphrase is not None
+        assert auth is not None and auth.passphrase is not None
         # For some reason, when "passphrase" is non empty, when using
         # secret export option, we're prompted for a password by gui even
         # tough "--passphrase" is specified. This is a workaround.
@@ -77,7 +97,7 @@ def _export_gpg_secret_keys_by_id_to_file(
         ])
 
         run_gpg(
-            args, text=True, input=auth_ctx.passphrase, check=True, proc_ctx=proc_ctx)
+            args, text=True, input=auth.passphrase, check=True, proc=proc)
 
     change_file_permissions(
         out_file_path,
@@ -88,8 +108,8 @@ def _export_gpg_secret_keys_by_id_to_file(
 
 def _export_gpg_info_to_str(
         option: str,
-        auth_ctx: OptGpgAuthContext = None,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None
 ) -> str:
     args = [
         "--batch",
@@ -97,7 +117,7 @@ def _export_gpg_info_to_str(
     ]
 
     out_str = check_gpg_output(
-        args, text=True, proc_ctx=proc_ctx, auth_ctx=auth_ctx)
+        args, text=True, proc=proc, auth=auth)
 
     return out_str
 
@@ -105,13 +125,13 @@ def _export_gpg_info_to_str(
 def _export_gpg_info_to_file(
         option: str,
         out_file_path: Path,
-        auth_ctx: OptGpgAuthContext = None,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None
 ) -> Path:
     _create_gpg_parentdir_for_exported_file(out_file_path)
 
     out_str = _export_gpg_info_to_str(
-        option, proc_ctx=proc_ctx, auth_ctx=auth_ctx)
+        option, proc=proc, auth=auth)
 
     with open(out_file_path, "w") as f:
         f.write(out_str)
@@ -124,17 +144,17 @@ def _export_gpg_info_to_file(
 
 
 def _export_gpg_otrust_to_str(
-        auth_ctx: OptGpgAuthContext,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext,
+        proc: OptGpgProcContextSoftT = None
 ) -> str:
     return _export_gpg_info_to_str(
-        "--export-ownertrust", auth_ctx, proc_ctx)
+        "--export-ownertrust", auth, proc)
 
 
 def _export_gpg_otrust_to_file(
         out_file_path: Path,
-        auth_ctx: OptGpgAuthContext,
-        proc_ctx: OptGpgProcContextSoftT = None
+        auth: OptGpgAuthContext,
+        proc: OptGpgProcContextSoftT = None
 ) -> Path:
     return _export_gpg_info_to_file(
-        "--export-ownertrust", out_file_path, auth_ctx, proc_ctx)
+        "--export-ownertrust", out_file_path, auth, proc)

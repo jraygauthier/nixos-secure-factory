@@ -4,27 +4,27 @@ from typing import Optional
 
 from .home_dir import create_and_assign_proper_permissions_to_gpg_home_dir
 from .process import OptGpgProcContextSoftT, run_gpg
-from .auth import OptGpgAuthContext
+from .ctx_auth_types import OptGpgAuthContext
 
 
 def create_gpg_secret_identity(
         email: str,
         user_name: str,
-        auth_ctx: OptGpgAuthContext,
+        auth: OptGpgAuthContext,
         expire_in: Optional[str] = None,
-        proc_ctx: OptGpgProcContextSoftT = None
+        proc: OptGpgProcContextSoftT = None
 ) -> None:
-    if auth_ctx is None or auth_ctx.passphrase is None:
+    if auth is None or auth.passphrase is None:
         passphrase = ""
     else:
-        passphrase = auth_ctx.passphrase
+        passphrase = auth.passphrase
 
     expire_in = expire_in or "1y"
 
     # print("Creating gpg identity with signing subkey")
 
     create_and_assign_proper_permissions_to_gpg_home_dir(
-        proc_ctx=proc_ctx
+        proc=proc
     )
 
     cipher_preferences = (
@@ -53,4 +53,4 @@ def create_gpg_secret_identity(
 
     run_gpg(
         args, text=True, check=True,
-        input=batch_script, proc_ctx=proc_ctx)
+        input=batch_script, proc=proc)

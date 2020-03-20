@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from nsft_pgp_utils.home_dir import create_and_assign_proper_permissions_to_gpg_home_dir
-from test_lib.gpg_ctx import mk_gpg_proc_ctx_for
+from nsft_pgp_utils.ctx_proc_types import mk_gpg_proc_ctx_for_user_home_dir
 from test_lib.gpg_ctx_checks import (
     check_minimal_gpg_home_dir_empty,
     check_minimal_gpg_home_dir_w_secret_id,
@@ -19,9 +19,9 @@ LOGGER = logging.getLogger(__name__)
 def test_create_and_assign_proper_permissions_to_gpg_home_dir(
         tmp_user_home_dir: Path) -> None:
     LOGGER.info("tmp_user_home_dir: %s", type(tmp_user_home_dir))
-    proc_ctx = mk_gpg_proc_ctx_for(tmp_user_home_dir)
-    create_and_assign_proper_permissions_to_gpg_home_dir(proc_ctx=proc_ctx)
-    check_minimal_gpg_home_dir_empty(proc_ctx)
+    proc = mk_gpg_proc_ctx_for_user_home_dir(tmp_user_home_dir)
+    create_and_assign_proper_permissions_to_gpg_home_dir(proc=proc)
+    check_minimal_gpg_home_dir_empty(proc)
 
 
 def test_create_gpg_secret_identity(

@@ -2,7 +2,7 @@ MKF_CWD := $(shell pwd)
 
 .PHONY: all clean release typechecks tests lint
 
-all: typechecks tests lint release
+all: typechecks lint release
 
 clean:
 	rm -f ./result*

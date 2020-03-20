@@ -4,8 +4,6 @@ data_deploy_sh_lib_dir="$(pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir)"
 . "$data_deploy_sh_lib_dir/deploy-tools.sh"
 
 
-
-
 print_file_extensions() {
   local file="${1?}"
   echo "$file" | tr '/' '\n' | tail -n -1 | cut -s -d. -f2-
@@ -78,7 +76,7 @@ build_gpg_argsa() {
   local -n _out_gpg_arg_a="${1?}"
   local src_file="${2?}"
   # shellcheck disable=SC2034
-  _out_gpg_arg_a=( --quiet --decrypt "$src_file" )
+  _out_gpg_arg_a=( --batch --pinentry-mode loopback --yes --quiet --decrypt "$src_file" )
 }
 
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from nsft_system_utils.permissions_simple import get_file_mode_simple
 
-from .process import OptGpgProcContextSoftT, ensure_gpg_context, run_gpg
+from .process import OptGpgProcContextSoftT, ensure_gpg_proc_ctx, run_gpg
 
 
 def _create_and_assign_proper_permissions_to_dir(
@@ -27,13 +27,13 @@ def create_and_assign_proper_permissions_to_user_home_dir(
 
 
 def create_and_assign_proper_permissions_to_gpg_home_dir(
-        proc_ctx: OptGpgProcContextSoftT = None
+        proc: OptGpgProcContextSoftT = None
 ) -> None:
-    proc_ctx = ensure_gpg_context(proc_ctx)
-    gpg_home_dir_already_exists = os.path.exists(proc_ctx.home_dir)
+    proc = ensure_gpg_proc_ctx(proc)
+    gpg_home_dir_already_exists = os.path.exists(proc.home_dir)
 
-    _create_and_assign_proper_permissions_to_dir(proc_ctx.home_dir, 0o700)
-    pkeys_subdir = proc_ctx.home_dir.joinpath("private-keys-v1.d")
+    _create_and_assign_proper_permissions_to_dir(proc.home_dir, 0o700)
+    pkeys_subdir = proc.home_dir.joinpath("private-keys-v1.d")
     _create_and_assign_proper_permissions_to_dir(pkeys_subdir, 0o700)
 
     if gpg_home_dir_already_exists:
@@ -47,4 +47,4 @@ def create_and_assign_proper_permissions_to_gpg_home_dir(
         args, check=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
-        proc_ctx=proc_ctx)
+        proc=proc)

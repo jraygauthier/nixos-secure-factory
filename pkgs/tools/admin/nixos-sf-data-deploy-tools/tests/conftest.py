@@ -3,7 +3,7 @@ import pytest
 from _pytest.tmpdir import TempPathFactory
 from pathlib import Path
 
-from nsft_system_utils.file import write_file_content
+from nsft_system_utils.file import write_text_file_content
 
 
 @pytest.fixture(scope="module")
@@ -14,12 +14,12 @@ def src_tmp_dir(tmp_path_factory: TempPathFactory) -> Path:
 @pytest.fixture(scope="module")
 def src_tmp_dir_w_dummy_files(src_tmp_dir: Path) -> Path:
     fn = src_tmp_dir.joinpath("dummy.txt")
-    write_file_content(fn, [
+    write_text_file_content(fn, [
         "Dummy src file content.\n"
     ])
 
     fn_ro = src_tmp_dir.joinpath("dummy-ro.txt")
-    write_file_content(fn_ro, [
+    write_text_file_content(fn_ro, [
         "Dummy src file content.\n"
     ])
 
@@ -56,12 +56,12 @@ def tgt_tmp_dir(tmp_path_factory: TempPathFactory) -> Path:
 @pytest.fixture(scope="function")
 def tgt_tmp_dir_w_dummy_files(tgt_tmp_dir: Path) -> Path:
     fn = tgt_tmp_dir.joinpath("dummy.txt")
-    write_file_content(fn, [
+    write_text_file_content(fn, [
         "Dummy src file content.\n"
     ])
 
     fn_ro = tgt_tmp_dir.joinpath("dummy-ro.txt")
-    write_file_content(fn_ro, [
+    write_text_file_content(fn_ro, [
         "Dummy src file content.\n"
     ])
     os.chmod(fn_ro, mode=0o444)

@@ -14,6 +14,8 @@ from nsft_system_utils.permissions_simple import (
 from nsft_system_utils.permissions import call_chmod
 from nsft_system_utils.file import (
     touch_file,
+    write_text_file_content,
+    read_text_file_content
 )
 
 LOGGER = logging.getLogger(__name__)
@@ -28,6 +30,18 @@ def test_touch_file(temp_dir: Path) -> None:
     dummy_file = temp_dir.joinpath("dummy.txt")
     touch_file(dummy_file)
     assert os.path.exists(dummy_file)
+
+
+def test_write_and_read_file_content(temp_dir: Path) -> None:
+    dummy_file = temp_dir.joinpath("dummy.txt")
+    content = [
+        "Line1"
+        "Line2"
+    ]
+    write_text_file_content(dummy_file, content)
+    read_content = read_text_file_content(dummy_file)
+
+    assert content == read_content
 
 
 def test_get_file_mode(temp_dir: Path) -> None:

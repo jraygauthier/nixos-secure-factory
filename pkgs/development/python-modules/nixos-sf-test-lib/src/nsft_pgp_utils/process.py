@@ -1,101 +1,40 @@
-import subprocess
-from pathlib import Path
+import sys
 from dataclasses import dataclass
-from subprocess import PIPE, CompletedProcess, Popen, CalledProcessError
-from typing import ContextManager, Dict, Iterator, List, Optional, Tuple, Union
-from .auth import OptGpgAuthContext
+from subprocess import (
+    PIPE,
+    CalledProcessError,
+    CompletedProcess,
+    Popen,
+    TimeoutExpired,
+    run,
+)
+from typing import Any, ContextManager, Dict, Iterator, List, Optional, Tuple
 
-
-@dataclass
-class GpgProcContextOpt:
-    exe: Optional[Path]
-    home_dir: Optional[Path]
-
-
-@dataclass
-class GpgProcContext:
-    exe: Path
-    home_dir: Path
-
-
-@dataclass
-class GpgProcContextExp(GpgProcContext):
-    pass
-
-
-# TODO: Use `TypedDict` on py 3.8.
-GpgProcContextDictT = Dict[str, Optional[Path]]
-GpgProcContextTupleT = Tuple[Optional[Path], Optional[Path]]
-
-GpgProcContextSoftT = Union[
-    GpgProcContext, GpgProcContextOpt, GpgProcContextDictT, GpgProcContextTupleT]
-OptGpgProcContextSoftT = Optional[GpgProcContextSoftT]
+from .ctx_auth_types import OptGpgAuthContext
+from .ctx_proc_types import OptGpgProcContextSoftT, ensure_gpg_proc_ctx
+from .errors import GpgProcessError
 
 _OptArgs = Optional[List[str]]
 
 
-def get_default_gpg_context() -> GpgProcContextExp:
-    return GpgProcContextExp(Path("gpg"), Path("~/.gnupg").expanduser())
-
-
-def _expand_gpg_context_paths(
-        proc_ctx: GpgProcContext) -> GpgProcContextExp:
-    return GpgProcContextExp(
-        proc_ctx.exe, proc_ctx.home_dir.expanduser())
-
-
-def _fill_gpg_context_missing_fields(
-        ctx: GpgProcContextOpt) -> GpgProcContextExp:
-    exe = ctx.exe
-    home_dir = ctx.home_dir
-
-    assert exe is None or isinstance(exe, Path)
-    assert home_dir is None or isinstance(home_dir, Path)
-
-    if exe is None:
-        exe = get_default_gpg_context().exe
-    if home_dir is None:
-        home_dir = get_default_gpg_context().home_dir
-
-    return _expand_gpg_context_paths(GpgProcContext(exe, home_dir))
-
-
-def ensure_gpg_context(
-        proc_ctx: OptGpgProcContextSoftT
-) -> GpgProcContextExp:
-    if isinstance(proc_ctx, GpgProcContext):
-        return _expand_gpg_context_paths(proc_ctx)
-
-    if proc_ctx is None:
-        return get_default_gpg_context()
-
-    if isinstance(proc_ctx, dict):
-        return _fill_gpg_context_missing_fields(GpgProcContextOpt(**proc_ctx))
-
-    if isinstance(proc_ctx, tuple):
-        return _fill_gpg_context_missing_fields(GpgProcContextOpt(*proc_ctx))
-
-    return _fill_gpg_context_missing_fields(proc_ctx)
-
-
-def _mk_gpg_args(
+def _mk_gpg_cmd_and_args(
         extra_args: _OptArgs = None,
-        proc_ctx: OptGpgProcContextSoftT = None,
-        auth_ctx: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
 ) -> List[str]:
     if extra_args is None:
         extra_args = []
 
-    proc_ctx = ensure_gpg_context(proc_ctx)
+    proc = ensure_gpg_proc_ctx(proc)
 
     out = [
-        str(proc_ctx.exe),
-        f"--homedir", str(proc_ctx.home_dir)
+        str(proc.exe),
+        f"--homedir", str(proc.home_dir)
     ]
 
-    if auth_ctx is not None and auth_ctx.passphrase is not None:
+    if auth is not None and auth.passphrase is not None:
         out.extend([
-            "--passphrase", auth_ctx.passphrase
+            "--passphrase", auth.passphrase
         ])
 
     out.extend(extra_args)
@@ -104,61 +43,222 @@ def _mk_gpg_args(
 
 def gpg_popen(
         args: _OptArgs = None,
-        proc_ctx: OptGpgProcContextSoftT = None,
-        auth_ctx: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
         **kwargs
 ) -> ContextManager[Popen]:
-    args = _mk_gpg_args(args, proc_ctx, auth_ctx)
-    return subprocess.Popen(args, **kwargs)
+    cmd_and_args = _mk_gpg_cmd_and_args(args, proc, auth)
+    try:
+        return Popen(cmd_and_args, **kwargs)
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e
 
 
 def gpg_stdout_it(
         args: _OptArgs = None,
-        proc_ctx: OptGpgProcContextSoftT = None,
-        auth_ctx: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
         **kwargs
 ) -> Iterator[str]:
     assert 'stdout' not in kwargs
     assert 'text' not in kwargs
 
-    with gpg_popen(
-            args, proc_ctx=proc_ctx,
-            auth_ctx=auth_ctx,
-            text=True, stdout=PIPE,
-            **kwargs) as p:
-        try:
-            for l in p.stdout.readlines():
-                yield l.rstrip()
-        except KeyboardInterrupt:
-            p.kill()
-            raise
-        except Exception:
-            p.kill()
-            raise
+    try:
+        with gpg_popen(
+                args, proc=proc,
+                auth=auth,
+                text=True, stdout=PIPE,
+                **kwargs) as p:
+            try:
+                for l in p.stdout.readlines():
+                    yield l.rstrip()
+            except KeyboardInterrupt:
+                p.kill()
+                raise
+            except Exception:
+                p.kill()
+                raise
 
-        retcode = p.poll()
-        if retcode:
-            raise CalledProcessError(retcode, p.args,
-                                     output=None, stderr=None)
+            retcode = p.poll()
+            if retcode:
+                raise CalledProcessError(retcode, p.args,
+                                         output=None, stderr=None)
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e
 
 
 def run_gpg(
         args: _OptArgs,
-        proc_ctx: OptGpgProcContextSoftT = None,
-        auth_ctx: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
         **kwargs
 ) -> CompletedProcess:
-    args = _mk_gpg_args(args, proc_ctx, auth_ctx)
-    return subprocess.run(args, **kwargs)
+    cmd_and_args = _mk_gpg_cmd_and_args(args, proc, auth)
+    try:
+        return run(cmd_and_args, **kwargs)
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e
 
 
 def check_gpg_output(
         args: _OptArgs,
-        proc_ctx: OptGpgProcContextSoftT = None,
-        auth_ctx: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
         **kwargs
 ) -> str:
     assert 'stdout' not in kwargs
     assert 'check' not in kwargs
-    args = _mk_gpg_args(args, proc_ctx, auth_ctx)
-    return subprocess.run(args, check=True, stdout=PIPE, **kwargs).stdout
+    cmd_and_args = _mk_gpg_cmd_and_args(args, proc, auth)
+    try:
+        return run(cmd_and_args, check=True, stdout=PIPE, **kwargs).stdout
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e
+
+
+@dataclass
+class _RunLikeInputs:
+    kwargs: Dict[str, Any]
+    in_kwargs: Dict[str, Any]
+    out_kwargs: Dict[str, Any]
+    communicate_args: Tuple[Optional[str], Optional[float], bool]
+
+
+# The first part of `subprocess.run`.
+# Allow one to implement run like composite pipelines.
+# Return the 3 last inputs of `_communicate_run_impl`.
+def _process_run_like_kwargs(
+        input: Optional[str] = None,
+        capture_output: bool = False,
+        timeout: Optional[float] = None,
+        check: bool = False,
+        **kwargs
+) -> _RunLikeInputs:
+    in_kwargs = dict()
+
+    if input is not None:
+        if kwargs.get('stdin') is not None:
+            raise ValueError('stdin and input arguments may not both be used.')
+        in_kwargs['stdin'] = PIPE
+
+    out_kwargs = dict()
+
+    if capture_output:
+        if kwargs.get('stdout') is not None or kwargs.get('stderr') is not None:
+            raise ValueError('stdout and stderr arguments may not be used '
+                             'with capture_output.')
+        out_kwargs['stdout'] = PIPE
+        out_kwargs['stderr'] = PIPE
+
+    for k in ['stdin', 'stdout', 'stderr']:
+        try:
+            del kwargs[k]
+        except KeyError:
+            pass
+
+    # All keys should have been handled as in or out here.
+    assert not kwargs
+
+    return _RunLikeInputs(
+        kwargs=kwargs,
+        in_kwargs=in_kwargs,
+        out_kwargs=out_kwargs,
+        communicate_args=(input, timeout, check)
+    )
+
+
+# The last part of `subprocess.run`.
+# Allow one to implement run like composite pipelines.
+# Its 3 last inputs match the return of `_process_run_like_kwargs`.
+def _communicate_run_impl(
+        process: Popen,
+        input: Optional[str] = None,
+        timeout: Optional[float] = None,
+        check: bool = False
+) -> CompletedProcess:
+    try:
+        stdout, stderr = process.communicate(input, timeout=timeout)
+    except TimeoutExpired as exc:
+        process.kill()
+        if "win32" == sys.platform:
+            exc.stdout, exc.stderr = process.communicate()
+        else:
+            process.wait()
+        raise
+    except KeyboardInterrupt:
+        process.kill()
+        raise
+    except Exception:
+        process.kill()
+        raise
+
+    retcode = process.poll()
+    if check and retcode:
+        raise CalledProcessError(retcode, process.args,
+                                 output=stdout, stderr=stderr)
+    return CompletedProcess(process.args, retcode, stdout, stderr)
+
+
+def run_precmd_and_pipe_to_gpg(
+        pre_cmd: str,
+        pre_args: _OptArgs,
+        args: _OptArgs,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
+        **kwargs
+) -> CompletedProcess:
+    try:
+        run_like_ins = _process_run_like_kwargs(**kwargs)
+
+        if pre_args is None:
+            pre_args = []
+
+        pre_cmd_and_args = [pre_cmd]
+        pre_cmd_and_args.extend(pre_args)
+        pre_p = Popen(
+            pre_cmd_and_args, stdout=PIPE, **run_like_ins.in_kwargs)
+
+        cmd_and_args = _mk_gpg_cmd_and_args(args, proc, auth)
+
+        assert not run_like_ins.kwargs
+        with Popen(
+                cmd_and_args,
+                stdin=pre_p.stdout,
+                **run_like_ins.out_kwargs) as gpg_p:
+            pre_p.stdout.close()
+            out = _communicate_run_impl(gpg_p, *run_like_ins.communicate_args)
+        return out
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e
+
+
+def run_gpg_and_pipe_to_postcmd(
+        post_cmd: str,
+        post_args: _OptArgs,
+        args: _OptArgs,
+        proc: OptGpgProcContextSoftT = None,
+        auth: OptGpgAuthContext = None,
+        **kwargs
+) -> CompletedProcess:
+    try:
+        run_like_ins = _process_run_like_kwargs(**kwargs)
+        cmd_and_args = _mk_gpg_cmd_and_args(args, proc, auth)
+
+        assert not run_like_ins.kwargs
+        gpg_p = Popen(
+            cmd_and_args, stdout=PIPE, **run_like_ins.in_kwargs)
+
+        if post_args is None:
+            post_args = []
+
+        post_cmd_and_args = [post_cmd]
+        post_cmd_and_args.extend(post_args)
+
+        with Popen(
+                post_cmd_and_args,
+                stdin=gpg_p.stdout,
+                **run_like_ins.out_kwargs) as post_p:
+            gpg_p.stdout.close()
+            out = _communicate_run_impl(post_p, *run_like_ins.communicate_args)
+        return out
+    except CalledProcessError as e:
+        raise GpgProcessError.mk_from(e) from e

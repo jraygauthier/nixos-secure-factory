@@ -7,9 +7,9 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Callable, List, Set
+from typing import Any, Optional, Callable, List, Set, TypeVar
 
-from nsft_system_utils.file import write_file_content, touch_file
+from nsft_system_utils.file import write_text_file_content, touch_file
 
 try:
     from _pytest.fixtures import FixtureRequest as _FixtureRequestT
@@ -125,19 +125,29 @@ def copy_ignore_gpg_home_dir(src, names):
     return names
 
 
+_LoadDirContentRetT = TypeVar('_LoadDirContentRetT')
+
+
 def create_dir_content_cached(
         module_filename: Path,
         dir: Path,
-        create_dir_content_fn: Callable[[Path], Any],
+        generate_dir_content_fn: Callable[[Path], _LoadDirContentRetT],
         stale_after_s: Optional[float] = None,
         cache_dir_provider: OptICacheDirProvider = None,
-        copy_ignore_fn: OptCopyIgnoreFnT = None
-) -> None:
-    cache_id = create_dir_content_fn.__name__
+        copy_ignore_fn: OptCopyIgnoreFnT = None,
+        load_dir_content_fn: Optional[Callable[[Path], _LoadDirContentRetT]] = None,
+) -> _LoadDirContentRetT:
+    def default_load_dir_content(in_path: Path) -> _LoadDirContentRetT:
+        pass
+
+    if load_dir_content_fn is None:
+        load_dir_content_fn = default_load_dir_content
+
+    cache_id = generate_dir_content_fn.__name__
 
     cache_state = obtain_cache_dir(
         module_filename,
-        create_dir_content_fn.__name__,
+        generate_dir_content_fn.__name__,
         stale_after_s=stale_after_s,
         cache_dir_provider=cache_dir_provider
     )
@@ -146,24 +156,23 @@ def create_dir_content_cached(
         assert cache_state.path is not None
         shutil.rmtree(dir)
         shutil.copytree(cache_state.path, dir, ignore=copy_ignore_fn)
-        return
+        return load_dir_content_fn(dir)
 
     if cache_state.path is None:
-        create_dir_content_fn(dir)
-        return
+        return generate_dir_content_fn(dir)
 
-    create_dir_content_fn(cache_state.path)
+    generate_dir_content_fn(cache_state.path)
 
     # Write some info about what module / function gave rise to this cache.
     cache_info = cache_state.path.joinpath(".nsft-cache-info")
-    write_file_content(
+    write_text_file_content(
         cache_info, [
             f"{module_filename}::{cache_id}"]
     )
 
     shutil.rmtree(dir)
     shutil.copytree(cache_state.path, dir, ignore=copy_ignore_fn)
-    return
+    return load_dir_content_fn(dir)
 
 
 if _with_pytest:
@@ -203,20 +212,22 @@ if _with_pytest:
     def create_dir_content_cached_from_pytest(
             module_filename: Path,
             dir: Path,
-            create_dir_content_fn: Callable[[Path], Any],
+            generate_dir_content_fn: Callable[[Path], _LoadDirContentRetT],
             request: Optional[_FixtureRequestT],
             stale_after_s: Optional[float] = None,
-            copy_ignore_fn: OptCopyIgnoreFnT = None
-    ) -> None:
+            copy_ignore_fn: OptCopyIgnoreFnT = None,
+            load_dir_content_fn: Optional[Callable[[Path], _LoadDirContentRetT]] = None,
+    ) -> _LoadDirContentRetT:
         if request is None:
             cache_dir_provider = None
         else:
             cache_dir_provider = PyTestCacheDirProvider(request)
 
-        create_dir_content_cached(
+        return create_dir_content_cached(
             module_filename,
             dir,
-            create_dir_content_fn,
+            generate_dir_content_fn,
             stale_after_s,
             cache_dir_provider,
-            copy_ignore_fn)
+            copy_ignore_fn,
+            load_dir_content_fn)
