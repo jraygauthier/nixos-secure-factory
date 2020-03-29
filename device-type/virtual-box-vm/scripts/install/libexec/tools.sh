@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# device_type_install_libexec_dir="$(pkg-nixos-device-type-install-get-libexec-dir)"
+# device_type_install_libexec_dir="$(pkg-nixos-sf-device-type-install-get-libexec-dir)"
 device_common_install_libexec_dir="$(pkg-nixos-device-common-install-get-libexec-dir)"
 . "$device_common_install_libexec_dir/tools.sh"
 

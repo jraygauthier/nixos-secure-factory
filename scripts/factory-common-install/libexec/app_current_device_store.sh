@@ -114,6 +114,39 @@ get_required_current_device_type() {
 }
 
 
+get_required_current_backend() {
+  get_value_from_current_device_yaml_or_if_null_then_error '.backend'
+}
+
+
+get_default_ssh_port_for_current_backend() {
+  local be
+  be="$(get_required_current_backend)" || return 1
+
+  if [[ "virtual_box" == "$be" ]]; then
+    echo "2222"
+    return 0
+  fi
+
+  echo "22"
+}
+
+
+get_default_hostname_for_current_backend() {
+  local be
+  be="$(get_required_current_backend)" || return 1
+
+  if [[ "virtual_box" == "$be" ]]; then
+    echo "localhost"
+    return 0
+  fi
+
+  1>&2 echo "ERROR: ${FUNCNAME[0]}: No proper default can be found!"
+  echo "localhost"
+  return 1
+}
+
+
 get_current_device_hostname() {
   get_value_from_current_device_yaml_or_if_null_then_replace_with '.hostname' ""
 }
@@ -123,9 +156,8 @@ get_resolved_current_device_hostname() {
   local out
   out="$(get_current_device_hostname)" || return 1
 
-  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
   if [[ "$out" == "auto" ]]; then
-    out="localhost"
+    out="$(get_default_hostname_for_current_backend)" || return 1
   fi
 
   echo "$out"
@@ -154,9 +186,8 @@ get_resolved_current_device_ssh_port() {
   local out
   out="$(get_current_device_ssh_port)" || return 1
 
-  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
   if [[ "$out" == "auto" ]]; then
-    out="2222"
+    out="$(get_default_ssh_port_for_current_backend)" || return 1
   fi
 
   echo "$out"

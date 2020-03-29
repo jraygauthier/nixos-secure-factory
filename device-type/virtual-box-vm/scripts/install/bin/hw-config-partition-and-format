@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-device_type_install_libexec_dir="$(pkg-nixos-device-type-install-get-libexec-dir)"
+device_type_install_libexec_dir="$(pkg-nixos-sf-device-type-install-get-libexec-dir)"
 . "$device_type_install_libexec_dir/tools.sh"
 ensure_supported_device_from_nixos_live_cd
 
