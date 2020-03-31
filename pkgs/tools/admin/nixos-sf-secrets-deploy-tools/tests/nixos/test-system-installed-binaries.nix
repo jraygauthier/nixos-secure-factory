@@ -42,6 +42,7 @@ let
 
         mkdir -p "$out/bin"
         makeWrapper "${customPython}/bin/pytest" "$out/bin/pytest-run-tests-${testName}" \
+          --set NIXOS_SF_TEST_LIB_BIN_PATH "${coreutils}/bin:${pkgs.gnupg}/bin" \
           --add-flags "--color yes" \
           --add-flags "'$share_dir/${testPath}'"
       '';

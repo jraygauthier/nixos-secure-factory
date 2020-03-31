@@ -23,16 +23,19 @@ def test_gpg_encrypt_decrypt_file_gpg(
     ori_file = tmp_enc_dec_dir.joinpath("file.txt")
 
     ori_file_content = [
-        "Line1"
+        "Line1",
         "Line2"
     ]
 
     write_text_file_content(ori_file, ori_file_content)
 
+    ori_file_content_reread = read_text_file_content(ori_file)
+    assert 2 == len(ori_file_content_reread)
+
     logging.info("encrypt_file_to_gpg_file")
-    gpg_b64_file = encrypt_file_to_gpg_file(
+    enc_gpg_file = encrypt_file_to_gpg_file(
         ori_file,
-        tmp_enc_dec_dir.joinpath("file.txt.b64.gpg"),
+        tmp_enc_dec_dir.joinpath("file.txt.gpg"),
         pre_encode_to_b64=False,
         recipients=map(lambda x: x.fpr, fix.e_e.keys.all),
         **fix.e_e.as_proc_dict()
@@ -40,14 +43,15 @@ def test_gpg_encrypt_decrypt_file_gpg(
 
     logging.info("decrypt_gpg_file_to_file")
     dec_file = decrypt_gpg_file_to_file(
-        gpg_b64_file,
+        enc_gpg_file,
         tmp_enc_dec_dir.joinpath("decrypted-file.txt"),
         post_decode_from_b64=False,
         **fix.d_a.as_proc_auth_dict()
     )
 
     dec_file_content = read_text_file_content(dec_file)
-
+    logging.info(f"dec_file_content: {dec_file_content}")
+    assert 2 == len(dec_file_content)
     assert ori_file_content == dec_file_content
 
 
@@ -59,11 +63,14 @@ def test_gpg_encrypt_decrypt_file_b64_gpg(
     ori_file = tmp_enc_dec_dir.joinpath("file.txt")
 
     ori_file_content = [
-        "Line1"
+        "Line1",
         "Line2"
     ]
 
     write_text_file_content(ori_file, ori_file_content)
+
+    ori_file_content_reread = read_text_file_content(ori_file)
+    assert 2 == len(ori_file_content_reread)
 
     logging.info("encrypt_file_to_gpg_file")
     gpg_b64_file = encrypt_file_to_gpg_file(
@@ -74,6 +81,18 @@ def test_gpg_encrypt_decrypt_file_b64_gpg(
         **fix.e_e.as_proc_dict()
     )
 
+    logging.info("decrypt_gpg_file_to_file(no b64)")
+    dec_file_no_b64 = decrypt_gpg_file_to_file(
+        gpg_b64_file,
+        tmp_enc_dec_dir.joinpath("decrypted-file-no-b64.txt"),
+        post_decode_from_b64=False,
+        **fix.d_a.as_proc_auth_dict()
+    )
+
+    dec_file_no_b64_content = read_text_file_content(dec_file_no_b64)
+    logging.info(f"dec_file_no_b64_content: {dec_file_no_b64_content}")
+    assert ori_file_content != dec_file_no_b64_content
+
     logging.info("decrypt_gpg_file_to_file")
     dec_file = decrypt_gpg_file_to_file(
         gpg_b64_file,
@@ -83,5 +102,7 @@ def test_gpg_encrypt_decrypt_file_b64_gpg(
     )
 
     dec_file_content = read_text_file_content(dec_file)
+    logging.info(f"dec_file_content: {dec_file_content}")
+    assert 2 == len(dec_file_content)
 
     assert ori_file_content == dec_file_content

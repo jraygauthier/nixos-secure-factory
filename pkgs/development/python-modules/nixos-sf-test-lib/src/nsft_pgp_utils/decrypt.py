@@ -72,13 +72,9 @@ def _decrypt_from_gpg_file(
 
     assert out_file is not None or out_as_text_str
 
-    if out_file is not None:
-        assert not out_as_text_str
-        args.extend([
-            "-o", f"{out_file}",
-        ])
-
-    args.append(f"{in_file}")
+    in_file_args = [
+        f"{in_file}"
+    ]
 
     run_gpg_kwargs: Dict[str, Any] = {
         'check': True,
@@ -86,20 +82,52 @@ def _decrypt_from_gpg_file(
         'auth': auth
     }
 
-    if out_as_text_str:
-        run_gpg_kwargs['text'] = True
-        run_gpg_kwargs['stdout'] = subprocess.PIPE
-
     if not post_decode_from_b64:
-        compl_p = run_gpg(args, **run_gpg_kwargs)
+        out_kwargs: Dict[str, Any] = dict()
+
+        if out_as_text_str:
+            out_kwargs['text'] = True
+            out_kwargs['stdout'] = subprocess.PIPE
+
+        run_gpg_kwargs.update(out_kwargs)
+
+        if out_file is not None:
+            assert not out_as_text_str
+            args.extend([
+                "-o", f"{out_file}",
+            ])
+
+        args.extend(in_file_args)
+        compl_p = run_gpg(
+            args, **run_gpg_kwargs)
         return _process_decrypt_output(
             compl_p, out_file, out_as_text_str)
 
     post_cmd = "base64"
     post_args = ["-d"]
 
-    compl_p = run_gpg_and_pipe_to_postcmd(
-        post_cmd, post_args, args, **run_gpg_kwargs)
+    args.extend(in_file_args)
+
+    if out_file is not None:
+        assert not out_as_text_str
+
+        with open(out_file, "wb") as of:
+            out_kwargs = {
+                'stdout': of
+            }
+            compl_p = run_gpg_and_pipe_to_postcmd(
+                post_cmd, post_args, out_kwargs,
+                args, None, **run_gpg_kwargs)
+    else:
+        if out_as_text_str:
+            out_kwargs = {
+                'text': True,
+                'stdout': subprocess.PIPE
+            }
+
+        compl_p = run_gpg_and_pipe_to_postcmd(
+            post_cmd, post_args, out_kwargs,
+            args, None, **run_gpg_kwargs)
 
     return _process_decrypt_output(
         compl_p, out_file, out_as_text_str)

@@ -22,7 +22,7 @@ release:
 tests-sandboxed-lib:
 	nix-build release.nix -A tests.lib
 
-tests-sandboxed-install:
+tests-sandboxed-installed:
 	nix-build release.nix -A tests.installed
 
 tests-sandboxed-nixos:
@@ -32,10 +32,10 @@ tests-sandboxed-all:
 	nix-build release.nix -A tests.all
 
 tests-lib:
-	nix-shell --pure release.nix -A tests.lib --run 'pytest tests/lib'
+	nix-shell release.nix -A tests.lib --run 'pytest tests/lib'
 
 tests-installed:
-	nix-shell --pure release.nix -A tests.installed --run 'pytest tests/installed'
+	nix-shell release.nix -A tests.installed --run 'pytest tests/installed'
 
 tests-nixos: tests-sandboxed-nixos
 

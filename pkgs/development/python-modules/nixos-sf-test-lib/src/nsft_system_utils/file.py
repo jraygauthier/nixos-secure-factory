@@ -9,7 +9,8 @@ def touch_file(filename: Path) -> None:
 
 def write_text_file_content(filename: Path, lines: Iterable[str]) -> None:
     with open(filename, "w") as f:
-        f.writelines(lines)
+        for l in lines:
+            f.write(f"{l}\n")
 
 
 def read_text_file_content_it(filename: Path) -> Iterator[str]:

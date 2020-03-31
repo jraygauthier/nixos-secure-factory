@@ -62,6 +62,7 @@ let
       buildInputs = [ testPython ] ++ runTimeDeps;
 
       buildPhase = ''
+        export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
         pytest --color=yes ${testPath} | tee ./pytest.log
       '';
 
@@ -103,6 +104,7 @@ rec {
       shellHook = ''
         export PATH="${builtins.toString ./bin}:$PATH"
         export "PYTHON_INTERPRETER=${devPython}/bin/python"
+        export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
 
         # TODO: Make this more concise while avoiding the vscode debugger issue
         # observed when using the bash colon trick.

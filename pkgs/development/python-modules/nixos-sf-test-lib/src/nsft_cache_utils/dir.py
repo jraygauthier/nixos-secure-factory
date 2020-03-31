@@ -84,9 +84,11 @@ def obtain_cache_dir(
         cache_dir_provider = DefaultCacheDirProvider()
 
     prov_dir_state = cache_dir_provider.mk_cache_dir(module_filename, cache_id)
+
     if prov_dir_state.path is None:
         assert not prov_dir_state.valid
-        # No possible cache for unknown reason. Caching might be disabled.
+        # No possible cache for unknown reason. Caching might be disabled or
+        # file system used by the cache provider read-only.
         return CacheDirState(path=None, valid=False)
 
     cache_dir = prov_dir_state.path
@@ -175,10 +177,34 @@ def create_dir_content_cached(
     return load_dir_content_fn(dir)
 
 
-if _with_pytest:
+# There is not much I can do to fix complexity here as indent
+# is artificial.
+if _with_pytest:  # noqa C901
     class PyTestCacheDirProvider(ICacheDirProvider):
         def __init__(self, request: _FixtureRequestT) -> None:
             self._request = request
+
+        def _mk_pytest_cache_dir(
+                self, cache_key: str, hashed_dir_name: str) -> Optional[Path]:
+
+            try:
+                # Some program such as gpg do not work well with long files names.
+                # Using a short hash of what would have been the dir name fixes
+                # those cases.
+                cache_dir_str = str(self._request.config.cache.makedir(
+                    hashed_dir_name))
+            except OSError as e:
+                if 30 != e.errno:
+                    raise  # re-raise
+
+                # Read-only file-system.
+                return None
+
+            cache_dir = Path(cache_dir_str)
+            assert cache_dir.exists()
+
+            self._request.config.cache.set(cache_key, str(cache_dir))
+            return cache_dir
 
         def mk_cache_dir(
                 self, module_filename: Path, cache_id: str) -> CacheDirState:
@@ -190,23 +216,14 @@ if _with_pytest:
             cache_key = f"nsft-cache/{module_name}/{cache_id}/{unique_hashed_str}"
             existing_cache_dir_str = self._request.config.cache.get(cache_key, None)
 
+            cache_dir = None
             if existing_cache_dir_str is not None:
                 cache_dir = Path(existing_cache_dir_str)
                 if cache_dir.exists():
                     return CacheDirState(path=cache_dir, valid=True)
 
             hashed_dir_name = f"nsft-{unique_hashed_str}"
-
-            # Some program such as gpg do not work well with long files names.
-            # Using a short hash of what would have been the dir name fixes
-            # those cases.
-            cache_dir_str = str(self._request.config.cache.makedir(
-                hashed_dir_name))
-
-            cache_dir = Path(cache_dir_str)
-            assert cache_dir.exists()
-
-            self._request.config.cache.set(cache_key, str(cache_dir))
+            cache_dir = self._mk_pytest_cache_dir(cache_key, hashed_dir_name)
             return CacheDirState(path=cache_dir, valid=False)
 
     def create_dir_content_cached_from_pytest(

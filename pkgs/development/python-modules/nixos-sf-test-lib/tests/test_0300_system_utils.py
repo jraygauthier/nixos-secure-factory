@@ -34,12 +34,15 @@ def test_touch_file(temp_dir: Path) -> None:
 
 def test_write_and_read_file_content(temp_dir: Path) -> None:
     dummy_file = temp_dir.joinpath("dummy.txt")
+    logging.info(f"dummy_file: {dummy_file}")
     content = [
-        "Line1"
+        "Line1",
         "Line2"
     ]
     write_text_file_content(dummy_file, content)
     read_content = read_text_file_content(dummy_file)
+
+    assert 2 == len(read_content)
 
     assert content == read_content
 

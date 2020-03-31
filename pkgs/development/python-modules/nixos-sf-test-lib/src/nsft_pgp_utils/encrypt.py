@@ -68,30 +68,39 @@ def _encrypt_to_gpg_file(
 
     assert in_file is not None or in_text_content is not None
 
+    in_proc_args = []
     if in_file is not None:
         assert in_text_content is None
-        args.append(f"{in_file}")
+        in_proc_args.append(f"{in_file}")
 
     run_gpg_kwargs: Dict[str, Any] = {
         'check': True,
         'proc': proc
     }
 
+    in_kwargs: Dict[str, Any] = dict()
+
     if in_text_content is not None:
         assert in_file is None
-        run_gpg_kwargs['text'] = True
-        run_gpg_kwargs['input'] = in_text_content
+        in_kwargs['text'] = True
+        in_kwargs['input'] = in_text_content
 
     if not pre_encode_to_b64:
+        run_gpg_kwargs.update(in_kwargs)
         run_gpg(
-            args, **run_gpg_kwargs)
+            args + in_proc_args, **run_gpg_kwargs)
         return out_file
 
     pre_cmd = "base64"
     pre_args: List[str] = []
 
     run_precmd_and_pipe_to_gpg(
-        pre_cmd, pre_args, args, **run_gpg_kwargs)
+        pre_cmd,
+        pre_args + in_proc_args,
+        in_kwargs,
+        args,
+        None,
+        **run_gpg_kwargs)
 
     return out_file
 

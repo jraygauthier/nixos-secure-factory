@@ -100,6 +100,13 @@ deploy_gpg_base64_encoded_file() {
 }
 
 
+deploy_gpg_base64_encoded_file_to_dev_null() {
+  local src_file="${1?}"
+  local tgt_file="/dev/null"
+  deploy_gpg_base64_encoded_file "$src_file" "$tgt_file"
+}
+
+
 decrypt_gpg_file_to_stdout() {
   local src_file="${1?}"
   local gpg_args
@@ -119,6 +126,13 @@ deploy_gpg_file() {
 }
 
 
+deploy_gpg_file_to_dev_null() {
+  local src_file="${1?}"
+  local tgt_file="/dev/null"
+  deploy_gpg_file "$src_file" "$tgt_file"
+}
+
+
 deploy_pgp_file() {
   local src_file="${1?}"
   local tgt_file="${2?}"
@@ -131,9 +145,15 @@ deploy_pgp_file() {
 
   if is_pgp_file_b64_encoded "$file_exts" "$b64_encoded"; then
     # Has been base64 encoded before encryption.
+    # We want to rule out any gpg issues before writing the file.
+    deploy_gpg_base64_encoded_file_to_dev_null "$src_file" || return 1
+    # We do the actual job here.
     deploy_gpg_base64_encoded_file "$src_file" "$tgt_file" || return 1
   else
     # Has not been base64 encoded. Only decrypt.
+    # We want to rule out any gpg issues before writing the file.
+    deploy_gpg_file_to_dev_null "$src_file" || return 1
+    # We do the actual job here.
     deploy_gpg_file "$src_file" "$tgt_file" || return 1
   fi
 }
@@ -147,6 +167,6 @@ deploy_pgp_file_w_inherited_permissions() {
   local tgt_dir
   tgt_dir="$(dirname "$tgt_file")"
   mkdir_w_inherited_permissions "$tgt_dir" || return 1
-  deploy_pgp_file "$src_file" "$tgt_file" "$b64_encoded"
+  deploy_pgp_file "$src_file" "$tgt_file" "$b64_encoded" || return 1
   inherit_permissions_from "$tgt_file" "$tgt_dir"
 }
