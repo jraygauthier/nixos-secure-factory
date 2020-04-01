@@ -70,3 +70,11 @@ def ensure_gpg_ctx(
     return GpgContext(
         auth=ensure_gpg_auth_ctx(auth),
         proc=ensure_gpg_proc_ctx(proc))
+
+
+def mk_empty_gpg_ctx_w_ext_info(
+        auth: OptGpgAuthContext = None,
+        proc: OptGpgProcContextSoftT = None
+) -> GpgContextWExtInfo:
+    ctx = ensure_gpg_ctx(auth, proc)
+    return GpgContextWExtInfo(**ctx.__dict__)

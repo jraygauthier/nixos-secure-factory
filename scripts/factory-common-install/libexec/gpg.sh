@@ -430,7 +430,7 @@ EOF
     --passphrase "$passphrase" \
     --list-secret-keys
   nix-gpg --homedir "$target_gpg_home_dir" \
-    --batch --passphrase "$passphrase" --quick-add-key "$master_key_fingerprint" rsa sign 1y
+    --batch --passphrase "$passphrase" --quick-add-key "$master_key_fingerprint" rsa4096 sign 1y
 }
 
 

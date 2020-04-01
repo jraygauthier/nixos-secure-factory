@@ -1,6 +1,12 @@
 import shutil
+
+from nsft_shell_utils.outcome import (
+    ExpShOutcome,
+    ExpShOutcomeByCtxSoftT,
+    ensure_exp_shell_outcome_by_context,
+)
 from nsft_shell_utils.permissions import has_admin_priviledges
-from nsft_system_utils.os import get_os_users, get_os_groups
+from nsft_system_utils.os import get_os_groups, get_os_users
 
 
 def is_package_installed() -> bool:
@@ -19,3 +25,12 @@ def from_nixos_test_machine() -> bool:
         and "nsft-yet-another-user" in get_os_users()
         and "nsft-yet-another-group" in get_os_groups()
     )
+
+
+def get_current_ctx_outcome(
+        expected_outcome: ExpShOutcomeByCtxSoftT) -> ExpShOutcome:
+    exp_outcome = ensure_exp_shell_outcome_by_context(expected_outcome)
+    if from_nixos_test_machine():
+        return exp_outcome.privileged
+    else:
+        return exp_outcome.unprivileged

@@ -50,6 +50,8 @@ def ensure_file_permissions_opt(
 
 def ensure_file_permissions_w_ref(
         in_value: FilePermissionsSoftT, ref_file: Path) -> FilePermissions:
+    assert ref_file.exists()
+
     if isinstance(in_value, FilePermissions):
         return in_value
 

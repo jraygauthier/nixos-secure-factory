@@ -13,8 +13,16 @@ typechecks:
 tests:
 	pytest
 
-lint:
+lint: lint-shell lint-python
+
+lint-python:
 	flake8
+
+lint-shell:
+	shellcheck -x -P \
+	  "$(shell pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir)" \
+	  $(shell find ./sh-lib -type f -name "*.sh") \
+	  $(shell find ./bin -mindepth 1 -executable -type f)
 
 release:
 	nix-build release.nix -A release
@@ -32,10 +40,10 @@ tests-sandboxed-all:
 	nix-build release.nix -A tests.all
 
 tests-lib:
-	nix-shell release.nix -A tests.lib --run 'pytest tests/lib'
+	pytest tests/lib
 
 tests-installed:
-	nix-shell release.nix -A tests.installed --run 'pytest tests/installed'
+	pytest tests/installed
 
 tests-nixos: tests-sandboxed-nixos
 

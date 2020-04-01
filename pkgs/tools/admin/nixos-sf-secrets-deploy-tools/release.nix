@@ -36,7 +36,7 @@ let
     flake8
   ]);
 
-  libTestInputs = release.buildInputs;
+  libTestInputs = release.buildInputs ++ [release];
 
   installedTestInputs = [
     env
@@ -62,8 +62,11 @@ let
       buildInputs = [ testPython ] ++ runTimeDeps;
 
       buildPhase = ''
+        if [[ "1" != "''${IN_NIX_SHELL+1}" ]]; then
+          export "NIXOS_SF_TEST_LIB_NO_DIR_CACHE=1"
+        fi
         export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
-        pytest --color=yes ${testPath} | tee ./pytest.log
+        pytest --color=yes "${testPath}" | tee ./pytest.log
       '';
 
       installPhase = ''
@@ -99,6 +102,7 @@ rec {
 
       buildInputs = [
         devPython
+        shellcheck
       ];
 
       shellHook = ''

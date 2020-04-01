@@ -70,6 +70,14 @@ class DisabledCacheDirProvider(ICacheDirProvider):
         return CacheDirState(path=None, valid=False)
 
 
+def _is_dir_caching_disabled() -> bool:
+    no_dir_cache_env_var = os.environ.get("NIXOS_SF_TEST_LIB_NO_DIR_CACHE", "0")
+    if "1" == no_dir_cache_env_var:
+        return True
+
+    return False
+
+
 def obtain_cache_dir(
         module_filename: Path,
         cache_id: str,
@@ -80,7 +88,9 @@ def obtain_cache_dir(
         # Defaults to 30 minutes.
         stale_after_s = 60 * 30
 
-    if cache_dir_provider is None:
+    if _is_dir_caching_disabled():
+        cache_dir_provider = DisabledCacheDirProvider()
+    elif cache_dir_provider is None:
         cache_dir_provider = DefaultCacheDirProvider()
 
     prov_dir_state = cache_dir_provider.mk_cache_dir(module_filename, cache_id)

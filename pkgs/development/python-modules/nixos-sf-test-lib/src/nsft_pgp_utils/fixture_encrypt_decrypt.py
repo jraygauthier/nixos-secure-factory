@@ -9,20 +9,17 @@ from .ctx_gen_types import (
 from .ctx_types import GpgContextWExtInfo, GpgContext, mk_gpg_ctx_for_user_home_dir
 from .secret_id import create_gpg_secret_identity
 from .query import query_gpg_context_w_ext_info
-from .io_export import export_gpg_public_key_to_text
-from .io_import import import_gpg_key_text
-from .trust_types import GpgOwnerTrust
-from .trust import sign_and_trust_gpg_key
+from ._fixture_gen_tools import import_pub_key_for_all_sids_in_ctxs
 
 
 @dataclass
-class GpgEncryptDecryptBasicGenInfo:
+class _GpgEncryptDecryptBasicGenInfo:
     d_a: GpgContextGenInfo
     d_b: GpgContextGenInfo
     e_e: GpgContextGenInfo
 
 
-def mk_gpg_encrypt_decrypt_basic_gen_info() -> GpgEncryptDecryptBasicGenInfo:
+def _mk_gpg_encrypt_decrypt_basic_gen_info() -> _GpgEncryptDecryptBasicGenInfo:
     def _mk_gen_info(in_fn_and_elp: Tuple[str, str]) -> GpgContextGenInfo:
         first_name, email_local_part = in_fn_and_elp
 
@@ -35,7 +32,7 @@ def mk_gpg_encrypt_decrypt_basic_gen_info() -> GpgEncryptDecryptBasicGenInfo:
             ]
         )
 
-    return GpgEncryptDecryptBasicGenInfo(
+    return _GpgEncryptDecryptBasicGenInfo(
         *map(_mk_gen_info, [
             ("DecrypterA", "decrypter-a"),
             ("DecrypterB", "decrypter-b"),
@@ -45,65 +42,74 @@ def mk_gpg_encrypt_decrypt_basic_gen_info() -> GpgEncryptDecryptBasicGenInfo:
 
 
 @dataclass
-class GpgUserPaths:
+class _GpgUserPaths:
     home_dir: Path
+    # Other paths here if useful at some point.
 
 
-def mk_gpg_user_paths(home_dir: Path) -> GpgUserPaths:
-    return GpgUserPaths(home_dir)
+def _mk_gpg_user_paths(home_dir: Path) -> _GpgUserPaths:
+    return _GpgUserPaths(home_dir)
 
 
 @dataclass
-class GpgEncryptDecryptBasicPaths:
-    d_a: GpgUserPaths
-    d_b: GpgUserPaths
-    e_e: GpgUserPaths
+class _GpgEncryptDecryptBasicPaths:
+    d_a: _GpgUserPaths
+    d_b: _GpgUserPaths
+    e_e: _GpgUserPaths
 
 
 def mk_gpg_encrypt_decrypt_basic_paths(
-        homes_root_dir: Path) -> GpgEncryptDecryptBasicPaths:
+        homes_root_dir: Path) -> _GpgEncryptDecryptBasicPaths:
 
-    def mk_home_dir(user_name: str) -> GpgUserPaths:
-        return mk_gpg_user_paths(homes_root_dir.joinpath(user_name))
+    def mk_home_dir(user_name: str) -> _GpgUserPaths:
+        return _mk_gpg_user_paths(homes_root_dir.joinpath(user_name))
 
-    return GpgEncryptDecryptBasicPaths(
+    return _GpgEncryptDecryptBasicPaths(
         *map(mk_home_dir, [
-            "decrypter_a",
-            "decrypter_b",
-            "encrypter_e"
+            "decrypter-a",
+            "decrypter-b",
+            "encrypter-e"
         ])
     )
 
 
 @dataclass
-class GpgEncryptDecryptBasicCtxs:
+class _GpgEncryptDecryptBasicCtxs:
     d_a: GpgContext
     d_b: GpgContext
     e_e: GpgContext
 
 
-def mk_gpg_encrypt_decrypt_basic_ctx(
-        homes_root_dir: Path) -> GpgEncryptDecryptBasicCtxs:
+def _mk_gpg_encrypt_decrypt_basic_ctxs(
+        homes_root_dir: Path) -> _GpgEncryptDecryptBasicCtxs:
     ctxs = map(
         lambda ps: mk_gpg_ctx_for_user_home_dir(ps.home_dir),
         mk_gpg_encrypt_decrypt_basic_paths(homes_root_dir).__dict__.values())
 
-    return GpgEncryptDecryptBasicCtxs(
+    return _GpgEncryptDecryptBasicCtxs(
         *ctxs
     )
 
 
 @dataclass
 class GpgEncryptDecryptBasicFixture:
+    #
+    # Part of the trust network (they all know and trust each other fully).
+    #
+    # This is the ideal case / happiest situation possible.
+    #
+
+    # Decrypter contexes
     d_a: GpgContextWExtInfo
     d_b: GpgContextWExtInfo
+    # Encrypter contexes
     e_e: GpgContextWExtInfo
 
 
 def load_gpg_encrypt_decrypt_basic_fixture(
         homes_root_dir: Path) -> GpgEncryptDecryptBasicFixture:
 
-    ctxs = mk_gpg_encrypt_decrypt_basic_ctx(homes_root_dir)
+    ctxs = _mk_gpg_encrypt_decrypt_basic_ctxs(homes_root_dir)
     return GpgEncryptDecryptBasicFixture(
         *[query_gpg_context_w_ext_info(**ctx.as_proc_auth_dict())
             for ctx in ctxs.__dict__.values()]
@@ -113,8 +119,8 @@ def load_gpg_encrypt_decrypt_basic_fixture(
 def generate_gpg_encrypt_decrypt_basic_fixture(
         homes_root_dir: Path) -> GpgEncryptDecryptBasicFixture:
 
-    gen_info = mk_gpg_encrypt_decrypt_basic_gen_info()
-    ctxs = mk_gpg_encrypt_decrypt_basic_ctx(homes_root_dir)
+    gen_info = _mk_gpg_encrypt_decrypt_basic_gen_info()
+    ctxs = _mk_gpg_encrypt_decrypt_basic_ctxs(homes_root_dir)
 
     def gen_ctx(g_info: GpgContextGenInfo, gpg_ctx: GpgContext) -> GpgContextWExtInfo:
         for k_info in g_info.secret_keys:
@@ -129,16 +135,6 @@ def generate_gpg_encrypt_decrypt_basic_fixture(
 
     for ctx_i, ctx in enumerate(fix.__dict__.values()):
         in_ctxs = [c for ci, c in enumerate(fix.__dict__.values()) if ci != ctx_i]
-
-        for in_ctx in in_ctxs:
-            for sk in in_ctx.keys.secret:
-                exp_str = export_gpg_public_key_to_text(
-                    sk.fpr, **in_ctx.as_proc_auth_dict())
-                import_gpg_key_text(exp_str, **ctx.as_proc_dict())
-                # The following is essential as otherwise, file encyption will fail
-                # with this key as a recipient.
-                sign_and_trust_gpg_key(
-                    sk.fpr, GpgOwnerTrust.Fully,
-                    **ctx.as_proc_auth_dict())
+        import_pub_key_for_all_sids_in_ctxs(ctx, in_ctxs)
 
     return load_gpg_encrypt_decrypt_basic_fixture(homes_root_dir)

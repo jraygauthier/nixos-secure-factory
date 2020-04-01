@@ -55,9 +55,18 @@ def get_default_gpg_proc_ctx() -> GpgProcContextExp:
             "PATH": os.environ["PATH"]
         }
 
+    # We want to prevent at any costs any effect of this test lib on the user's
+    # own gnupg home directory. All operations should be performed on temporary
+    # gnupg home dirs.
+    default_gnupg_homedir = "/homeless-shelter/.gnupg"
+
+    env.update({
+        "GNUPGHOME": default_gnupg_homedir
+    })
+
     exe = Path("gpg")
 
-    return GpgProcContextExp(exe, Path("~/.gnupg").expanduser(), env)
+    return GpgProcContextExp(exe, Path(default_gnupg_homedir).expanduser(), env)
 
 
 def _expand_gpg_proc_context_paths(

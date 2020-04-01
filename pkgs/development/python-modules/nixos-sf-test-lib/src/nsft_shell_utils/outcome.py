@@ -257,6 +257,10 @@ class ExpShOutcome:
         assert isinstance(error, subprocess.CalledProcessError)
         self._check_expected_called_process_error(error)
 
+    def check_expected_success(
+            self, cp: subprocess.CompletedProcess) -> None:
+        self.check_as_expected(cp.returncode, cp.stdout, cp.stderr)
+
     def _check_expected_called_process_error(
             self, error: subprocess.CalledProcessError) -> None:
         self.check_as_expected(error.returncode, error.stdout, error.stderr)
@@ -310,8 +314,8 @@ def ensure_exp_shell_outcome_by_context(
 
     # Allow the shortcut of specifying the same output
     # for the 2 contexts.
-    if isinstance(in_value, ExpShOutcome) \
-            or isinstance(in_value, int):
+    if (isinstance(in_value, ExpShOutcome)
+            or isinstance(in_value, int)):
         in_value = (in_value,) * 2
 
     if isinstance(in_value, tuple) and 1 == len(in_value):

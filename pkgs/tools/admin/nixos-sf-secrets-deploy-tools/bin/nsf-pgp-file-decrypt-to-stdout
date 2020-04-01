@@ -3,4 +3,4 @@ set -euf -o pipefail
 sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-secrets-deploy-tools-get-sh-lib-dir")"
 # shellcheck source=SCRIPTDIR/../sh-lib/pgp-file-deploy.sh
 . "$sh_lib_dir/pgp-file-deploy.sh"
-deploy_pgp_file_w_inherited_permissions "$@"
+decrypt_pgp_file_to_stdout "$@"

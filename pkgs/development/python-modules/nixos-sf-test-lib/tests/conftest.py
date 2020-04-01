@@ -16,7 +16,9 @@ from test_lib.gpg_ctx_fixture_gen import (
     generate_gpg_ctx_w_2_distinct_secret_ids_cached,
     generate_gpg_ctx_w_2_same_user_secret_ids_cached,
     generate_gpg_ctx_w_secret_id_cached,
-    generate_gpg_encrypt_decrypt_basic_fixture_cached)
+    generate_gpg_encrypt_decrypt_basic_fixture_cached,
+    generate_gpg_initial_fixture_cached,
+    GpgInitialFixture)
 
 _GpgCtxGenFnT = Callable[[Path, OptPyTestFixtureRequestT], GpgContextWGenInfo]
 
@@ -130,4 +132,13 @@ def gpg_encrypt_decrypt_basic(
         tmp_root_homes_dir: Path
 ) -> GpgEncryptDecryptBasicFixture:
     return generate_gpg_encrypt_decrypt_basic_fixture_cached(
+        tmp_root_homes_dir, request)
+
+
+@pytest.fixture
+def gpg_initial(
+        request: PyTestFixtureRequestT,
+        tmp_root_homes_dir: Path
+) -> GpgInitialFixture:
+    return generate_gpg_initial_fixture_cached(
         tmp_root_homes_dir, request)

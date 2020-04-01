@@ -1,29 +1,24 @@
 import shutil
 from pathlib import Path
-from typing import Callable, TypeVar, Optional
+from typing import Callable, Optional, TypeVar
 
-from nsft_cache_utils.dir import (
-    OptPyTestFixtureRequestT,
-    create_dir_content_cached_from_pytest,
-)
+from nsft_cache_utils.dir import (OptPyTestFixtureRequestT,
+                                  create_dir_content_cached_from_pytest)
 from nsft_pgp_utils.ctx_auth_types import GpgAuthContext
 from nsft_pgp_utils.ctx_gen_types import (
-    GpgContextGenInfo,
-    GpgContextWGenInfo,
-    GpgKeyGenInfo,
-    mk_gpg_ctx_w_gen_info_for_user_home_dir,
-)
+    GpgContextGenInfo, GpgContextWGenInfo, GpgKeyGenInfo,
+    mk_gpg_ctx_w_gen_info_for_user_home_dir)
 from nsft_pgp_utils.ctx_proc_types import mk_gpg_proc_ctx_for_user_home_dir
 from nsft_pgp_utils.ctx_types import GpgContextWExtInfo
 from nsft_pgp_utils.fixture_encrypt_decrypt import (
-    generate_gpg_encrypt_decrypt_basic_fixture,
-    load_gpg_encrypt_decrypt_basic_fixture,
-    GpgEncryptDecryptBasicFixture
-)
+    GpgEncryptDecryptBasicFixture, generate_gpg_encrypt_decrypt_basic_fixture,
+    load_gpg_encrypt_decrypt_basic_fixture)
+from nsft_pgp_utils.fixture_initial import (GpgInitialFixture,
+                                            generate_gpg_initial_fixture,
+                                            load_gpg_initial_fixture)
 from nsft_pgp_utils.home_dir import (
     create_and_assign_proper_permissions_to_gpg_home_dir,
-    create_and_assign_proper_permissions_to_user_home_dir,
-)
+    create_and_assign_proper_permissions_to_user_home_dir)
 from nsft_pgp_utils.query import query_gpg_context_w_ext_info
 from nsft_pgp_utils.secret_id import create_gpg_secret_identity
 
@@ -177,6 +172,15 @@ def generate_gpg_ctx_w_2_same_user_secret_ids_cached(
         home_dir, generate_gpg_ctx_w_2_same_user_secret_ids, request)
     return mk_gpg_ctx_w_gen_info_for_user_home_dir(
         home_dir, get_gpg_ctx_w_2_same_user_secret_ids_info())
+
+
+def generate_gpg_initial_fixture_cached(
+        homes_root_dir: Path, request: OptPyTestFixtureRequestT = None
+) -> GpgInitialFixture:
+    return _create_dir_content_cached(
+        homes_root_dir,
+        generate_gpg_initial_fixture,
+        request, load_gpg_initial_fixture)
 
 
 def generate_gpg_encrypt_decrypt_basic_fixture_cached(

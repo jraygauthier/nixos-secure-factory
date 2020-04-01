@@ -42,6 +42,7 @@ let
 
         mkdir -p "$out/bin"
         makeWrapper "${customPython}/bin/pytest" "$out/bin/pytest-run-tests-${testName}" \
+          --set NIXOS_SF_TEST_LIB_NO_DIR_CACHE "1" \
           --set NIXOS_SF_TEST_LIB_BIN_PATH "${coreutils}/bin:${pkgs.gnupg}/bin" \
           --add-flags "--color yes" \
           --add-flags "'$share_dir/${testPath}'"
@@ -100,9 +101,11 @@ in
   testScript = { nodes }:
     ''
       startAll;
-      # $device->log("pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir");
+      # Check that the package is installed.
       $device->succeed("pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir");
-      # $device->log("pytest-run-tests-installed");
+      # Ensure that gpg is not leaked on the system by the package.
+      $device->succeed("! command -v gpg > /dev/null");
+      # Run tests on the package.
       $device->succeed("pytest-run-tests-installed");
     '';
 })

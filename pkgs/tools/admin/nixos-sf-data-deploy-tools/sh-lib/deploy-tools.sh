@@ -4,7 +4,7 @@ change_mode() {
   local tgt_file="${1?}"
   local new_mode="${2?}"
   local chmod_args=( "$new_mode" "$tgt_file" )
-  echo chmod "${chmod_args[@]}"
+  echo '$ chmod' "${chmod_args[@]}"
   chmod "${chmod_args[@]}"
 }
 
@@ -15,7 +15,7 @@ change_owner() {
   local group="${3:-}"
 
   local chown_args=( "${owner}${group:+":"}${group}" "$tgt_file" )
-  echo chown "${chown_args[@]}"
+  echo '$ chown' "${chown_args[@]}"
   chown "${chown_args[@]}"
 }
 
@@ -25,7 +25,7 @@ inherit_mode_from() {
   local from_file="${2?}"
 
   local chmod_args=( --reference "$from_file" "$tgt_file" )
-  echo chmod "${chmod_args[@]}"
+  echo '$ chmod' "${chmod_args[@]}"
   chmod "${chmod_args[@]}"
 }
 
@@ -35,7 +35,7 @@ inherit_owner_from() {
   local from_file="${2?}"
 
   local chown_args=( --reference "$from_file" "$tgt_file" )
-  echo chown "${chown_args[@]}"
+  echo '$ chown' "${chown_args[@]}"
   chown "${chown_args[@]}"
 }
 
@@ -76,7 +76,7 @@ mkdir_w_inherited_permissions() {
 
   for d in "${to_be_created[@]}"; do
     local mkdir_args=( -m "$oct_mode" "$d" )
-    echo mkdir "${mkdir_args[@]}"
+    echo '$ mkdir' "${mkdir_args[@]}"
     mkdir "${mkdir_args[@]}"
     inherit_permissions_from "$d" "$p_dir"
   done
@@ -88,7 +88,7 @@ deploy_file() {
   local tgt_file="${2?}"
 
   local cp_args=( "$src_file" "$tgt_file" )
-  echo cp "${cp_args[@]}"
+  echo '$ cp' "${cp_args[@]}"
   cp "${cp_args[@]}"
 }
 
@@ -108,6 +108,6 @@ deploy_file_w_inherited_permissions() {
 rm_file() {
   local in_file="${1?}"
   local rm_args=( "-f" "$in_file" )
-  echo rm "${rm_args[@]}"
+  echo '$ rm' "${rm_args[@]}"
   rm "${rm_args[@]}"
 }
