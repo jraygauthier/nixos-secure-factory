@@ -5,7 +5,9 @@
       "type": "pgp-gnupg-keyring",
       "sources": [ "./root/_gnupg/subkeys.gpg-keys.b64.gpg" ],
       "otrust-sources": [ "./root/_gnupg/gpg-otrust.b64.gpg" ],
-      "run-as-user": "root",
+      "target-user": "root",
+      "decrypt-gpg-homedir": "/home/other-user/.gnupg-alt",
+      "decrypt-user": "other-user",
       "permission": {
         "mode": "0700"
       }

@@ -1,41 +1,54 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ nixpkgs ? <nixpkgs>
+, pkgs ? import nixpkgs {}
+}:
 
 let
-  dataBundleDir = ./device/my-device-id/data-override;
-
-  deviceDataOverride = ./device/my-device-id/data-override;
-  deviceData = ./device/my-device-id/data;
-  deviceTypeData = ./device-type/my-device-type/data;
-  deviceFamilyData = ./device-family/my-device-family/data;
-  deviceBaseFamilyData = ./device-family/my-device-base-family/data;
-
-
-  defaultImportsFn = currentDataBundleDir:
-    let
-      mkOptBaseImports = path: [{
-        inherit path;
-        allow-inexistent = true;
-      }];
-      defImportsMap = {
-        "${toString deviceDataOverride}" = mkOptBaseImports deviceData;
-        "${toString deviceData}" = mkOptBaseImports deviceTypeData;
-        "${toString deviceTypeData}" = mkOptBaseImports deviceFamilyData;
-        "${toString deviceFamilyData}" = mkOptBaseImports deviceBaseFamilyData;
-      };
-
-      currentDataBundleDirStr = toString currentDataBundleDir;
-
-      defImports =
-        if defImportsMap ? "${currentDataBundleDirStr}"
-          then defImportsMap."${currentDataBundleDirStr}"
-          else [];
-    in
-      defImports;
-
-  deviceDataDeployDerivation =
+  release =
     import ../../release.nix {
-      inherit dataBundleDir defaultImportsFn nixpkgs;
+      inherit nixpkgs pkgs;
   };
-in {
-  myDeviceDataDeployDerivation = deviceDataDeployDerivation;
+
+  dataDeployLib = release.nix-lib;
+in
+
+with dataDeployLib; with dataDeployLib.impl; rec {
+
+  loadDeviceDataDeployBundle = data0: data1: data2: data3: data4: data5:
+    loadResolvedDataDeployBundle data0 {
+        defaultImportsFn = dd:
+          let
+            defImportsMap = {
+              "${toString data0}" = [ data1 ];
+              "${toString data1}" = [
+                {
+                  path = data2; allow-inexistent = false;
+                }
+              ];
+              "${toString data3}" = [
+                {
+                  path = data4; allow-inexistent = true;
+                }
+              ];
+            };
+
+            ddStr = toString dd;
+
+            defImports =
+              if defImportsMap ? "${ddStr}"
+                then defImportsMap."${ddStr}"
+                else [];
+          in
+            defImports;
+    };
+
+  myDeviceResolvedBundle = loadDeviceDataDeployBundle ./data0 ./data1 ./data2 ./data3 ./data4 ./data5;
+  myDeviceResolvedBundleAsJson = writeToPrettyJson "debug.json" myDeviceResolvedBundle;
+  myDerivationResolvedBundle = mkDerivationResolvedBundleFromResolvedBundle myDeviceResolvedBundle;
+  myDerivationResolvedBundleAsJson =
+    writeResolvedBundleToPrettyJson "deploy.json" myDerivationResolvedBundle;
+
+  myRulesInstallScript = writeRulesInstallScript myDeviceResolvedBundle;
+  myRulesDeployScript = writeRulesDeployScript myDerivationResolvedBundle;
+
+  myDeviceDataDeployDerivation = mkDataDeployDerivationFromResolvedBundle myDeviceResolvedBundle;
 }

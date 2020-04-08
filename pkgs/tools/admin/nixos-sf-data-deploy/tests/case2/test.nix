@@ -1,6 +1,13 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ nixpkgs ? <nixpkgs>
+, pkgs ? import nixpkgs {}
+}:
 
 let
+  release =
+    import ../../release.nix {
+      inherit nixpkgs pkgs;
+  };
+
   dataBundleDir = ./device/my-device-id/data-override;
 
   deviceDataOverride = ./device/my-device-id/data-override;
@@ -33,8 +40,8 @@ let
       defImports;
 
   deviceDataDeployDerivation =
-    import ../../release.nix {
-      inherit dataBundleDir defaultImportsFn nixpkgs;
+    release.deployBundleDir {
+      inherit dataBundleDir defaultImportsFn;
   };
 in {
   myDeviceDataDeployDerivation = deviceDataDeployDerivation;

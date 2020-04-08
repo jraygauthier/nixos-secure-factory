@@ -1,0 +1,50 @@
+{
+  "rules": [
+    {
+      "target": "/var/lib/my-service",
+      "type": "mkdir",
+      "permission": {
+        "mode": "u+rw"
+      }
+    },
+    {
+      "target": "/var/lib/my-service/.config/some-lib",
+      "type": "mkdir"
+    },
+    {
+      "target": "/var/lib/my-service/.config/some-lib/my.cfg",
+      "type": "file",
+      "source": "./lib-cfg/my.cfg",
+      "option": {
+        "allow-inexistant-source": true
+      }
+    },
+    {
+      "target": "/root/.ssh/id_rsa",
+      "type": "pgp-file",
+      "source": "./root/_ssh/id_rsa.b64.gpg",
+      "permission": {
+        "mode": "0600"
+      }
+    },
+    {
+      "target": "/root/.ssh/id_rsa.pub",
+      "type": "pgp-file",
+      "source": "./root/_ssh/id_rsa.pub.b64.gpg",
+      "permission": {
+        "mode": "0644"
+      }
+    },
+    {
+      "target": "/root/.gnupg",
+      "type": "pgp-gnupg-keyring",
+      "sources": [
+        "./root/_gnupg/b-subkeys.gpg-keys.b64.gpg",
+        "./root/_gnupg/a-subkeys.gpg-keys.b64.gpg"
+      ],
+      "otrust-sources": [
+        "./root/_gnupg/b-gpg-otrust.b64.gpg",
+        "./root/_gnupg/a-gpg-otrust.b64.gpg"]
+    }
+  ]
+}

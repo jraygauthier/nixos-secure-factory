@@ -5,3 +5,5 @@ Todo
 
      -  At minimum should check that for a given attribute set, only
         supported keys are used.
+
+ -  Rules grouping / tags.
