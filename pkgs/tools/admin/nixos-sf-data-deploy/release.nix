@@ -19,16 +19,16 @@ let
       inherit nixos-sf-data-deploy-tools;
     };
 
-  deployBundleDir =
-      { dataBundleDir
-      , defaultImportsFn ? dataBundleDir: []
+  mkDataDeployPackage =
+      { bundleDir
+      , defaultImportsFn ? bundleDir: []
       }:
-    nix-lib.mkDataDeployDerivation dataBundleDir {
+    nix-lib.mkDataDeployDerivation bundleDir {
       inherit defaultImportsFn;
     };
 in
 
 {
   inherit nix-lib;
-  inherit deployBundleDir;
+  inherit mkDataDeployPackage;
 }

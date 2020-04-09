@@ -25,16 +25,16 @@ let
       inherit nixos-sf-secrets-deploy-tools;
     };
 
-  deployBundleDir =
-      { dataBundleDir
-      , defaultImportsFn ? dataBundleDir: []
+  mkSecretsDeployPackage =
+      { bundleDir
+      , defaultImportsFn ? bundleDir: []
       }:
-    nix-lib.mkSecretsDeployDerivation dataBundleDir {
+    nix-lib.mkSecretsDeployDerivation bundleDir {
       inherit defaultImportsFn;
     };
 in
 
 {
   inherit nix-lib;
-  inherit deployBundleDir;
+  inherit mkSecretsDeployPackage;
 }

@@ -8,7 +8,7 @@ let
       inherit nixpkgs pkgs;
   };
 
-  dataBundleDir = ./device/my-device-id/data-override;
+  bundleDir = ./device/my-device-id/data-override;
 
   deviceDataOverride = ./device/my-device-id/data-override;
   deviceData = ./device/my-device-id/data;
@@ -40,8 +40,8 @@ let
       defImports;
 
   deviceDataDeployDerivation =
-    release.deployBundleDir {
-      inherit dataBundleDir defaultImportsFn;
+    release.mkSecretsDeployPackage {
+      inherit bundleDir defaultImportsFn;
   };
 in {
   myDeviceDataDeployDerivation = deviceDataDeployDerivation;
