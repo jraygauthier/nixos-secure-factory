@@ -97,11 +97,6 @@ _store_device_secret_files() {
   for rf in $rel_expected_secrets_files; do
     local in_f="${created_secrets_root}/${rf}"
     store_gopass_device_bin_file_secret "$rf" "$in_f" || exit 1
-    # if _is_text_file "$in_f"; then
-    #   store_gopass_device_text_file_secret "$rf" "$in_f" || exit 1
-    # else
-    #   store_gopass_device_bin_file_secret "$rf" "$in_f" || exit 1
-    # fi
   done
 }
 
@@ -116,11 +111,6 @@ _load_device_secret_files() {
   for rf in $rel_expected_secrets_files; do
     local out_f="${stored_secrets_root}/${rf}"
     load_gopass_device_bin_file_secret "$rf" "$out_f" || exit 1
-    # if exists_gopass_device_text_secret "$rf"; then
-    #   load_gopass_device_text_file_secret "$rf" "$out_f" || exit 1
-    # else
-    #   load_gopass_device_bin_file_secret "$rf" "$out_f" || exit 1
-    # fi
   done
 
   find "$stored_secrets_root/$rel_root_dir_of_given_secrets" -exec stat -c '%a %n' {} +

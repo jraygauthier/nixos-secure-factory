@@ -25,7 +25,7 @@ _ensure_gopass_device_id_or_current_device_id() {
 _get_gopass_cdevice_substore_key() {
   local repo_store_key="$1"
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "${2:-}")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "${2:-}")" || return 1
   get_gopass_device_substore_key_impl "$repo_store_key" "$device_id"
 }
 
@@ -65,21 +65,21 @@ get_gopass_cdevice_factory_only_substore_dir() {
 
 exists_gopass_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   exists_gopass_device_substore "$device_id"
 }
 
 
 exists_gopass_factory_only_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   exists_gopass_factory_only_device_substore "$device_id"
 }
 
 
 mount_gopass_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
 
   mount_gopass_device_substore "$device_id"
 }
@@ -87,35 +87,35 @@ mount_gopass_cdevice_substore() {
 
 umount_gopass_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   umount_gopass_device_substore "$device_id"
 }
 
 
 mount_gopass_factory_only_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   mount_gopass_factory_only_device_substore "$device_id"
 }
 
 
 umount_gopass_factory_only_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   umount_gopass_factory_only_device_substore "$device_id"
 }
 
 
 mount_gopass_factory_cdevice_substores() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   mount_gopass_factory_device_substores "$device_id"
 }
 
 
 umount_gopass_factory_cdevice_substores() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   umount_gopass_factory_device_substores "$device_id"
 }
 
@@ -123,38 +123,47 @@ umount_gopass_factory_cdevice_substores() {
 
 rm_no_prompt_gopass_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   rm_no_prompt_gopass_device_substore "$device_id"
 }
 
 
 rm_no_prompt_gopass_factory_only_cdevice_substore() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   rm_no_prompt_gopass_factory_only_device_substore "$device_id"
 }
 
 
 rm_no_prompt_gopass_factory_cdevice_substores() {
   local device_id
-  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")"
+  device_id="$(_ensure_gopass_device_id_or_current_device_id "$@")" || return 1
   rm_no_prompt_gopass_factory_device_substores "$device_id"
 }
 
 
+_get_gopass_device_secrets_store_key_prefix() {
+  # Device secrets will be stored under a "secrets" directory.
+  echo "secrets/"
+}
+
+
 _get_gopass_device_full_store_key_for() {
-  local repo_store_key="$1"
-  local store_key="$2"
+  local repo_store_key="${1?}"
+  local store_key="${2?}"
   local device_id="${3:-}"
 
   local device_store
-  device_store="$(_get_gopass_cdevice_substore_key "$repo_store_key" "$device_id")"
-  local full_store_key="${device_store}/${store_key}"
+  device_store="$(_get_gopass_cdevice_substore_key "$repo_store_key" "$device_id")" || return 1
+
+  local store_key_prefix
+  store_key_prefix="$(_get_gopass_device_secrets_store_key_prefix)" || return 1
+  local full_store_key="${device_store}/${store_key_prefix}${store_key}"
 
   # Remove all leading dot in filenames and directory components.
   # This seems to be poorly supported by gopass.
   local valid_full_store_key
-  valid_full_store_key="$(echo "$full_store_key" | sed -E -e 's#/\.#/_#g')"
+  valid_full_store_key="$(echo "$full_store_key" | sed -E -e 's#/\.#/_#g')" || return 1
   echo "$valid_full_store_key"
 }
 
