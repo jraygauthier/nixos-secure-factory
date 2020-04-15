@@ -1,0 +1,22 @@
+{
+  "ssh-user-defaults": {
+    "pubkey-file-template": [
+      "${ssh-user.name}.rsa.pub",
+      "${ssh-user.name}.pub"
+    ],
+    "pubkey-file-search-path": [
+      "./public-keys-override",
+      "./public-keys",
+      "./public-keys-inherited"
+    ]
+  },
+  "ssh-users": {
+    "my-ssh-user-a": {},
+    "my-ssh-user-b": {},
+    "my-ssh-user-c": { "pubkey-file": "./public-keys/my-ssh-user-c.ed25519.pub" },
+    "my-ssh-user-d": { "pubkey-file-template": "${ssh-user.name}.ed25519.pub" },
+    "my-ssh-user-e": {},
+    "my-ssh-user-f": {},
+    "my-ssh-user-g": {}
+  }
+}

@@ -1,0 +1,2 @@
+my-ssh-user-d ssh pubkey content here.
+Should not get selected as user specified a template which should lead to 'ed25519' being selected.

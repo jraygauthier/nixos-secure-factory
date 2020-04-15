@@ -1,0 +1,30 @@
+{
+  "device-users": {
+    "": {
+      "ssh-groups": [
+        "my-group-3"
+      ],
+      "ssh-users": [
+        "my-ssh-user-f"
+      ]
+    },
+    "my-device-user-a": {
+      "ssh-groups": [
+        "my-group-1"
+      ]
+    },
+    "my-device-user-b": {
+      "ssh-groups": [
+        "my-group-2"
+      ],
+      "ssh-users": [
+        "my-ssh-user-d"
+      ]
+    },
+    "my-device-user-c": {
+      "ssh-users": [
+        "my-ssh-user-e"
+      ]
+    }
+  }
+}
