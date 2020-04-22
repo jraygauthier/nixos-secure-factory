@@ -1,2 +1,1 @@
-my-ssh-user-g ssh pubkey content here.
-Should not get selected has there exist an override.
+my-ssh-user-g.rsa.pub

@@ -25,6 +25,7 @@
       "ssh-users": [
         "my-ssh-user-e"
       ]
-    }
+    },
+    "my-device-user-d": {}
   }
 }

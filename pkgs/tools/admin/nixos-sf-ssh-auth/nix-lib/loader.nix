@@ -5,6 +5,13 @@
 }:
 
 rec {
+  defFileFormats = [
+      { ext = "nix"; }
+      { ext = "json"; }
+      # Yaml support needs more work. Do not activate by default.
+      # { ext = "yaml"; }
+    ];
+
   extendAttrsWSrcsInfo = srcDir: srcStem: srcFlns: attrs:
     assert ! (attrs ? "srcs");
     attrs // {
@@ -16,7 +23,19 @@ rec {
     };
 
 
-  printSingleSrcPath = src:
+  listSrcFilesForSingleSrc = src:
+    src.files;
+
+
+  listSrcFilesForSrcs = srcs:
+    lib.lists.concatMap listSrcFilesForSingleSrc srcs;
+
+
+  printSrcFilesStrForSrcs = sep: srcs:
+    "${lib.strings.concatMapStringsSep sep (fp: builtins.toString fp) (listSrcFilesForSrcs srcs)}";
+
+
+  printSrcStrForSingleSrc = src:
     if 0 == lib.lists.length src.files
       then "defaultSrc[${builtins.toString (src.dir + "/${src.stem}")}]"
     else if 1 == lib.lists.length src.files
@@ -25,12 +44,24 @@ rec {
       "mergedFiles[${lib.strings.concatMapStringsSep ":" (fp: builtins.toString fp) src.files}]";
 
 
-  printSrcPaths = srcs:
+  printSrcStrForSrcs = srcs:
     assert 1 <= lib.lists.length srcs;
     if 1 == lib.lists.length srcs
-      then printSingleSrcPath (lib.lists.head srcs)
+      then printSrcStrForSingleSrc (lib.lists.head srcs)
     else
-      "mergedSrcs[${lib.strings.concatMapStringsSep ":" printSingleSrcPath srcs}]";
+      "mergedSrcs[${lib.strings.concatMapStringsSep ":" printSrcStrForSingleSrc srcs}]";
+
+
+  mergeSrcStrList = srcStrs:
+      let
+        uniqueSrcStrs = lib.lists.unique srcStrs;
+        srcStrsCount = lib.lists.length uniqueSrcStrs;
+      in
+    assert 1 <= srcStrsCount;
+    if 1 == srcStrsCount
+      then lib.lists.head uniqueSrcStrs
+    else
+      "mergedSrcs[${lib.strings.concatStringsSep ":" uniqueSrcStrs}]";
 
 
   getSingleSrcDir = srcs:
@@ -105,6 +136,7 @@ rec {
         # (failing on duplicate attributes, merging list by concat).
         # IDEA: A higher level might be optionally passed in case
         # the default merge behavior is found lacking.
+        # TODO: Meanwhile, we should not allow multiple files to coexists.
         foundFln = lib.lists.findFirst
           builtins.pathExists null potentialFlns;
 

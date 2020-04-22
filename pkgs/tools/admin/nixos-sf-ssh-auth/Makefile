@@ -7,7 +7,6 @@ all: tests
 clean:
 	rm -f ./result*
 
-tests: tests.case1
+tests:
+	nix eval --show-trace --raw -f ./tests runTestsAll
 
-tests.case1:
-	nix-build ./tests/case1/test.nix -A hello
