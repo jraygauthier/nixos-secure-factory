@@ -29,7 +29,7 @@ rec {
 
 
   loadUsersRawAttrs = dCfg: dir:
-    loadAttrs dCfg.dirLayout.fileFormat dir dCfg.dirLayout.users defUsersRawAttrs;
+    loadAttrs dCfg.dir-layout.file-format dir dCfg.dir-layout.users defUsersRawAttrs;
 
 
   resolveStrWUserVarExpansion = user: str:
@@ -97,10 +97,10 @@ rec {
   # explicitely set as part of the section specifying that merge
   # is allowed.
   ensureValidUsersMergePolicy = {
-        allowMergeMismatchingPubKeys ? false
+        allow-merge-mismatching-pubkeys ? false
       }:
     {
-      inherit allowMergeMismatchingPubKeys;
+      inherit allow-merge-mismatching-pubkeys;
     };
 
 
@@ -108,12 +108,12 @@ rec {
 
 
   inheritedUsersMergePolicy = ensureValidUsersMergePolicy {
-      allowMergeMismatchingPubKeys = true;
+      allow-merge-mismatching-pubkeys = true;
     };
 
 
   overrideUsersMergePolicy = ensureValidUsersMergePolicy {
-      allowMergeMismatchingPubKeys = true;
+      allow-merge-mismatching-pubkeys = true;
     };
 
 
@@ -147,7 +147,7 @@ rec {
         yPkf = yu.pubkey.file;
         samePubkey = xPkf == yPkf;
       in
-    assert lib.asserts.assertMsg (umPolValid.allowMergeMismatchingPubKeys || samePubkey) (
+    assert lib.asserts.assertMsg (umPolValid.allow-merge-mismatching-pubkeys || samePubkey) (
         onDisallowedSameSshUserPubkeyMsg uName xu yu
       );
     {
@@ -267,7 +267,7 @@ rec {
           dir "in-memory-user-extra-raw-${qualifierStr}" [] extraRawAttrs;
         userDef = if rawAttrs ? "ssh-user-defaults"
           then
-            resolveUserDefaults dCfg.userDefaultsRawAttr rawAttrs
+            resolveUserDefaults dCfg.user-defaults-raw-attr rawAttrs
           else
             # When extra users are specified without their own defaults
             # specification, we inherit from the dir's loaded defaults
@@ -280,14 +280,14 @@ rec {
 
   loadUsersRawExtra = dCfg: dir: qualifierStr: extraRawAttrs:
     loadUsersRawExtra'
-      dCfg dir (resolveUserDefaults dCfg.userDefaultsRawAttr rawAttrs)
+      dCfg dir (resolveUserDefaults dCfg.user-defaults-raw-attr rawAttrs)
       qualifierStr extraRawAttrs;
 
 
   loadUsersPlain = dCfg: dir:
       let
         rawAttrs = loadUsersRawAttrs dCfg dir;
-        userDef = resolveUserDefaults dCfg.userDefaultsRawAttr rawAttrs;
+        userDef = resolveUserDefaults dCfg.user-defaults-raw-attr rawAttrs;
       in
     resolveUsers userDef rawAttrs;
 
@@ -297,18 +297,18 @@ rec {
     }:
       let
         rawAttrs = loadUsersRawAttrs dCfg dir;
-        userDef = resolveUserDefaults dCfg.userDefaultsRawAttr rawAttrs;
+        userDef = resolveUserDefaults dCfg.user-defaults-raw-attr rawAttrs;
       in
     mergePlainWExtra
       (resolveUsers userDef rawAttrs)
       extraUsers
       {
         inherited = {
-          mergeLOf = mergeListOfUserBundles dCfg.mergePolicy.sshUser.inherited;
+          mergeLOf = mergeListOfUserBundles dCfg.merge-policy.ssh-user.inherited;
           loadExtra = loadUsersRawExtra' dCfg dir userDef "inherited";
         };
         override = {
-          mergeLOf = mergeListOfUserBundles dCfg.mergePolicy.sshUser.override;
+          mergeLOf = mergeListOfUserBundles dCfg.merge-policy.ssh-user.override;
           loadExtra = loadUsersRawExtra' dCfg dir userDef "override";
         };
       };

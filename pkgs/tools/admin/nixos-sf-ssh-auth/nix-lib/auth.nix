@@ -22,24 +22,24 @@ with authModule;
 rec {
   ensureValidAuthMergePolicy = {
         # How to merge ssh users when merging 2 auth.
-        sshUser ? defUsersMergePolicy,
-        # sshGroup ? defGroupsMergePolicy,
+        ssh-user ? defUsersMergePolicy,
+        # ssh-group ? defGroupsMergePolicy,
         # For 2 *device users* with same name, the rhs *auth ssh user set*
         # is always preserved / override entirely the lhs set.
-        allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride ? false,
+        allow-merge-mismatching-authorized-ssh-user-set-whole-override ? false,
         # For 2 *device users* with same name, when the *authorized ssh user set*
         # is found to be different, those set will be allowed to intermingle
-        # according to the above `sshUser` merge policy. By default, for a same
+        # according to the above `ssh-user` merge policy. By default, for a same
         # name user the rhs win (i.e: rhs pub key is preserved).
         # IMPORTANT: With this option on, lhs users can be injected into
         # the rhs authorized set which *breaks the integrity* of rhs.
-        allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix ? false,
+        allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix ? false,
       }:
     {
-      sshUser = ensureValidUsersMergePolicy sshUser;
+      ssh-user = ensureValidUsersMergePolicy ssh-user;
       inherit
-        allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride
-        allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix;
+        allow-merge-mismatching-authorized-ssh-user-set-whole-override
+        allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix;
     };
 
 
@@ -47,37 +47,37 @@ rec {
 
 
   inheritedAuthMergePolicy = ensureValidAuthMergePolicy {
-    sshUser = inheritedUsersMergePolicy;
-    allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride = true;
+    ssh-user = inheritedUsersMergePolicy;
+    allow-merge-mismatching-authorized-ssh-user-set-whole-override = true;
   };
 
 
   inheritedAuthMergePolicyWPiecewise = inheritedAuthMergePolicy // {
-      allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix = true;
+      allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix = true;
     };
 
 
   overrideAuthMergePolicy = ensureValidAuthMergePolicy {
-    sshUser = overrideUsersMergePolicy;
-    allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride = true;
+    ssh-user = overrideUsersMergePolicy;
+    allow-merge-mismatching-authorized-ssh-user-set-whole-override = true;
   };
 
 
   overrideAuthMergePolicyWPiecewise = overrideAuthMergePolicy // {
-      allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix = true;
+      allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix = true;
     };
 
 
 /*
   TODO: Example of potential merge rules for multi file format support.
   internalSameStemFilesAuthMergePolicy = ensureValidAuthMergePolicy {
-    allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix = true;
+    allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix = true;
   };
 */
 
 
   internalAuthMergePolicy = ensureValidAuthMergePolicy {
-    allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix = true;
+    allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix = true;
   };
 
 
@@ -106,8 +106,8 @@ rec {
       let
         amPolValid = ensureValidAuthMergePolicy amPol;
         allowMergeMismatching =
-            amPolValid.allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride
-         || amPolValid.allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix;
+            amPolValid.allow-merge-mismatching-authorized-ssh-user-set-whole-override
+         || amPolValid.allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix;
 
         sameUsrKs = attrsetSameKeys xdu.sshUsers ydu.sshUsers;
       in
@@ -120,18 +120,18 @@ rec {
         # Lhs does not bring anything new to the table so rhs's memberset is taken as a whole
         # diregarding lhs.
         ydu
-    else if amPolValid.allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix
+    else if amPolValid.allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix
       then
         {
           # Some part of lhs's memberset is allowed to be injected into rhs according to
-          # current `sshUser` policy (by default a rhs user will override the lhs user as a whole).
+          # current `ssh-user` policy (by default a rhs user will override the lhs user as a whole).
           # See `ensureValidAuthMergePolicy` important comment about this option's security.
           # TODO: specialize `defUsersMergeOpts` in order to get better error message.
-          sshUsers = mergeUserAttrSets amPolValid.sshUser defUsersMergeOpts xdu.sshUsers ydu.sshUsers;
+          sshUsers = mergeUserAttrSets amPolValid.ssh-user defUsersMergeOpts xdu.sshUsers ydu.sshUsers;
           srcStr = mergeSrcStrList [xdu.srcStr ydu.srcStr];
         }
     else
-      assert amPolValid.allowMergeMismatchingDeviceUserAuthSshUserSetWholeOverride;
+      assert amPolValid.allow-merge-mismatching-authorized-ssh-user-set-whole-override;
       # Rhs's *authorized ssh user set* is chosen as a whole.
       ydu;
 
@@ -214,11 +214,11 @@ rec {
 
 
   loadAuthAlwaysRawAttrs = dCfg: dir:
-    loadAttrs dCfg.dirLayout.fileFormat dir dCfg.dirLayout.authAlways defAuthRawAttrs;
+    loadAttrs dCfg.dir-layout.file-format dir dCfg.dir-layout.auth-always defAuthRawAttrs;
 
 
   loadAuthAlways' = dCfg: dir: users: groups:
-    resolveAuth dCfg.mergePolicy users groups (loadAuthAlwaysRawAttrs dCfg dir);
+    resolveAuth dCfg.merge-policy users groups (loadAuthAlwaysRawAttrs dCfg dir);
 
 
   loadAuthAlways = dCfg: dir:
@@ -230,11 +230,11 @@ rec {
 
 
   getAuthOnDir = dCfg: dir:
-    dir + "/${dCfg.dirLayout.authOn.dir}";
+    dir + "/${dCfg.dir-layout.auth-on.dir}";
 
 
   listSearchPathsForAuthOn = dCfg: dir: onState:
-    mkPathsForSupportedFormats dCfg.dirLayout.fileFormat dir onState;
+    mkPathsForSupportedFormats dCfg.dir-layout.file-format dir onState;
 
 
   listSearchPathsForAuth = dCfg: dir: onStates:
@@ -243,12 +243,12 @@ rec {
 
   loadAuthOnRawAttrs = dCfg: dir: onState:
     loadAttrs
-      dCfg.dirLayout.fileFormat (getAuthOnDir dCfg dir)
-      {stem = onState; mandatoryFile = dCfg.dirLayout.authOn.failOnMissingFile; } defAuthRawAttrs;
+      dCfg.dir-layout.file-format (getAuthOnDir dCfg dir)
+      {stem = onState; mandatory-file = dCfg.dir-layout.auth-on.fail-on-missing-file; } defAuthRawAttrs;
 
 
   loadAuthOn' = dCfg: dir: onState: users: groups:
-    resolveAuth dCfg.mergePolicy users groups (loadAuthOnRawAttrs dCfg dir onState);
+    resolveAuth dCfg.merge-policy users groups (loadAuthOnRawAttrs dCfg dir onState);
 
 
   loadAuthOn = dCfg: dir: onState:
@@ -261,7 +261,7 @@ rec {
 
   loadAuthRawExtra' = dCfg: dir: users: groups: qualifierStr: extraRawAttrs:
     assert null != extraRawAttrs;
-    resolveAuth dCfg.mergePolicy users groups (
+    resolveAuth dCfg.merge-policy users groups (
         extendAttrsWSrcsInfo
           dir "in-memory-auth-extra-raw-${qualifierStr}" [] extraRawAttrs
       );
@@ -282,7 +282,7 @@ rec {
             [ authAlways ]
          ++ (builtins.map (on: (loadAuthOn' dCfg dir on users groups)) onStates);
       in
-    mergeListOfAuthBundles dCfg.mergePolicy.auth.internal listOfPlainAuth;
+    mergeListOfAuthBundles dCfg.merge-policy.auth.internal listOfPlainAuth;
 
 
   loadAuthPlain = dCfg: dir: onStates:
@@ -304,11 +304,11 @@ rec {
       extraAuth
       {
         inherited = {
-          mergeLOf = mergeListOfAuthBundles dCfg.mergePolicy.auth.inherited;
+          mergeLOf = mergeListOfAuthBundles dCfg.merge-policy.auth.inherited;
           loadExtra = loadAuthRawExtra' dCfg dir users groups "inherited";
         };
         override = {
-          mergeLOf = mergeListOfAuthBundles dCfg.mergePolicy.auth.override;
+          mergeLOf = mergeListOfAuthBundles dCfg.merge-policy.auth.override;
           loadExtra = loadAuthRawExtra' dCfg dir users groups "override";
         };
       };

@@ -22,7 +22,7 @@ rec {
 
 
   loadGroupsRawAttrs = dCfg: dir:
-    loadAttrs dCfg.dirLayout.fileFormat dir dCfg.dirLayout.groups defGroupsRawAttrs;
+    loadAttrs dCfg.dir-layout.file-format dir dCfg.dir-layout.groups defGroupsRawAttrs;
 
 
   isSshGroups = groups:
@@ -80,13 +80,13 @@ rec {
 
   ensureValidGroupsMergePolicy = {
         # How to merge ssh users when merging 2 groups.
-        sshUser ? defUsersMergePolicy,
+        ssh-user ? defUsersMergePolicy,
         # Lhs memberset will be completly overriden by rhs memberset.
         # (e.g: rhs will preserve its integrity, nothing from lhs will
         # be injected into rhs).
-        allowMergeMismatchingMemberSetWholeOverride ? false,
+        allow-merge-mismatching-member-set-whole-override ? false,
         # Lhs memberset will be mixed with rhs according to specified
-        # `sshUser` policy (which by default favor rhs override of lhs pubkey
+        # `ssh-user` policy (which by default favor rhs override of lhs pubkey
         # for members with same names).
         # WARNING: Lhs members will be injected into rhs memberse which
         # will change the original definition of the group which most
@@ -94,15 +94,15 @@ rec {
         # Thus, lhs **must** be highly trusted as an attacker might obtain
         # priviledges this way.
         # This is the reason why this is off be default.
-        allowMergeMismatchingMemberSetPiecewiseMix ? false
+        allow-merge-mismatching-member-set-piecewise-mix ? false
         # When none of the 2 above true, an error will be raised when
         # mismatching groups are found.
       }:
     {
-      sshUser = ensureValidUsersMergePolicy sshUser;
+      ssh-user = ensureValidUsersMergePolicy ssh-user;
       inherit
-        allowMergeMismatchingMemberSetWholeOverride
-        allowMergeMismatchingMemberSetPiecewiseMix;
+        allow-merge-mismatching-member-set-whole-override
+        allow-merge-mismatching-member-set-piecewise-mix;
     };
 
 
@@ -110,34 +110,34 @@ rec {
 
 
   inheritedGroupsMergePolicy = ensureValidGroupsMergePolicy {
-      sshUser = inheritedUsersMergePolicy;
-      allowMergeMismatchingMemberSetWholeOverride = true;
+      ssh-user = inheritedUsersMergePolicy;
+      allow-merge-mismatching-member-set-whole-override = true;
       # See `ensureValidGroupsMergePolicy` comment before changing the below
       # value. This can be a security concern if lightly changed to true.
-      allowMergeMismatchingMemberSetPiecewiseMix = false;
+      allow-merge-mismatching-member-set-piecewise-mix = false;
     };
 
 
   overrideGroupsMergePolicy = ensureValidGroupsMergePolicy {
-      sshUser = overrideUsersMergePolicy;
-      allowMergeMismatchingMemberSetWholeOverride = true;
+      ssh-user = overrideUsersMergePolicy;
+      allow-merge-mismatching-member-set-whole-override = true;
       # See `ensureValidGroupsMergePolicy` comment before changing the below
       # value. This can be a security concern if lightly changed to true.
-      allowMergeMismatchingMemberSetPiecewiseMix = false;
+      allow-merge-mismatching-member-set-piecewise-mix = false;
     };
 
 
   # See `ensureValidGroupsMergePolicy` comment for security implication
   # of using this policy.
   inheritedGroupsMergePolicyWPiecewise = inheritedGroupsMergePolicy // {
-      allowMergeMismatchingMemberSetPiecewiseMix = true;
+      allow-merge-mismatching-member-set-piecewise-mix = true;
     };
 
 
   # See `ensureValidGroupsMergePolicy` comment for security implication
   # of using this policy.
   overrideGroupsMergePolicyWPiecewise = overrideGroupsMergePolicy // {
-      allowMergeMismatchingMemberSetPiecewiseMix = true;
+      allow-merge-mismatching-member-set-piecewise-mix = true;
     };
 
 
@@ -158,8 +158,8 @@ rec {
         gmPolValid = ensureValidGroupsMergePolicy gmPol;
         sameMemKs = attrsetSameKeys xg.members yg.members;
         allowMergeMismatching =
-            gmPolValid.allowMergeMismatchingMemberSetWholeOverride
-         || gmPolValid.allowMergeMismatchingMemberSetPiecewiseMix;
+            gmPolValid.allow-merge-mismatching-member-set-whole-override
+         || gmPolValid.allow-merge-mismatching-member-set-piecewise-mix;
       in
     assert lib.asserts.assertMsg (allowMergeMismatching || sameMemKs) (
         onDisallowedMergeMismatchingMemberSetMsg gName xg yg
@@ -170,18 +170,18 @@ rec {
         # Lhs does not bring anything new to the table so rhs's memberset is taken as a whole
         # diregarding lhs.
         yg
-    else if gmPolValid.allowMergeMismatchingMemberSetPiecewiseMix
+    else if gmPolValid.allow-merge-mismatching-member-set-piecewise-mix
       then
         {
           # Some part of lhs's memberset is allowed to be injected into rhs according to
-          # current `sshUser` policy (by default a rhs user will override the lhs user as a whole).
+          # current `ssh-user` policy (by default a rhs user will override the lhs user as a whole).
           # See `ensureValidGroupsMergePolicy` important comment about this option's security.
           # TODO: Specialize `defUsersMergeOpts` in order to improve error messages.
-          members = mergeUserAttrSets gmPolValid.sshUser defUsersMergeOpts xg.members yg.members;
+          members = mergeUserAttrSets gmPolValid.ssh-user defUsersMergeOpts xg.members yg.members;
           srcStr = mergeSrcStrList [xg.srcStr yg.srcStr];
         }
     else
-      assert gmPolValid.allowMergeMismatchingMemberSetWholeOverride;
+      assert gmPolValid.allow-merge-mismatching-member-set-whole-override;
       # Rhs's memberset is chosen as a whole.
       yg;
 
@@ -288,11 +288,11 @@ rec {
       extraGroups
       {
         inherited = {
-          mergeLOf = mergeListOfGroupBundles dCfg.mergePolicy.sshGroup.inherited;
+          mergeLOf = mergeListOfGroupBundles dCfg.merge-policy.ssh-group.inherited;
           loadExtra = loadGroupsRawExtra' dCfg dir users "inherited";
         };
         override = {
-          mergeLOf = mergeListOfGroupBundles dCfg.mergePolicy.sshGroup.override;
+          mergeLOf = mergeListOfGroupBundles dCfg.merge-policy.ssh-group.override;
           loadExtra = loadGroupsRawExtra' dCfg dir users "override";
         };
       };

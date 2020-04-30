@@ -25,51 +25,51 @@ rec {
   # TODO: Change attrs names to use dash instead of camel case. This
   # might get loaded from an external file.
   defaultAuthDirCfg = {
-    userDefaultsRawAttr = defUserDefaultsRawAttr;
+    user-defaults-raw-attr = defUserDefaultsRawAttr;
 
-    dirLayout = {
-      fileFormat = defFileFormats;
+    dir-layout = {
+      file-format = defFileFormats;
 
       users = {
         stem = "users";
         # If the user file is missing, it is most likely an error.
-        mandatoryFile = false;
+        mandatory-file = false;
       };
 
       groups = {
         stem = "groups";
         # Group management is optional.
-        mandatoryFile = false;
+        mandatory-file = false;
       };
 
-      authAlways = {
+      auth-always = {
         stem = "authorized-always";
         # This is alright to authorize on some state / moments only.
-        mandatoryFile = false;
+        mandatory-file = false;
       };
 
-      authOn = {
+      auth-on = {
         dir = "authorized-on";
         # When a particular moment / state is loaded we want it to
         # fail if the file is absent.
-        failOnMissingFile = false;
+        fail-on-missing-file = false;
       };
     };
 
-    mergePolicy = rec {
+    merge-policy = rec {
       # Used by `mergeUserAttrSets`.
       # Defaults defined in / validated by `ensureValidUsersMergePolicy`.
-      sshUser.inherited = inheritedUsersMergePolicy;
-      sshUser.override = overrideUsersMergePolicy;
+      ssh-user.inherited = inheritedUsersMergePolicy;
+      ssh-user.override = overrideUsersMergePolicy;
 
-      sshGroup.inherited = inheritedGroupsMergePolicy;
-      sshGroup.override = overrideGroupsMergePolicy;
+      ssh-group.inherited = inheritedGroupsMergePolicy;
+      ssh-group.override = overrideGroupsMergePolicy;
 
       auth.internal = internalAuthMergePolicy;
       auth.inherited = inheritedAuthMergePolicy;
       auth.override = overrideAuthMergePolicy;
 
-      finalDeviceUser.internal = internalFinalDeviceUserMergePolicy;
+      final-device-user.internal = internalFinalDeviceUserMergePolicy;
     };
   };
 
@@ -80,7 +80,7 @@ rec {
 
   mkAuthDirDeviceUser = authDir: deviceUsername:
       let
-        deviceUserAuth = mkDeviceUserFromAuth authDir.cfg.mergePolicy authDir deviceUsername;
+        deviceUserAuth = mkDeviceUserFromAuth authDir.cfg.merge-policy authDir deviceUsername;
       in
     { inherit authDir; } // deviceUserAuth;
 

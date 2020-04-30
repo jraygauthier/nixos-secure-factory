@@ -144,7 +144,7 @@ rec {
       in
 
     extendAttrsWSrcsInfo dir stem flns (
-      if fCfg.mandatoryFile || foundFln != null
+      if fCfg.mandatory-file || foundFln != null
         then
           assert lib.asserts.assertMsg (foundFln != null)
             ( "Cannot find file with stem '${stem}' under dir '${builtins.toString dir}'.\n"

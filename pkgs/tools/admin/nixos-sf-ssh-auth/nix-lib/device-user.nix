@@ -27,19 +27,19 @@ rec {
   # the specified *device username*.
   ensureValidFinalDeviceUserMergePolicy = {
         # How to merge ssh users when merging 2 auth.
-        sshUser ? defUsersMergePolicy,
+        ssh-user ? defUsersMergePolicy,
         # Allow that the requested *final user* be missing, fallbacking on
         # the `""` definition. When `false`, an error will be raised.
-        allowMissingFinalDeviceUserDefinition ? false,
+        allow-missing-device-user-definition ? false,
         # A list of *device users* for which an error will be raised in case
         # no *ssh user* is authorized to the final / resulting *device user*.
-        forbidEmptyAuthorizedSetForDeviceUsers ? []
+        forbid-empty-authorized-set-for ? []
       }:
     {
-      sshUser = ensureValidUsersMergePolicy sshUser;
+      ssh-user = ensureValidUsersMergePolicy ssh-user;
       inherit
-        allowMissingFinalDeviceUserDefinition
-        forbidEmptyAuthorizedSetForDeviceUsers;
+        allow-missing-device-user-definition
+        forbid-empty-authorized-set-for;
     };
 
   defFinalDeviceUserMergePolicy = ensureValidFinalDeviceUserMergePolicy {};
@@ -59,7 +59,7 @@ rec {
       in
     {
       # TODO: Specialize `defUsersMergeOpts` in order to improve error messages.
-      sshUsers = mergeUserAttrSets fdumPol.sshUser defUsersMergeOpts xdu.sshUsers ydu.sshUsers;
+      sshUsers = mergeUserAttrSets fdumPol.ssh-user defUsersMergeOpts xdu.sshUsers ydu.sshUsers;
       srcStr = mergeSrcStrList [xdu.srcStr ydu.srcStr];
     };
 
@@ -86,17 +86,17 @@ rec {
         dus = auth.deviceUsers;
         validUsername = "" != deviceUsername;
         existDeviceUserDefinition = dus ? "${deviceUsername}";
-        fdumPol = mPol.finalDeviceUser.internal;
+        fdumPol = mPol.final-device-user.internal;
         emptyAuthSetAllowed = !(
-          lib.lists.elem deviceUsername fdumPol.forbidEmptyAuthorizedSetForDeviceUsers);
+          lib.lists.elem deviceUsername fdumPol.forbid-empty-authorized-set-for);
         authFilesStr = printSrcFilesStrForSrcs "\n" auth.srcs;
       in
     assert lib.asserts.assertMsg (validUsername)
       "Invalid \"final\" device username: '${deviceUsername}'.";
-    assert lib.asserts.assertMsg (fdumPol.allowMissingFinalDeviceUserDefinition || existDeviceUserDefinition)
+    assert lib.asserts.assertMsg (fdumPol.allow-missing-device-user-definition || existDeviceUserDefinition)
       ( "Inexistant \"device user\" definition for specified username '${deviceUsername}'.\n"
       + "Current \"final device user\" merge policy does not allow this.\n"
-      + "You can either set the policy's 'allowMissingFinalDeviceUserDefinition' flag true "
+      + "You can either set the policy's 'allow-missing-device-user-definition' flag true "
       + "or provide a definition for '${deviceUsername}' "
       + "in one of the following files: ''\n${authFilesStr}\n''"
       );
@@ -115,7 +115,7 @@ rec {
       ( "Empty \"final device user\" authorized user set detected for specified "
       + "username '${deviceUsername}' from '${duSrcStr}'.\n"
       + "Current \"final device user\" merge policy does not allow this.\n"
-      + "You can either remove this user from the policy's 'forbidEmptyAuthorizedSetForDeviceUsers' list "
+      + "You can either remove this user from the policy's 'forbid-empty-authorized-set-for' list "
       + "or authorize at least a single \"ssh user\" to \"device user\" with username '${deviceUsername}' "
       + "in one of the following files: ''\n${authFilesStr}\n''"
       );

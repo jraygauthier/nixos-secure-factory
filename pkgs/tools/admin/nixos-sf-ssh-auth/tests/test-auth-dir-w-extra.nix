@@ -178,7 +178,7 @@ in
         {
           extraGroups.rawInherited = rawCAdminGroups;
           extraUsers.rawOverride = rawC2C3Users;
-          cfgOverrides.mergePolicy.sshGroup.inherited.allowMergeMismatchingMemberSetPiecewiseMix = true;
+          cfgOverrides.merge-policy.ssh-group.inherited.allow-merge-mismatching-member-set-piecewise-mix = true;
         };
     in
     {

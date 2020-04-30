@@ -9,7 +9,7 @@ let
   optsEmpty = {};
 
   optsAllowInexistantDevUsrDef = {
-    cfgOverrides.mergePolicy.finalDeviceUser.internal.allowMissingFinalDeviceUserDefinition = true;
+    cfgOverrides.merge-policy.final-device-user.internal.allow-missing-device-user-definition = true;
   };
 in
 
@@ -44,9 +44,9 @@ in
         listNamesOfSshUsersAuthorizedToDeviceUser (
           loadAuthDirDeviceUser ./case1/device-ssh "root"
             {
-              cfgOverrides.mergePolicy.finalDeviceUser.internal = {
-                  allowMissingFinalDeviceUserDefinition = true;
-                  forbidEmptyAuthorizedSetForDeviceUsers = ["root"];
+              cfgOverrides.merge-policy.final-device-user.internal = {
+                  allow-missing-device-user-definition = true;
+                  forbid-empty-authorized-set-for = ["root"];
                 };
             });
       expected = [];
@@ -58,8 +58,8 @@ in
         listNamesOfSshUsersAuthorizedToDeviceUser (
           loadAuthDirDeviceUser ./case1/device-ssh "root"
             {
-              cfgOverrides.mergePolicy.finalDeviceUser.internal = {
-                  forbidEmptyAuthorizedSetForDeviceUsers = ["root" "my-device-user-d"];
+              cfgOverrides.merge-policy.final-device-user.internal = {
+                  forbid-empty-authorized-set-for = ["root" "my-device-user-d"];
                 };
             });
       expected = [];

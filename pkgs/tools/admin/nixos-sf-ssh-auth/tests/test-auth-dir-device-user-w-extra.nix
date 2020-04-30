@@ -7,11 +7,11 @@ with sshAuthLib;
 
 let
   mPolOvAllowInexistantDevUsrDef = {
-    finalDeviceUser.internal.allowMissingFinalDeviceUserDefinition = true;
+    final-device-user.internal.allow-missing-device-user-definition = true;
   };
 
   cfgOvAllowInexistantDevUsrDef = {
-    mergePolicy = mPolOvAllowInexistantDevUsrDef;
+    merge-policy = mPolOvAllowInexistantDevUsrDef;
   };
 
   optsAllowInexistantDevUsrDef = {
@@ -65,8 +65,8 @@ in
           {
             extraAuth.inherited = adC3FOnFactoryInstall;
             # extraUsers.rawOverride = rawC2C3Users;
-            cfgOverrides.mergePolicy = mPolOvAllowInexistantDevUsrDef // {
-                auth.inherited.allowMergeMismatchingDeviceUserAuthSshUserSetPiecewiseMix = true;
+            cfgOverrides.merge-policy = mPolOvAllowInexistantDevUsrDef // {
+                auth.inherited.allow-merge-mismatching-authorized-ssh-user-set-piecewise-mix = true;
               };
           };
       in
