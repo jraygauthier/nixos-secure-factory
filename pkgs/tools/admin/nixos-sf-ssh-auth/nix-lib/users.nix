@@ -93,14 +93,33 @@ rec {
     };
 
 
-  # IDEA: `allowExplicitMergeMismatchingPubKeys` where an option is
-  # explicitely set as part of the section specifying that merge
-  # is allowed.
-  ensureValidUsersMergePolicy = {
-        allow-merge-mismatching-pubkeys ? false
+  ensureValidMPolMergeMismatchingPukeyCfg = {
+        allow ? false
       }:
     {
-      inherit allow-merge-mismatching-pubkeys;
+      inherit allow;
+    };
+
+
+  defMPolMergeMismatchingPukeyCfg = ensureValidMPolMergeMismatchingPukeyCfg {};
+
+
+  ensureValidMPolUserPubkeyCfg = {
+        merge-mismatching ? defMPolMergeMismatchingPukeyCfg
+      }:
+    {
+      merge-mismatching = ensureValidMPolMergeMismatchingPukeyCfg merge-mismatching;
+    };
+
+
+  defMPolUserPubkeyCfg = ensureValidMPolUserPubkeyCfg {};
+
+
+  ensureValidUsersMergePolicy = {
+        pubkey ? defMPolUserPubkeyCfg
+      }:
+    {
+      pubkey = ensureValidMPolUserPubkeyCfg pubkey;
     };
 
 
@@ -108,12 +127,12 @@ rec {
 
 
   inheritedUsersMergePolicy = ensureValidUsersMergePolicy {
-      allow-merge-mismatching-pubkeys = true;
+      pubkey.merge-mismatching.allow = true;
     };
 
 
   overrideUsersMergePolicy = ensureValidUsersMergePolicy {
-      allow-merge-mismatching-pubkeys = true;
+      pubkey.merge-mismatching.allow = true;
     };
 
 
@@ -147,7 +166,7 @@ rec {
         yPkf = yu.pubkey.file;
         samePubkey = xPkf == yPkf;
       in
-    assert lib.asserts.assertMsg (umPolValid.allow-merge-mismatching-pubkeys || samePubkey) (
+    assert lib.asserts.assertMsg (umPolValid.pubkey.merge-mismatching.allow || samePubkey) (
         onDisallowedSameSshUserPubkeyMsg uName xu yu
       );
     {

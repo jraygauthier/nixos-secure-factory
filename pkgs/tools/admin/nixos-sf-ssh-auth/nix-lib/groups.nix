@@ -78,31 +78,78 @@ rec {
     listPubKeysContentForSshUsers (getMembersForSshGroupAsSshUsers groupName groups);
 
 
+  validMergeMismatchingMemberSetMethodFieldValues =
+    [
+      "whole-override"
+      "piecewise-mix"
+    ];
+
+
+  validMergeMismatchingMemberSetMethodFieldValuesWDefault =
+    ["default"] ++ validMergeMismatchingMemberSetMethodFieldValues;
+
+
+  ensureValidMPolMergeMismatchingMemberSetCfg = {
+        # When disabled, an error will be raised when mismatching groups are found.
+        allow ? false,
+        method ? "default"  # Is 'whole-override'.
+        # 'whole-override':
+        #   Lhs memberset will be completly overriden by rhs memberset.
+        #   (e.g: rhs will preserve its integrity, nothing from lhs will
+        #   be injected into rhs).
+        # 'piecewise-mix':
+        #   Lhs memberset will be mixed with rhs according to specified
+        #   `ssh-user` policy (which by default favor rhs override of lhs pubkey
+        #   for members with same names).
+        #   WARNING: Lhs members will be injected into rhs memberse which
+        #   will change the original definition of the group which most
+        #   likely will get expanded to authorize its ssh users to device user.
+        #   Thus, lhs **must** be highly trusted as an attacker might obtain
+        #   priviledges this way.
+        #   This is the reason why this is off be default.
+      }:
+      let
+        resolvedDefaultValue = "whole-override";
+        validMethods = validMergeMismatchingMemberSetMethodFieldValuesWDefault;
+        methodIsValid = lib.lists.elem method validMethods;
+        validMethodsStr = lib.strings.concatStringsSep "\n" validMethods;
+      in
+    assert lib.asserts.assertMsg (methodIsValid)
+      ( "Invalid \"member-set.merge-mismatching.method\" field value. "
+      + "Expected one of the following: ''\n${validMethodsStr}\n''");
+      let
+        resolvedMethod = if "default" == method
+          then resolvedDefaultValue
+          else method;
+      in
+    {
+      inherit allow;
+      method = resolvedMethod;
+    };
+
+
+  defMPolMergeMismatchingMemberSetCfg = ensureValidMPolMergeMismatchingMemberSetCfg {};
+
+
+  ensureValidMPolGroupMemberSetCfg = {
+        merge-mismatching ? defMPolMergeMismatchingMemberSetCfg
+      }:
+    {
+      merge-mismatching = ensureValidMPolMergeMismatchingMemberSetCfg merge-mismatching;
+    };
+
+
+  defMPolGroupMemberSetCfg = ensureValidMPolGroupMemberSetCfg {};
+
+
   ensureValidGroupsMergePolicy = {
         # How to merge ssh users when merging 2 groups.
         ssh-user ? defUsersMergePolicy,
-        # Lhs memberset will be completly overriden by rhs memberset.
-        # (e.g: rhs will preserve its integrity, nothing from lhs will
-        # be injected into rhs).
-        allow-merge-mismatching-member-set-whole-override ? false,
-        # Lhs memberset will be mixed with rhs according to specified
-        # `ssh-user` policy (which by default favor rhs override of lhs pubkey
-        # for members with same names).
-        # WARNING: Lhs members will be injected into rhs memberse which
-        # will change the original definition of the group which most
-        # likely will get expanded to authorize its ssh users to device user.
-        # Thus, lhs **must** be highly trusted as an attacker might obtain
-        # priviledges this way.
-        # This is the reason why this is off be default.
-        allow-merge-mismatching-member-set-piecewise-mix ? false
-        # When none of the 2 above true, an error will be raised when
-        # mismatching groups are found.
+        member-set ? defMPolGroupMemberSetCfg
       }:
     {
       ssh-user = ensureValidUsersMergePolicy ssh-user;
-      inherit
-        allow-merge-mismatching-member-set-whole-override
-        allow-merge-mismatching-member-set-piecewise-mix;
+      member-set = ensureValidMPolGroupMemberSetCfg member-set;
     };
 
 
@@ -111,33 +158,39 @@ rec {
 
   inheritedGroupsMergePolicy = ensureValidGroupsMergePolicy {
       ssh-user = inheritedUsersMergePolicy;
-      allow-merge-mismatching-member-set-whole-override = true;
       # See `ensureValidGroupsMergePolicy` comment before changing the below
-      # value. This can be a security concern if lightly changed to true.
-      allow-merge-mismatching-member-set-piecewise-mix = false;
+      # value. This can be a security concern if lightly changed to
+      # something else.
+      member-set.merge-mismatching.allow = true;
     };
 
 
   overrideGroupsMergePolicy = ensureValidGroupsMergePolicy {
       ssh-user = overrideUsersMergePolicy;
-      allow-merge-mismatching-member-set-whole-override = true;
       # See `ensureValidGroupsMergePolicy` comment before changing the below
-      # value. This can be a security concern if lightly changed to true.
-      allow-merge-mismatching-member-set-piecewise-mix = false;
+      # value. This can be a security concern if lightly changed to
+      # something else.
+      member-set.merge-mismatching.allow = true;
     };
 
 
   # See `ensureValidGroupsMergePolicy` comment for security implication
   # of using this policy.
   inheritedGroupsMergePolicyWPiecewise = inheritedGroupsMergePolicy // {
-      allow-merge-mismatching-member-set-piecewise-mix = true;
+      member-set.merge-mismatching = {
+          allow = true;
+          method = "piecewise-mix";
+        };
     };
 
 
   # See `ensureValidGroupsMergePolicy` comment for security implication
   # of using this policy.
   overrideGroupsMergePolicyWPiecewise = overrideGroupsMergePolicy // {
-      allow-merge-mismatching-member-set-piecewise-mix = true;
+      member-set.merge-mismatching = {
+          allow = true;
+          method = "piecewise-mix";
+        };
     };
 
 
@@ -157,9 +210,7 @@ rec {
       let
         gmPolValid = ensureValidGroupsMergePolicy gmPol;
         sameMemKs = attrsetSameKeys xg.members yg.members;
-        allowMergeMismatching =
-            gmPolValid.allow-merge-mismatching-member-set-whole-override
-         || gmPolValid.allow-merge-mismatching-member-set-piecewise-mix;
+        allowMergeMismatching = gmPolValid.member-set.merge-mismatching.allow;
       in
     assert lib.asserts.assertMsg (allowMergeMismatching || sameMemKs) (
         onDisallowedMergeMismatchingMemberSetMsg gName xg yg
@@ -170,7 +221,7 @@ rec {
         # Lhs does not bring anything new to the table so rhs's memberset is taken as a whole
         # diregarding lhs.
         yg
-    else if gmPolValid.allow-merge-mismatching-member-set-piecewise-mix
+    else if "piecewise-mix" == gmPolValid.member-set.merge-mismatching.method
       then
         {
           # Some part of lhs's memberset is allowed to be injected into rhs according to
@@ -181,7 +232,7 @@ rec {
           srcStr = mergeSrcStrList [xg.srcStr yg.srcStr];
         }
     else
-      assert gmPolValid.allow-merge-mismatching-member-set-whole-override;
+      assert "whole-override" == gmPolValid.member-set.merge-mismatching.method;
       # Rhs's memberset is chosen as a whole.
       yg;
 

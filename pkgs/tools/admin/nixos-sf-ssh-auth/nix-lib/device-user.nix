@@ -22,24 +22,45 @@ rec {
 
   defFinalDeviceUserMergeOpts = {};
 
+  ensureValidMPolFinalDeviceUserDefinitionCfg = {
+        # Allow that the requested *final user* be missing, fallbacking on
+        # the `""` definition. When `false`, an error will be raised.
+        allow-missing ? false
+      }:
+    {
+      inherit allow-missing;
+    };
+
+
+  defMPolFinalDeviceUserDefinitionCfg = ensureValidMPolFinalDeviceUserDefinitionCfg {};
+
+
+  ensureValidMPolFinalDeviceUserAuthorizedSetCfg = {
+        # A list of *device users* for which an error will be raised in case
+        # no *ssh user* is authorized to the final / resulting *device user*.
+        forbid-empty-for ? []
+      }:
+    {
+      inherit forbid-empty-for;
+    };
+
+
+  defMPolFinalDeviceUserAuthorizedSetCfg = ensureValidMPolFinalDeviceUserAuthorizedSetCfg {};
+
+
   # This policy specifies how to merge the *final device user* using the special
   # `""` (all users) *device user* definition with the *device user* definition matching
   # the specified *device username*.
   ensureValidFinalDeviceUserMergePolicy = {
         # How to merge ssh users when merging 2 auth.
         ssh-user ? defUsersMergePolicy,
-        # Allow that the requested *final user* be missing, fallbacking on
-        # the `""` definition. When `false`, an error will be raised.
-        allow-missing-device-user-definition ? false,
-        # A list of *device users* for which an error will be raised in case
-        # no *ssh user* is authorized to the final / resulting *device user*.
-        forbid-empty-authorized-set-for ? []
+        device-user-definition ? defMPolFinalDeviceUserDefinitionCfg,
+        authorized-set ? defMPolFinalDeviceUserAuthorizedSetCfg
       }:
     {
       ssh-user = ensureValidUsersMergePolicy ssh-user;
-      inherit
-        allow-missing-device-user-definition
-        forbid-empty-authorized-set-for;
+      device-user-definition = ensureValidMPolFinalDeviceUserDefinitionCfg device-user-definition;
+      authorized-set = ensureValidMPolFinalDeviceUserAuthorizedSetCfg authorized-set;
     };
 
   defFinalDeviceUserMergePolicy = ensureValidFinalDeviceUserMergePolicy {};
@@ -88,15 +109,15 @@ rec {
         existDeviceUserDefinition = dus ? "${deviceUsername}";
         fdumPol = mPol.final-device-user.internal;
         emptyAuthSetAllowed = !(
-          lib.lists.elem deviceUsername fdumPol.forbid-empty-authorized-set-for);
+          lib.lists.elem deviceUsername fdumPol.authorized-set.forbid-empty-for);
         authFilesStr = printSrcFilesStrForSrcs "\n" auth.srcs;
       in
     assert lib.asserts.assertMsg (validUsername)
       "Invalid \"final\" device username: '${deviceUsername}'.";
-    assert lib.asserts.assertMsg (fdumPol.allow-missing-device-user-definition || existDeviceUserDefinition)
+    assert lib.asserts.assertMsg (fdumPol.device-user-definition.allow-missing || existDeviceUserDefinition)
       ( "Inexistant \"device user\" definition for specified username '${deviceUsername}'.\n"
       + "Current \"final device user\" merge policy does not allow this.\n"
-      + "You can either set the policy's 'allow-missing-device-user-definition' flag true "
+      + "You can either set the policy's 'device-user-definition.allow-missing' flag true "
       + "or provide a definition for '${deviceUsername}' "
       + "in one of the following files: ''\n${authFilesStr}\n''"
       );
@@ -115,7 +136,7 @@ rec {
       ( "Empty \"final device user\" authorized user set detected for specified "
       + "username '${deviceUsername}' from '${duSrcStr}'.\n"
       + "Current \"final device user\" merge policy does not allow this.\n"
-      + "You can either remove this user from the policy's 'forbid-empty-authorized-set-for' list "
+      + "You can either remove this user from the policy's 'authorized-set.forbid-empty-for' list "
       + "or authorize at least a single \"ssh user\" to \"device user\" with username '${deviceUsername}' "
       + "in one of the following files: ''\n${authFilesStr}\n''"
       );

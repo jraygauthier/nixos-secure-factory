@@ -65,9 +65,9 @@ rec {
       ssh-group.inherited = inheritedGroupsMergePolicy;
       ssh-group.override = overrideGroupsMergePolicy;
 
-      auth.internal = internalAuthMergePolicy;
-      auth.inherited = inheritedAuthMergePolicy;
-      auth.override = overrideAuthMergePolicy;
+      device-user.internal = internalAuthMergePolicy;
+      device-user.inherited = inheritedAuthMergePolicy;
+      device-user.override = overrideAuthMergePolicy;
 
       final-device-user.internal = internalFinalDeviceUserMergePolicy;
     };
