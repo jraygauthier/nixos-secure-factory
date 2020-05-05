@@ -230,6 +230,7 @@ store_current_device_gpg_id() {
   store_yaml="$(get_current_device_store_yaml_filename)"
 
   local yaml_str
+  # shellcheck disable=SC2016
   yaml_str="$(\
     yq -y --arg gpg_id "$gpg_id" '."gpg-id" = $gpg_id' \
       < "$(get_current_device_store_yaml_filename)")"
@@ -240,6 +241,35 @@ store_current_device_gpg_id() {
   echo "$yaml_str" > "$store_yaml"
 
   update_device_json_from_current_yaml
+}
+
+
+store_current_device_factory_installed_by() {
+  local installed_by_users="$1"
+  ensure_current_device_specified
+  local store_yaml
+  store_yaml="$(get_current_device_store_yaml_filename)"
+
+  local installed_by_json_array
+  installed_by_json_array="$(printf "%s" "$installed_by_users" | jq -R --slurp 'split("\n")')"
+
+  local yaml_str
+  # shellcheck disable=SC2016
+  yaml_str="$(\
+    yq -y --argjson installed_by_array "$installed_by_json_array" \
+      '."factory-installed-by" = $installed_by_array' \
+      < "$(get_current_device_store_yaml_filename)")"
+
+  echo "Writing device configuration to '$store_yaml'."
+  echo "$yaml_str" > "$store_yaml"
+
+  update_device_json_from_current_yaml
+}
+
+
+get_required_current_device_factory_installed_by() {
+  yq -e -c -r  '."factory-installed-by"[]?' \
+    < "$(get_current_device_store_yaml_filename)"
 }
 
 

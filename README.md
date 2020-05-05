@@ -123,29 +123,47 @@ device configurations. Specific device factories are required to:
      4. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR`
 
         Should point to a writable location in the device configuration (e.g.:
-        `my_factory_install/device-ssh/authorized`) where the factory tools will
-        be able to create its authorization json file
-        `per-user-authorized-keys.json` and manage the authorized users're
-        public keys under the `./public-keys` subdirectory.
+        `my_factory_install/device-ssh`) where the factory tools will
+        be able to create / read and modify a set of files related to the
+        allowed access to devices through ssh.
+
+        This directory will be managed according to `nixos-sf-ssh-auth`'s policy.
+
+        See [nixos-sf-ssh-auth - Readme](nixos-secure-factory/pkgs/tools/admin/nixos-sf-ssh-auth/README.md)
+        for more details.
 
         You configuration will then be able to exploit this information
         to grant access to the public keys listed in the json file.
 
-    It is recommanded that the following helpers are provided under
+        TODO: Document how to integrate this with a device configuration.
+
+        TODO: Document special setup to confer special ssh priviledges to
+        factory users listed in the `factory-installed-by` array (member of the
+        device state file).
+
+        TODO: Document how it is also possible to setup a separate ssh
+        authorization directory in a separate *core* repository and
+        merging this directory with the factory install one.
+
+        TODO: Document how it is possible to user the `authorized-on`
+        directory to authorize some users and groups temporarily.
+
+
+    It is recommended that the following helpers are provided under
     `./scripts/factory-install/bin`:
 
-     -  `factory-state-init`: reponsible to initialize the factory's
+     -  `factory-state-init`: responsible to initialize the factory's
         `.factory-info.yaml` file.
 
-     -  `device-state-init-new`: reponsible to initialize a new device's
+     -  `device-state-init-new`: responsible to initialize a new device's
         `.current-device.yaml` file.
 
     The following helpers can optionally be provided as well:
 
-     -  `factory-repos-update-dependencies`: reponsible to clone / synchronize
+     -  `factory-repos-update-dependencies`: responsible to clone / synchronize
         the repo on which `my_factory_install`.
 
-     -  `factory-repos-update`: reponsible to clone / synchronize all the
+     -  `factory-repos-update`: responsible to clone / synchronize all the
         repositories including `my_factory_install`.
 
      -  `factory-repos-init-mr-config`: responsible to create a `.mrconfig`

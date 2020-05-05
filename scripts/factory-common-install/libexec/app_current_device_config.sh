@@ -3,33 +3,43 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 . "$common_factory_install_libexec_dir/workspace_paths.sh"
+. "$common_factory_install_libexec_dir/app_current_device_store.sh"
+
 
 device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
 . "$device_system_update_libexec_dir/device_system_config.sh"
 
 
-_rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
-  print_title_lvl3 "Removing existing factory user accesses from production devices"
+_rm_factory_user_from_cfg_ssh_auth_dir() {
+  print_title_lvl3 "Removing factory user from ssh auth dir"
 
-  local device_user="$1"
-  local factory_user_id="$2"
+  local factory_user_id="$1"
 
-  local device_ssh_authorized_dir
-  device_ssh_authorized_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
-  local json_path="$device_ssh_authorized_dir/per-user-authorized-keys.json"
+  local cfg_ssh_auth_dir
+  cfg_ssh_auth_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
+  local json_path="$cfg_ssh_auth_dir/users.json"
+
+  if ! jq -e -c -r \
+      --arg factory_user_id "$factory_user_id" \
+      '.["ssh-users"][$factory_user_id]' < "$json_path"; then
+    # Nothing to do, user does not exists.
+    return 0
+  fi
+
+  local pub_key_path="$cfg_ssh_auth_dir/public-keys/${factory_user_id}.pub"
 
   local rel_pub_key_path_from_json
   if rel_pub_key_path_from_json="$(
-      jq -j \
+      jq -e -c -r \
       --arg factory_user_id "$factory_user_id" \
-      --arg device_user "$device_user" \
-      '.[$device_user][$factory_user_id].public_key_file' \
-      < "$json_path")" && \
-      test "" != "$rel_pub_key_path_from_json" &&
-      test "null" != "$rel_pub_key_path_from_json"; then
-    echo "Factory user already had access to the device. Will update the ssh public key."
-    echo_eval "rm -f '$device_ssh_authorized_dir/$rel_pub_key_path_from_json'"
+      '.["ssh-users"][$factory_user_id]."pubkey-file"' \
+      < "$json_path")"; then
+
+    pub_key_path="$cfg_ssh_auth_dir/$rel_pub_key_path_from_json"
   fi
+
+  echo "Factory user already had access to the device. Will update the ssh public key."
+  echo_eval "rm -f '$pub_key_path'"
 
   local previous_json_content=""
   if test -f "$json_path"; then
@@ -43,12 +53,11 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
     echo "$previous_json_content" | \
     jq -S \
     --arg factory_user_id "$factory_user_id" \
-    --arg device_user "$device_user" \
-    'del(.[$device_user][$factory_user_id])')"
+    'del(.["ssh-users"][$factory_user_id])')"
 
   echo "Removing '$factory_user_id' factory user from '$json_path'."
   echo "echo '\$json_content' > '$json_path'"
-  mkdir -p "$device_ssh_authorized_dir"
+  mkdir -p "$cfg_ssh_auth_dir"
   echo "$json_content" > "$json_path"
 
   print_title_lvl4 "Content of '$json_path'"
@@ -56,60 +65,25 @@ _rm_existing_factory_ssh_pub_key_from_prod_dev_access() {
 }
 
 
-deauthorize_ssh_access_to_all_production_devices() {
-  print_title_lvl2 "Denying factory user access to production devices via ssh"
+_add_factory_user_to_cfg_ssh_auth_dir() {
+  print_title_lvl2 "Adding factory user to ssh auth dir"
 
-  # All users by default.
-  local device_user="${1:-}"
-  local factory_user_id="${2:-}"
+  local factory_user_id="$1"
 
-  if test "" == "$factory_user_id"; then
-    factory_user_id="$(get_required_factory_info__user_id)"
-  fi
+  _rm_factory_user_from_cfg_ssh_auth_dir "$factory_user_id"
 
-  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
-}
-
-
-# shellcheck disable=2120 # Optional arguments.
-authorize_ssh_access_to_all_production_devices() {
-  print_title_lvl2 "Granting factory user access to production devices via ssh"
-
-  # All users by default.
-  local device_user="${1:-}"
-  local factory_user_id="${2:-}"
-
-  if test "" == "$factory_user_id"; then
-    factory_user_id="$(get_required_factory_info__user_id)"
-  fi
-
-  _rm_existing_factory_ssh_pub_key_from_prod_dev_access "$device_user" "$factory_user_id"
-
-  local device_ssh_authorized_dir
-  device_ssh_authorized_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
-  local json_path="$device_ssh_authorized_dir/per-user-authorized-keys.json"
-
-  local rel_pub_key_path_from_json
-  if rel_pub_key_path_from_json="$(
-      jq -j \
-      --arg factory_user_id "$factory_user_id" \
-      --arg device_user "$device_user" \
-      '.[$device_user][$factory_user_id].public_key_file' \
-      < "$json_path")" \
-        && test "" != "$rel_pub_key_path_from_json" \
-        && test "null" != "$rel_pub_key_path_from_json"; then
-    echo "Factory user already had access to the device. Will update the ssh public key."
-    echo_eval "rm -f '$device_ssh_authorized_dir/$rel_pub_key_path_from_json'"
-  fi
+  local cfg_ssh_auth_dir
+  cfg_ssh_auth_dir="$(get_writable_device_cfg_ssh_auth_root_dir)" || return 1
+  local json_path="$cfg_ssh_auth_dir/users.json"
 
   local factory_pub_key_filename
   factory_pub_key_filename="$(get_current_user_ssh_public_key_path)"
 
-  local factory_pub_key_basename
-  factory_pub_key_basename="$(basename "$factory_pub_key_filename")"
+  # local factory_pub_key_basename
+  # factory_pub_key_basename="$(basename "$factory_pub_key_filename")"
 
-  local rel_pub_key_path_from_json="./public-keys/${factory_user_id}_${factory_pub_key_basename}"
-  local pub_key_path="$device_ssh_authorized_dir/$rel_pub_key_path_from_json"
+  local rel_pub_key_path_from_json="./public-keys/${factory_user_id}.pub"
+  local pub_key_path="$cfg_ssh_auth_dir/$rel_pub_key_path_from_json"
 
   local previous_json_content=""
   if test -f "$json_path"; then
@@ -123,9 +97,8 @@ authorize_ssh_access_to_all_production_devices() {
   json_content="$(
     echo "$previous_json_content" | jq -S \
     --arg factory_user_id "$factory_user_id" \
-    --arg device_user "$device_user" \
     --arg rel_pub_key_path_from_json "$rel_pub_key_path_from_json" \
-    '.[$device_user][$factory_user_id].public_key_file = $rel_pub_key_path_from_json')"
+    '.["ssh-users"][$factory_user_id]."pubkey-file" = $rel_pub_key_path_from_json')"
 
   local pub_keys_dir
   pub_keys_dir="$(dirname "$pub_key_path")"
@@ -145,13 +118,24 @@ authorize_ssh_access_to_all_production_devices() {
 }
 
 
-deauthorize_ssh_access_to_all_production_devices_cli() {
-  deauthorize_ssh_access_to_all_production_devices "${1:-}" "${2:-}"
-}
+_ensure_current_factory_user_access_to_installed_device() {
+  # Make sure current factory user has access to device via ssh.
+
+  local factory_user_id
+  factory_user_id="$(get_required_factory_info__user_id)" || return 1
+
+  # Add the current factory user as a user to the config's ssh auth dir.
+  # The presumes the nixos configuration uses the 'nixos-sf-ssh-auth'
+  # library.
+  _add_factory_user_to_cfg_ssh_auth_dir "$factory_user_id"
 
 
-authorize_ssh_access_to_all_production_devices_cli() {
-  authorize_ssh_access_to_all_production_devices "${1:-}" "${2:-}"
+  # Adds the current factory user's id to the current device's
+  # 'factory-installed-by' field. This actually rely on
+  # the device nixos configuration granting special (most likely
+  # temporary) priviledges to the `factory-installed-by` users.
+  # TODO: This requirement should be documented.
+  store_current_device_factory_installed_by "$factory_user_id"
 }
 
 
@@ -302,9 +286,17 @@ _build_and_deploy_initial_device_config_impl() {
   local config_name="$1"
   shift 1
 
-  # Make sure current factory user has access to device via ssh.
-  # TODO: Limit access to only the current device.
-  authorize_ssh_access_to_all_production_devices ""
+  # This is essential so that factory user is not *locked out* of the
+  # device he is about to factory install.
+  # TODO: A generic pre initial device config script hook called here
+  #       would be a better approach as it would allow custom code instead
+  #       of this hard coded approach which force user into using
+  #       a particular authorization scheme.
+  # TODO: Alternatively, consider instead this being perform on
+  #       'device-state-init-new' which is already project specific
+  #       code.
+  _ensure_current_factory_user_access_to_installed_device
+
   local system_closure
   _build_current_device_config_system_closure "system_closure" "$config_name" "$@"
   mount_livenv_nixos_partition_if_required
