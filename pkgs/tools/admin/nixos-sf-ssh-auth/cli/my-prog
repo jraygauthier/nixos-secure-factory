@@ -1,8 +1,0 @@
-#! /nix/store/506nnycf7nk22x7n07mjjjl2g8nifpda-bash-4.4-p23/bin/bash -e
-#export PATH='/nix/store/4c3z5r6yxsf2cxwwyazhdn92xixn4j5b-python3-3.7.5/bin:/nix/store/90r6ky6034ans8dr4l3g2s47wb0vnr8f-python3.7-nixos-sf-ssh-auth-cli-0.0.0/bin'${PATH:+':'}$PATH
-#export PYTHONNOUSERSITE='true'
-#exec -a "my-prog" "/nix/store/90r6ky6034ans8dr4l3g2s47wb0vnr8f-python3.7-nixos-sf-ssh-auth-cli-0.0.0/bin/.nixos-sf-ssh-auth-dir-wrapped"  "${extraFlagsArray[@]}" "$@"
-
-
-# exec -a "my-prog" "nixos-sf-ssh-auth-dir"  "${extraFlagsArray[@]}" "$@"
-exec -a "my-prog" "$PWD/ori-prog"

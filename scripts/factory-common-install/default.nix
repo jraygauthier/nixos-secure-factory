@@ -33,7 +33,7 @@ bashCompletionLib = import ../../lib/bash-completions.nix {
   inherit lib;
 };
 
-pythonWPackackages = python3.withPackages (pp: with pp; [
+pythonWPackages = python3.withPackages (pp: with pp; [
   pytest
   ipython
   click
@@ -54,7 +54,7 @@ stdenv.mkDerivation rec {
     makeWrapper
     # Required as we have python shebangs that needs to be patched
     # with a python that has the proper libraries.
-    pythonWPackackages
+    pythonWPackages
   ];
 
   propagatedUserEnvPkgs = [
@@ -89,7 +89,7 @@ stdenv.mkDerivation rec {
     screen
     socat
     picocom
-    pythonWPackackages
+    pythonWPackages
 
     # TODO: Consider this. Not certain if nix would be capable
     # of introducing this dependency on non nix system as it
@@ -138,11 +138,15 @@ stdenv.mkDerivation rec {
         --prefix PYTHONPATH : "${pythonPathDeps}"
     done
 
+    # Principally required for read -e -i 'Default value'
+    # but also, we need to patch programs earlier as we
+    # need to run some of these in order to produce bash
+    # completions just below.
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
     ${bashCompletionLib.installClickExesBashCompletion [
       "device-state-checkout"
-      "device-all-ssh-auth-dir"
+      "device-common-ssh-auth-dir"
       "device-ssh-auth-dir"
     ]}
   '';
