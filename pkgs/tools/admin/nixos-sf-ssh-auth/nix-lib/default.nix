@@ -7,13 +7,13 @@
 let
   callPackage = lib.callPackageWith args;
 
-  coreModule = callPackage ./nix-lib/core.nix {};
-  loaderModule = callPackage ./nix-lib/loader.nix {};
-  usersModule = callPackage ./nix-lib/users.nix {};
-  groupsModule = callPackage ./nix-lib/groups.nix {};
-  authModule = callPackage ./nix-lib/auth.nix {};
-  deviceUserModule = callPackage ./nix-lib/device-user.nix {};
-  dirModule = callPackage ./nix-lib/dir.nix {};
+  coreModule = callPackage ./core.nix {};
+  loaderModule = callPackage ./loader.nix {};
+  usersModule = callPackage ./users.nix {};
+  groupsModule = callPackage ./groups.nix {};
+  authModule = callPackage ./auth.nix {};
+  deviceUserModule = callPackage ./device-user.nix {};
+  dirModule = callPackage ./dir.nix {};
 in
 
 rec {

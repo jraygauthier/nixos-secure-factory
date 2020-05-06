@@ -6,6 +6,7 @@
 , nixos-common-install-scripts
 , nixos-device-system-config
 , nixos-sf-device-system-config-updater
+, nixos-sf-ssh-auth-cli
 , openssh
 , yq
 , jq
@@ -37,6 +38,7 @@ pythonWPackackages = python3.withPackages (pp: with pp; [
   ipython
   click
   pyyaml
+  nixos-sf-ssh-auth-cli
 ]);
 
 in
@@ -69,6 +71,7 @@ stdenv.mkDerivation rec {
   buildInputs = [
     nixos-common-install-scripts
     nixos-device-system-config
+    nixos-sf-ssh-auth-cli
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.
@@ -139,6 +142,8 @@ stdenv.mkDerivation rec {
 
     ${bashCompletionLib.installClickExesBashCompletion [
       "device-state-checkout"
+      "device-all-ssh-auth-dir"
+      "device-ssh-auth-dir"
     ]}
   '';
 

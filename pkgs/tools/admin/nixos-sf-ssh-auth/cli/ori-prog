@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+import sys
+assert(sys.argv)
+argv0 = sys.argv[0]
+print(argv0)

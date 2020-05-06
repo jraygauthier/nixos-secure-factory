@@ -8,11 +8,8 @@ let
     writeTextDir
     writeText;
 
-  release =
-    import ../release.nix { inherit nixpkgs pkgs; };
-
-  testTools = pkgs.callPackage ../nix-lib/test-tools.nix {};
-  sshAuthLib = release.nix-lib;
+  testTools = pkgs.callPackage ../test-tools.nix {};
+  sshAuthLib = pkgs.callPackage ../. {};
 
   commonLocalDeps = { inherit testTools sshAuthLib; };
 
