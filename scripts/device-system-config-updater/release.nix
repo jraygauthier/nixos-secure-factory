@@ -1,9 +1,16 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
+
+with pkgs;
 
 let
-  nixos-device-system-config = import ../device-system-config/release.nix { inherit nixpkgs; };
+  nixos-device-system-config = (import
+    ../device-system-config/release.nix {
+      inherit pkgs;
+    }).default;
 in
 
-(nixpkgs.pkgs.callPackage ./. {
-  inherit nixos-device-system-config;
-})
+{
+  default = callPackage ./. {
+      inherit nixos-device-system-config;
+    };
+}

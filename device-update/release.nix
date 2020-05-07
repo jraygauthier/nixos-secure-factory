@@ -5,9 +5,10 @@
 }:
 
 let
-  nixos-sf-device-system-config-updater =
-    import ../scripts/device-system-config-updater/release.nix
-      { inherit nixpkgs; };
+  nixos-sf-device-system-config-updater = (import
+    ../scripts/device-system-config-updater/release.nix {
+      pkgs = nixpkgs;
+    }).default;
 in
 
 nixpkgs.callPackage ./. {

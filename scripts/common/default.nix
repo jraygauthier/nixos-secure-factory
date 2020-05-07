@@ -48,4 +48,6 @@ stdenv.mkDerivation rec {
       provided be this repository.
     '';
   };
+
+  passthru.pname = pname;
 }

@@ -4,13 +4,13 @@ with lib;
 
 let
   cfg = config.system.nixosDeviceSystemConfigUpdater;
-  nixos-sf-device-system-config-updater =
-    import ../../../scripts/device-system-config-updater/release.nix
+  nixos-sf-device-system-config-updater = (import
+    ../../../scripts/device-system-config-updater/release.nix
       {
-        nixpkgs = pkgs;
+        inherit pkgs;
         # TODO: Consider the pros / cons of doing this.
         # nix = config.nix.package.out;
-      };
+      });
 
   defaultChannelOptions = {
     options = {

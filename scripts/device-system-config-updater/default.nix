@@ -73,4 +73,5 @@ stdenv.mkDerivation rec {
     '';
   };
 
+  passthru.pname = pname;
 }

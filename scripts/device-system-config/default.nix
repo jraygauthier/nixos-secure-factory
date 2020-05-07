@@ -47,4 +47,6 @@ stdenv.mkDerivation rec {
       Some scripts to help with the updating of a nixos device.
     '';
   };
+
+  passthru.pname = pname;
 }

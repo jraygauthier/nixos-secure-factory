@@ -15,18 +15,18 @@ let
       inherit pkgs;
     }).default;
 
-  nixos-common-install-scripts = import
+  nixos-common-install-scripts = (import
     ../common-install/release.nix {
-      nixpkgs = pkgs;
-    };
-  nixos-device-system-config = import
+      inherit pkgs;
+    }).default;
+  nixos-device-system-config = (import
     ../device-system-config/release.nix {
-      nixpkgs = pkgs;
-    };
-  nixos-sf-device-system-config-updater = import
+      inherit pkgs;
+    }).default;
+  nixos-sf-device-system-config-updater = (import
     ../device-system-config-updater/release.nix {
-      nixpkgs = pkgs;
-    };
+      inherit pkgs;
+    }).default;
   default = callPackage ./. {
     inherit nixos-common-install-scripts;
     inherit nixos-device-system-config;

@@ -1,12 +1,12 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
+
+with pkgs;
 
 let
-  nixos-device-system-config = import ./release.nix { inherit nixpkgs; };
+  default = (import ./release.nix {inherit pkgs;}).default;
 in
 
-nixpkgs.pkgs.buildEnv {
-  name = "nixos-sf-device-system-config-env";
-  paths = [
-    nixos-device-system-config
-  ];
+buildEnv {
+  name = "${default.pname}-env";
+  paths = [default];
 }

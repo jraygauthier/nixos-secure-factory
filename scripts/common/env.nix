@@ -1,12 +1,14 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
+
+with pkgs;
 
 let
-  nixos-common-scripts = import ./release.nix { inherit nixpkgs; };
+  default = (import ./release.nix { inherit pkgs; }).default;
 in
 
-nixpkgs.pkgs.buildEnv {
-  name = "nixos-sf-common-env";
+buildEnv {
+  name = "${default.pname}-env";
   paths = [
-    nixos-common-scripts
+    default
   ];
 }

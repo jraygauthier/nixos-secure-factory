@@ -3,10 +3,10 @@
 with pkgs;
 
 let
-  nixos-sf-device-common-install = import
+  nixos-sf-device-common-install = (import
     ../../../../scripts/device-common-install/release.nix {
       inherit pkgs;
-    };
+    }).default;
 in
 
 (callPackage ./. {
