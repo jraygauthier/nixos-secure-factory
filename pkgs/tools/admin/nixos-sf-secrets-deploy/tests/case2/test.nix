@@ -1,11 +1,9 @@
-{ nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {}
-}:
+{ pkgs ? import <nixpkgs> {}}:
 
 let
   release =
     import ../../release.nix {
-      inherit nixpkgs pkgs;
+      inherit pkgs;
   };
 
   bundleDir = ./device/my-device-id/data-override;

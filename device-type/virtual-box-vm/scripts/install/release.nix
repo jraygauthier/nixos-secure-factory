@@ -9,6 +9,15 @@ let
     }).default;
 in
 
-(callPackage ./. {
-  inherit nixos-sf-device-common-install;
-})
+rec {
+  default = callPackage ./. {
+    inherit nixos-sf-device-common-install;
+  };
+
+  env = buildEnv {
+    name = "${default.pname}-env";
+    paths = [
+      default
+    ];
+  };
+}

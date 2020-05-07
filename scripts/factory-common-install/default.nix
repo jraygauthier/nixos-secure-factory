@@ -3,8 +3,8 @@
 , makeWrapper
 , coreutils
 , gnugrep
-, nixos-common-install-scripts
-, nixos-device-system-config
+, nixos-sf-common-install
+, nixos-sf-device-system-config
 , nixos-sf-device-system-config-updater
 , nixos-sf-ssh-auth-cli
 , nixos-sf-factory-common-install-py
@@ -60,19 +60,19 @@ stdenv.mkDerivation rec {
   ];
 
   propagatedUserEnvPkgs = [
-    nixos-common-install-scripts
-    nixos-device-system-config
+    nixos-sf-common-install
+    nixos-sf-device-system-config
   ];
 
   propagatedBuildInputs = [
     mr
-    nixos-common-install-scripts
-    nixos-device-system-config
+    nixos-sf-common-install
+    nixos-sf-device-system-config
   ];
 
   buildInputs = [
-    nixos-common-install-scripts
-    nixos-device-system-config
+    nixos-sf-common-install
+    nixos-sf-device-system-config
     nixos-sf-ssh-auth-cli
     coreutils
     gnugrep

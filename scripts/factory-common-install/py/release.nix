@@ -1,5 +1,4 @@
-{ nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
 let
   inherit (pkgs)
@@ -15,7 +14,7 @@ let
 
   nixos-sf-ssh-auth-cli = (
     import ../../../pkgs/tools/admin/nixos-sf-ssh-auth/release.nix {
-      inherit pkgs nixpkgs;
+      inherit pkgs;
     }).python-lib;
 
   default = python3Packages.callPackage ./. {

@@ -1,7 +1,7 @@
 { stdenv
 , lib
 , makeWrapper
-, nixos-common-scripts
+, nixos-sf-common
 , coreutils
 , gnugrep
 , gnupg
@@ -21,15 +21,15 @@ stdenv.mkDerivation rec {
 
 
   propagatedUserEnvPkgs = [
-    nixos-common-scripts
+    nixos-sf-common
   ];
 
   propagatedBuildInputs = [
-    nixos-common-scripts
+    nixos-sf-common
   ];
 
   buildInputs = [
-    nixos-common-scripts
+    nixos-sf-common
     coreutils
     gnugrep
     gnupg

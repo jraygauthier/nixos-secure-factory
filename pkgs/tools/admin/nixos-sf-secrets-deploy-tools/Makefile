@@ -25,7 +25,7 @@ lint-shell:
 	  $(shell find ./bin -mindepth 1 -executable -type f)
 
 release:
-	nix-build release.nix -A release
+	nix-build release.nix -A default
 
 tests-sandboxed-lib:
 	nix-build release.nix -A tests.lib

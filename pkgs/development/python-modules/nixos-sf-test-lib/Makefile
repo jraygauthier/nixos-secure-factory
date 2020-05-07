@@ -8,7 +8,7 @@ clean:
 	rm -f ./result*
 
 release:
-	nix-build release.nix -A release
+	nix-build release.nix -A default
 
 typechecks:
 	mypy . $(shell find ./tests -name "test_*.py")

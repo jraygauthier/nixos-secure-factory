@@ -54,7 +54,7 @@ in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-device-system-config-dir";
+  pname = "nixos-sf-device-system-config-dir";
   name = "${pname}-${version}";
 
   pkgCfgDir = "etc/${etcCfgDirName}";

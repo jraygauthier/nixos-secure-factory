@@ -3,7 +3,7 @@
 with pkgs;
 
 let
-  nixos-common-install-scripts = (import
+  nixos-sf-common-install = (import
     ../common-install/release.nix {
       inherit pkgs;
     }).default;
@@ -11,6 +11,6 @@ in
 
 {
   default = callPackage ./. {
-    inherit nixos-common-install-scripts;
+    inherit nixos-sf-common-install;
   };
 }

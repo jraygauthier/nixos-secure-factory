@@ -1,17 +1,15 @@
-{ nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {}
-}:
+{ pkgs ? import <nixpkgs> {}}:
 
 let
   nixos-sf-deploy-core-nix-lib =
     (import ../nixos-sf-deploy-core/release.nix {
-      inherit nixpkgs pkgs;
+      inherit pkgs;
     }).nix-lib;
 
   nixos-sf-data-deploy-tools =
     (import ../nixos-sf-data-deploy-tools/release.nix {
-      inherit nixpkgs pkgs;
-    }).release;
+      inherit pkgs;
+    }).default;
 
   nix-lib =
     pkgs.callPackage ./lib.nix {

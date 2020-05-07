@@ -10,7 +10,7 @@ let
         inherit pkgs;
         # TODO: Consider the pros / cons of doing this.
         # nix = config.nix.package.out;
-      });
+      }).default;
 
   defaultChannelOptions = {
     options = {

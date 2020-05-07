@@ -1,6 +1,6 @@
 { stdenv
 , makeWrapper
-, nixos-common-install-scripts
+, nixos-sf-common-install
 , coreutils
 , gnugrep
 , usbutils
@@ -26,9 +26,9 @@ stdenv.mkDerivation rec {
   src = ./.;
 
   nativeBuildInputs = [ makeWrapper ];
-  propagatedUserEnvPkgs = [ nixos-common-install-scripts ];
+  propagatedUserEnvPkgs = [ nixos-sf-common-install ];
   buildInputs = [
-    nixos-common-install-scripts
+    nixos-sf-common-install
     coreutils
     gnugrep
     parted

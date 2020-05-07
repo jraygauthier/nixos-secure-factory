@@ -9,4 +9,3 @@ clean:
 
 tests:
 	nix eval --show-trace --raw -f ./tests runTestsAll
-

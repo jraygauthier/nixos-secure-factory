@@ -5,7 +5,7 @@
 let
   release =
     import ../../release.nix {
-      inherit nixpkgs pkgs;
+      inherit pkgs;
   };
 
   dataDeployLib = release.nix-lib;

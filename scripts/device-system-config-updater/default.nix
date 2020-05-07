@@ -1,6 +1,6 @@
 { stdenv
 , makeWrapper
-, nixos-device-system-config
+, nixos-sf-device-system-config
 , coreutils
 , gnugrep
 , nix-prefetch-git
@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    nixos-device-system-config
+    nixos-sf-device-system-config
     coreutils
     gnugrep
     nix-prefetch-git

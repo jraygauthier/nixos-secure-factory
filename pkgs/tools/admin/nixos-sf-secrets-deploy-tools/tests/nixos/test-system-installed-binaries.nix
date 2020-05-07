@@ -1,4 +1,4 @@
-{ nixpkgs, system, release, nixos-sf-test-lib, commonGitIgnores }:
+{ nixpkgs, system, default, nixos-sf-test-lib, commonGitIgnores }:
 
 with import (nixpkgs + "/nixos/lib/testing.nix") { inherit system; };
 
@@ -9,7 +9,7 @@ let
     with pkgs;
     assert lib.isString testPath;
     stdenv.mkDerivation rec {
-      pname = "${release.pname}-tests-${testName}";
+      pname = "${default.pname}-tests-${testName}";
       name = pname;
       src = nix-gitignore.gitignoreSourcePure (commonGitIgnores ++ [
         ''
@@ -92,7 +92,7 @@ in
           };
 
           environment.systemPackages = [
-              release
+              default
               releaseNixosTestsInstalled
           ];
         };

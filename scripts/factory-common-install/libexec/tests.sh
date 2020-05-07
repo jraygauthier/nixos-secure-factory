@@ -2,7 +2,7 @@
 common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 
-TESTED_PACKAGE_NAME="nixos-factory-common-install"
+TESTED_PACKAGE_NAME="nixos-sf-factory-common-install"
 
 _list_all_modules() {
   find "$common_factory_install_libexec_dir" -mindepth 1 -maxdepth 1 -name '*.sh'

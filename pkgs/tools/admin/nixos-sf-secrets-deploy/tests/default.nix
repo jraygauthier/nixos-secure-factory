@@ -1,11 +1,9 @@
-{ nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {}
-}:
+{ pkgs ? import <nixpkgs> {}}:
 
 let
   release =
     import ../release.nix {
-      inherit nixpkgs pkgs;
+      inherit pkgs;
   };
 
   secretsDeployLib = release.nix-lib;

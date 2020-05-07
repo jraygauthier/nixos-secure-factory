@@ -16,7 +16,7 @@ in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-device-system-config-dir-update";
+  pname = "nixos-sf-device-system-config-dir-update";
   name = "${pname}-${version}";
 
   src = ./.;

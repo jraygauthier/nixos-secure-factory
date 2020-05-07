@@ -4,14 +4,14 @@ with pkgs; rec {
 
   pythonPackages = pkgs.python3Packages;
 
-  release = pythonPackages.callPackage ./. {};
+  default = pythonPackages.callPackage ./. {};
 
   shell = {
     dev = mkShell rec {
-      name = "${release.pname}-dev-shell";
+      name = "${default.pname}-dev-shell";
 
       inputsFrom = [
-        (release.overrideAttrs (oldAttrs: {
+        (default.overrideAttrs (oldAttrs: {
           buildInputs = oldAttrs.buildInputs ++ (with pythonPackages; [
             ipython
             pytest

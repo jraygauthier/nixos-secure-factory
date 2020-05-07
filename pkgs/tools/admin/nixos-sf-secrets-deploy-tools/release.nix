@@ -1,25 +1,27 @@
-{ nixpkgs ? <nixpkgs>
-, pkgs ? import nixpkgs {} }:
+{ nixpkgs ? null
+, pkgs ? import (if null != nixpkgs then nixpkgs else <nixpkgs>) {}
+} @ args:
 
 with pkgs;
 
 let
+  nixpkgs = if args ? "nixpkgs" then nixpkgs else <nixpkgs>;
   nixos-sf-data-deploy-tools = (import ../nixos-sf-data-deploy-tools/release.nix {
-    inherit nixpkgs pkgs; }).release;
+    inherit nixpkgs pkgs; }).default;
 
-  release = callPackage ./. {
+  default = callPackage ./. {
     inherit nixos-sf-data-deploy-tools;
   };
 
   env = buildEnv {
-    name = "${release.pname}-env";
-    paths = [ release ];
+    name = "${default.pname}-env";
+    paths = [ default ];
   };
 
   nixos-sf-test-lib-root-dir = ../../../development/python-modules/nixos-sf-test-lib;
 
   nixos-sf-test-lib = (
-    import (nixos-sf-test-lib-root-dir + "/release.nix") { inherit pkgs; }).release;
+    import (nixos-sf-test-lib-root-dir + "/release.nix") { inherit pkgs; }).default;
 
   nixTestLib = nixos-sf-test-lib.nixLib;
 
@@ -36,7 +38,7 @@ let
     flake8
   ]);
 
-  libTestInputs = release.buildInputs ++ [release];
+  libTestInputs = default.buildInputs ++ [default];
 
   installedTestInputs = [
     env
@@ -50,7 +52,7 @@ let
   mkPyTest = { testName, runTimeDeps, testPath, extraGitIgnores ? ""}:
     assert lib.isString testPath;
     stdenv.mkDerivation rec {
-      pname = "${release.pname}-tests-${testName}";
+      pname = "${default.pname}-tests-${testName}";
       name = pname;
       src = nix-gitignore.gitignoreSourcePure (commonGitIgnores ++ [
         ''
@@ -77,27 +79,27 @@ let
 in
 
 rec {
-  inherit env release;
+  inherit env default;
 
   shell = {
     build = mkShell rec {
-      name = "${release.pname}-build-shell";
+      name = "${default.pname}-build-shell";
       inputsFrom = [
-        release
+        default
       ];
     };
 
     installed = mkShell rec {
-      name = "${release.pname}-installed-shell";
+      name = "${default.pname}-installed-shell";
       buildInputs = [
         env
       ];
     };
 
     dev = mkShell rec {
-      name = "${release.pname}-dev-shell";
+      name = "${default.pname}-dev-shell";
       inputsFrom = [
-        release
+        default
       ];
 
       buildInputs = [
@@ -158,7 +160,7 @@ rec {
     };
 
     nixos = import ./tests/nixos/test-system-installed-binaries.nix {
-      inherit nixpkgs release nixos-sf-test-lib;
+      inherit nixpkgs default nixos-sf-test-lib;
       inherit (pkgs) system;
       inherit commonGitIgnores;
     };
@@ -170,7 +172,7 @@ rec {
     ];
 
     aggregate = releaseTools.aggregate {
-      name = "aggregated-tests-of-${release.name}";
+      name = "aggregated-tests-of-${default.name}";
       constituents = tests.all;
     };
   };
