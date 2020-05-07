@@ -13,25 +13,25 @@ def setup_module(module):
     pass
 
 
-def _get_cfi_libexec_dir():
+def _get_cfi_sh_lib_dir():
     return os.path.abspath(os.path.join(
         os.path.dirname(__file__),
-        "../../libexec"))
+        "../../sh-lib"))
 
     # return sanitize_bash_path_out(subprocess.check_output(
-        # "pkg-nixos-sf-factory-common-install-get-libexec-dir"))
+        # "pkg-nixos-sf-factory-common-install-get-sh-lib-dir"))
 
 
 def _get_cfi_sh_module_path(name):
-    return os.path.join(_get_cfi_libexec_dir(), name)
+    return os.path.join(_get_cfi_sh_lib_dir(), name)
 
 
-def test_get_common_install_libexec_dir():
-    ci_libexec_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-sf-common-install-get-libexec-dir")
+def test_get_common_install_sh_lib_dir():
+    ci_sh_lib_dir = sanitize_bash_path_out(subprocess.check_output(
+        "pkg-nixos-sf-common-install-get-sh-lib-dir")
     )
-    LOGGER.info("ci_libexec_dir: %s", ci_libexec_dir)
-    assert os.path.exists(ci_libexec_dir)
+    LOGGER.info("ci_sh_lib_dir: %s", ci_sh_lib_dir)
+    assert os.path.exists(ci_sh_lib_dir)
 
 
 def test_sandboxed_gpg_version():

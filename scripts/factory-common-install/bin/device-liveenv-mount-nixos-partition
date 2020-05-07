@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-common-install-get-libexec-dir")"
-. "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
+common_factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-common-install-get-sh-lib-dir")"
+. "$common_factory_install_sh_lib_dir/app_current_device_liveenv.sh"
 
 mount_liveenv_nixos_partitions

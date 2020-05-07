@@ -4,8 +4,6 @@ Todo
 Required refactors
 ------------------
 
- -  `libexec` -> `sh-lib`.
-
  -  `device-liveenv-install-factory-tools` -> should fetch the
     package env from `./release.nix` instead of `./env.nix`. This
     would make these bundles more lightweight.

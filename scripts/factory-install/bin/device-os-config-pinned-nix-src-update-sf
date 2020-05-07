@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-install-get-libexec-dir")"
-. "$factory_install_libexec_dir/cli_device_os_config_pinned_nix_src_update.sh"
+factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-install-get-sh-lib-dir")"
+. "$factory_install_sh_lib_dir/cli_device_os_config_pinned_nix_src_update.sh"
 update_device_os_cfg_pinned_nix_srcs_sf_cli "$@"

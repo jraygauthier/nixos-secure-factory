@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 
-device_type_install_libexec_dir="$(pkg-nixos-device-type-install-get-libexec-dir)"
-. "$device_type_install_libexec_dir/tools.sh"
+device_type_install_sh_lib_dir="$(pkg-nixos-device-type-install-get-sh-lib-dir)"
+. "$device_type_install_sh_lib_dir/tools.sh"
 ensure_supported_device_from_nixos_live_cd
 
 hw-config-prepare-for-partition-and-format

@@ -18,9 +18,9 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace ./bin/pkg-${pname}-get-libexec-dir \
+    substituteInPlace ./bin/pkg-${pname}-get-sh-lib-dir \
       --replace 'default_pkg_dir=' '# default_pkg_dir=' \
-      --replace '$default_pkg_dir/libexec' "$out/share/${pname}/libexec"
+      --replace '$default_pkg_dir/sh-lib' "$out/share/${pname}/sh-lib"
 
     substituteInPlace ./bin/pkg-${pname}-get-root-dir \
       --replace 'default_pkg_dir=' '# default_pkg_dir=' \

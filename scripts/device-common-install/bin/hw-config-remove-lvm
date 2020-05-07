@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-device-common-install-get-libexec-dir")"
-. "$device_common_install_libexec_dir/tools.sh"
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 
 # This small script allow one to remove any lvm
