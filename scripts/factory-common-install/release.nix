@@ -1,28 +1,47 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
-with nixpkgs;
+with pkgs;
 
 let
-  nixos-sf-ssh-auth-cli = (
-    import ../../pkgs/tools/admin/nixos-sf-ssh-auth/release.nix {
-      nixpkgs = null; pkgs = nixpkgs;
+  nixos-sf-ssh-auth-cli = (import
+    ../../pkgs/tools/admin/nixos-sf-ssh-auth/release.nix {
+      nixpkgs = null;
+      inherit pkgs;
     }).cli;
 
-  nixos-common-install-scripts = import ../common-install/release.nix { inherit nixpkgs; };
-  nixos-device-system-config = import ../device-system-config/release.nix { inherit nixpkgs; };
-  nixos-sf-device-system-config-updater = import ../device-system-config-updater/release.nix {
-    inherit nixpkgs;
-  };
-  release = callPackage ./. {
+  nixos-sf-factory-common-install-py = (import
+    ./py/release.nix {
+      nixpkgs = null;
+      inherit pkgs;
+    }).default;
+
+  nixos-common-install-scripts = import
+    ../common-install/release.nix {
+      nixpkgs = pkgs;
+    };
+  nixos-device-system-config = import
+    ../device-system-config/release.nix {
+      nixpkgs = pkgs;
+    };
+  nixos-sf-device-system-config-updater = import
+    ../device-system-config-updater/release.nix {
+      nixpkgs = pkgs;
+    };
+  default = callPackage ./. {
     inherit nixos-common-install-scripts;
     inherit nixos-device-system-config;
     inherit nixos-sf-device-system-config-updater;
     inherit nixos-sf-ssh-auth-cli;
+    inherit nixos-sf-factory-common-install-py;
   };
 
 in
 
-(release // {
-  envShellHook = writeScript "envShellHook.sh" ''
-  '';
-})
+{
+  default = (default // {
+      envShellHook = writeScript "envShellHook.sh" ''
+      '';
+    });
+
+  python-lib = nixos-sf-factory-common-install-py;
+}

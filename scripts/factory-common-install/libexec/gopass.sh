@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-common_libexec_dir="$(pkg-nixos-common-get-libexec-dir)"
+common_libexec_dir="$(pkg-nixos-sf-common-get-libexec-dir)"
 . "$common_libexec_dir"/permissions.sh
 
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/gpg.sh"
 . "$common_factory_install_libexec_dir/git.sh"

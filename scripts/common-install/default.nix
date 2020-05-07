@@ -12,7 +12,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-common-install";
+  pname = "nixos-sf-common-install";
   name = "${pname}-${version}";
 
   src = ./.;

@@ -1,0 +1,48 @@
+{ lib
+, buildPythonPackage
+, mypy
+, pytest
+, flake8
+, ipython
+, click
+, pyyaml
+, nixos-sf-ssh-auth-cli
+, withDevTools ? false
+}:
+
+let
+  bashCompletionLib = import ../../../lib/bash-completions.nix {
+    inherit lib;
+  };
+in
+
+buildPythonPackage rec  {
+  pname = "nixos-sf-factory-common-install-py";
+  version = "0.0.0";
+  src = ./.;
+  buildInputs = [];
+  checkInputs = [
+    mypy
+    pytest
+    flake8
+  ] ++ lib.optionals withDevTools [
+    ipython
+  ];
+  propagatedBuildInputs = [
+    click
+    pyyaml
+    nixos-sf-ssh-auth-cli
+  ];
+
+  postInstall = ''
+    ${bashCompletionLib.installClickExesBashCompletion [
+    ]}
+  '';
+
+  # Allow nix-shell inside nix-shell.
+  # See `pkgs/development/interpreters/python/hooks/setuptools-build-hook.sh`
+  # for the reason why.
+  shellHook = ''
+    setuptoolsShellHook
+  '';
+}

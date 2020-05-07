@@ -2,7 +2,7 @@
 , makeWrapper
 , coreutils
 , gnugrep
-, nixos-factory-common-install
+, nixos-sf-factory-common-install
 , mr
 , yq
 , python3
@@ -11,7 +11,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-factory-install";
+  pname = "nixos-sf-factory-install";
   name = "${pname}-${version}";
 
 
@@ -20,7 +20,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ makeWrapper ];
 
   propagatedUserEnvPkgs = [
-    nixos-factory-common-install
+    nixos-sf-factory-common-install
   ];
 
   propagatedBuildInputs = [
@@ -28,7 +28,7 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    nixos-factory-common-install
+    nixos-sf-factory-common-install
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.
@@ -51,6 +51,8 @@ stdenv.mkDerivation rec {
 
     ! test -e "./.local-env.sh" || rm ./.local-env.sh
   '';
+
+  buildPhase = "true";
 
   installPhase = ''
     mkdir -p "$out/share/${pname}"

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/app_current_device_ssh.sh"
 . "$common_factory_install_libexec_dir/app_current_device_liveenv.sh"
 . "$common_factory_install_libexec_dir/workspace_paths.sh"
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
 
 
-device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
+device_system_update_libexec_dir="$(pkg-nixos-sf-device-system-config-get-libexec-dir)"
 . "$device_system_update_libexec_dir/device_system_config.sh"
 
 

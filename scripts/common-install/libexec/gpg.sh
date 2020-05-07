@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-common_libexec_dir="$(pkg-nixos-common-get-libexec-dir)"
+common_libexec_dir="$(pkg-nixos-sf-common-get-libexec-dir)"
 . "$common_libexec_dir"/permissions.sh
 . "$common_libexec_dir"/sh_stream.sh
-# common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
+# common_install_libexec_dir="$(pkg-nixos-sf-common-install-get-libexec-dir)"
 
 
 wipe_gpg_home_dir() {

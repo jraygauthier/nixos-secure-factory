@@ -1,19 +1,22 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
-with nixpkgs;
+with pkgs;
 
 let
-  nixos-factory-common-install = import ../factory-common-install/release.nix { inherit nixpkgs; };
+  nixos-sf-factory-common-install = (import
+    ../factory-common-install/release.nix {
+      inherit pkgs;
+    }).default;
 
-  release = callPackage ./. {
-    inherit nixos-factory-common-install;
-  };
-
-
+  default = callPackage ./. {
+      inherit nixos-sf-factory-common-install;
+    };
 in
 
-(release // {
-  envShellHook = writeScript "envShellHook.sh" ''
-    source "${nixos-factory-common-install.envShellHook}"
-  '';
-})
+{
+  default = (default // {
+      envShellHook = writeScript "envShellHook.sh" ''
+        source "${nixos-sf-factory-common-install.envShellHook}"
+      '';
+    });
+}

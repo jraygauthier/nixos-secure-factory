@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/gpg.sh"
 . "$common_factory_install_libexec_dir/gopass.sh"
 . "$common_factory_install_libexec_dir/app_factory_gopass_vaults.sh"
@@ -7,7 +7,7 @@ common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libex
 . "$common_factory_install_libexec_dir/app_current_device_store.sh"
 
 # From deps libs.
-common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
+common_install_libexec_dir="$(pkg-nixos-sf-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/device_secrets.sh"
 
 

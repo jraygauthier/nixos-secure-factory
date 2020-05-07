@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-factory-common-install-get-libexec-dir")"
+common_factory_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-common-install-get-libexec-dir")"
 . "$common_factory_install_libexec_dir/cli_device_state.sh"
 
 # device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)"

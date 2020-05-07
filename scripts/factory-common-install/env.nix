@@ -1,9 +1,9 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
-with nixpkgs;
+with pkgs;
 
 let
-  release = import ./release.nix { inherit nixpkgs; };
+  release = import ./release.nix { inherit pkgs; };
   envLib = import ../../lib/env.nix {
     inherit lib bash-completion;
   };

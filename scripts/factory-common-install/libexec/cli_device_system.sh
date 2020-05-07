@@ -3,7 +3,7 @@
 device_system_config_updater_libexec_dir="$(pkg-nixos-sf-device-system-config-updater-get-libexec-dir)"
 . "$device_system_config_updater_libexec_dir/local_system_updater.sh"
 
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/app_current_device_config.sh"
 
 

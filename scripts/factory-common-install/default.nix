@@ -7,6 +7,7 @@
 , nixos-device-system-config
 , nixos-sf-device-system-config-updater
 , nixos-sf-ssh-auth-cli
+, nixos-sf-factory-common-install-py
 , openssh
 , yq
 , jq
@@ -39,13 +40,14 @@ pythonWPackages = python3.withPackages (pp: with pp; [
   click
   pyyaml
   nixos-sf-ssh-auth-cli
+  nixos-sf-factory-common-install-py
 ]);
 
 in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-factory-common-install";
+  pname = "nixos-sf-factory-common-install";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -118,11 +120,9 @@ stdenv.mkDerivation rec {
   '';
 
 
-  pythonPathDeps = lib.strings.makeSearchPath "python-lib" [
-  ];
-
   binPathDeps = stdenv.lib.makeBinPath buildInputs;
 
+  buildPhase = "true";
 
   installPhase = ''
     mkdir -p "$out/share/${pname}"
@@ -133,9 +133,7 @@ stdenv.mkDerivation rec {
       target_cmd_basename="$(basename "$cmd")"
       makeWrapper "$cmd" "$out/bin/$target_cmd_basename" \
         --prefix PATH : "${binPathDeps}" \
-        --prefix PATH : "$out/share/${pname}/bin" \
-        --prefix PYTHONPATH : "$out/share/${pname}/python-lib" \
-        --prefix PYTHONPATH : "${pythonPathDeps}"
+        --prefix PATH : "$out/share/${pname}/bin"
     done
 
     # Principally required for read -e -i 'Default value'

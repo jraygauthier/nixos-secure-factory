@@ -5,7 +5,7 @@ let
 in
 
 nixpkgs.pkgs.buildEnv {
-  name = "nixos-common-scripts-env";
+  name = "nixos-sf-common-env";
   paths = [
     nixos-common-scripts
   ];

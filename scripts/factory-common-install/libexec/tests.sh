@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 
 TESTED_PACKAGE_NAME="nixos-factory-common-install"
@@ -30,7 +30,7 @@ launch_all_tests() {
   printf -- "===============================================\n\n"
 
   local factory_common_install_pkg_root_dir
-  factory_common_install_pkg_root_dir="$(pkg-nixos-factory-common-install-get-root-dir)"
+  factory_common_install_pkg_root_dir="$(pkg-nixos-sf-factory-common-install-get-root-dir)"
 
   "$factory_common_install_pkg_root_dir/enter-build-env.sh" \
     --run "pytest \"$factory_common_install_pkg_root_dir/tests/pytest_in_build_env\""

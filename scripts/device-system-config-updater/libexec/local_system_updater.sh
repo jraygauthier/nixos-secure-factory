@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-device_system_update_libexec_dir="$(pkg-nixos-device-system-config-get-libexec-dir)"
+device_system_update_libexec_dir="$(pkg-nixos-sf-device-system-config-get-libexec-dir)"
 . "$device_system_update_libexec_dir/device_system_config.sh"
 
 

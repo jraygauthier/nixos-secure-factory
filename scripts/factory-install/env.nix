@@ -1,29 +1,29 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
-with nixpkgs;
+with pkgs;
 
 let
-  release = import ./release.nix { inherit nixpkgs; };
+  default = (import ./release.nix { inherit pkgs; }).default;
   envLib = import ../../lib/env.nix {
     inherit lib bash-completion;
   };
   env = buildEnv {
-    name = "${release.pname}-build-env";
-    paths = [ release ];
+    name = "${default.pname}-build-env";
+    paths = [ default ];
   };
 in
 
 mkShell rec {
-  name = "${release.pname}-env";
+  name = "${default.pname}-env";
   buildInputs = [
     env
     dieHook
   ];
 
   shellHook = ''
-    source ${release.envShellHook}
+    source ${default.envShellHook}
 
-    ${envLib.exportXdgDataDirsOf ([ release ] ++ release.buildInputs)}
+    ${envLib.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
     ${envLib.ensureDynamicBashCompletionLoaderInstalled}
 
     shell_dir="${toString ./.}"

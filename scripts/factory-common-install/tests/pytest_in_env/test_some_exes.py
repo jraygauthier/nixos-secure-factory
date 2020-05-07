@@ -16,7 +16,7 @@ def setup_module(module):
 
 def test_get_factory_common_install_libexec_dir():
     fci_libexec_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-factory-common-install-get-libexec-dir")
+        "pkg-nixos-sf-factory-common-install-get-libexec-dir")
     )
     LOGGER.info("fci_libexec_dir: %s", fci_libexec_dir)
     assert os.path.exists(fci_libexec_dir)

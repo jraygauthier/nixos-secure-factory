@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-device-common-install-get-libexec-dir")"
+device_common_install_libexec_dir="$("$(dirname "$0")/pkg-nixos-sf-device-common-install-get-libexec-dir")"
 . "$device_common_install_libexec_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 

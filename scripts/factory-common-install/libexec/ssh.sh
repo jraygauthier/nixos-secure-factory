@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-common_factory_install_libexec_dir="$(pkg-nixos-factory-common-install-get-libexec-dir)"
+common_factory_install_libexec_dir="$(pkg-nixos-sf-factory-common-install-get-libexec-dir)"
 . "$common_factory_install_libexec_dir/tools.sh"
 . "$common_factory_install_libexec_dir/prompt.sh"
 
 # From dependency libs.
-common_install_libexec_dir="$(pkg-nixos-common-install-get-libexec-dir)"
+common_install_libexec_dir="$(pkg-nixos-sf-common-install-get-libexec-dir)"
 . "$common_install_libexec_dir/ssh.sh"
 
 

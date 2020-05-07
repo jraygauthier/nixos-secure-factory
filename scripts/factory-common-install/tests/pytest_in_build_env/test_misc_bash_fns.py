@@ -19,7 +19,7 @@ def _get_cfi_libexec_dir():
         "../../libexec"))
 
     # return sanitize_bash_path_out(subprocess.check_output(
-        # "pkg-nixos-factory-common-install-get-libexec-dir"))
+        # "pkg-nixos-sf-factory-common-install-get-libexec-dir"))
 
 
 def _get_cfi_sh_module_path(name):
@@ -28,7 +28,7 @@ def _get_cfi_sh_module_path(name):
 
 def test_get_common_install_libexec_dir():
     ci_libexec_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-common-install-get-libexec-dir")
+        "pkg-nixos-sf-common-install-get-libexec-dir")
     )
     LOGGER.info("ci_libexec_dir: %s", ci_libexec_dir)
     assert os.path.exists(ci_libexec_dir)

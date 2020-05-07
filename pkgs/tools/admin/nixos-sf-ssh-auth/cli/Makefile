@@ -20,4 +20,4 @@ lint:
 	flake8
 
 release:
-	nix-build release.nix -A release
+	nix-build release.nix -A default

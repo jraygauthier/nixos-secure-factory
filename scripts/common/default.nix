@@ -6,7 +6,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-common";
+  pname = "nixos-sf-common";
   name = "${pname}-${version}";
 
   src = ./.;

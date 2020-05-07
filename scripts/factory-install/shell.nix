@@ -1,15 +1,15 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
 
-with nixpkgs;
+with pkgs;
 
 let
-  release = import ./release.nix { inherit nixpkgs; };
+  default = (import ./release.nix { inherit pkgs; }).default;
 in
 
 mkShell rec {
-  name = "${release.pname}-shell";
+  name = "${default.pname}-shell";
   inputsFrom = [
-    release
+    default
   ];
 
   buildInputs = [ dieHook ];

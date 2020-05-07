@@ -20,7 +20,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-device-common-install";
+  pname = "nixos-sf-device-common-install";
   name = "${pname}-${version}";
 
   src = ./.;

@@ -1,11 +1,14 @@
-{ nixpkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {} }:
+
+with pkgs;
 
 let
-  nixos-device-common-install-scripts = import ../../../../scripts/device-common-install/release.nix {
-    inherit nixpkgs;
-  };
+  nixos-sf-device-common-install = import
+    ../../../../scripts/device-common-install/release.nix {
+      inherit pkgs;
+    };
 in
 
-(nixpkgs.pkgs.callPackage ./. {
-  inherit nixos-device-common-install-scripts;
+(callPackage ./. {
+  inherit nixos-sf-device-common-install;
 })

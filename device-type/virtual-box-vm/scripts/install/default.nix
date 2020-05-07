@@ -1,5 +1,5 @@
 { stdenv
-, nixos-device-common-install-scripts
+, nixos-sf-device-common-install
 , makeWrapper
 , coreutils
 , gnugrep
@@ -17,15 +17,15 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [ makeWrapper ];
 
   propagatedUserEnvPkgs = [
-    nixos-device-common-install-scripts
+    nixos-sf-device-common-install
   ];
 
   propagatedBuildInputs = [
-    nixos-device-common-install-scripts
+    nixos-sf-device-common-install
   ];
 
   buildInputs = [
-    nixos-device-common-install-scripts
+    nixos-sf-device-common-install
     # For the common lib *.sh.
     coreutils
     gnugrep
