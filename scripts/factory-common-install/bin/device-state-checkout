@@ -203,5 +203,6 @@ def cli(device_id) -> None:
     dump_as_current_device_cfg(device_cfg, store_yaml)
     print("Current device is now set to '{}'.".format(matched_device_id))
 
+
 if __name__ == "__main__":
     cli()

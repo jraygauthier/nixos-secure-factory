@@ -26,6 +26,10 @@ buildPythonPackage rec  {
     gnupg
   ];
 
+  # TODO: Reactivate this only once we found a way to
+  # garbage collect gpg agents launched over the various test directories.
+  doCheck = false;
+
   checkPhase = ''
     mypy .
     pytest .

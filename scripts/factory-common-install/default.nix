@@ -6,8 +6,6 @@
 , nixos-sf-common-install
 , nixos-sf-device-system-config
 , nixos-sf-device-system-config-updater
-, nixos-sf-ssh-auth-cli
-, nixos-sf-factory-common-install-py
 , openssh
 , yq
 , jq
@@ -26,6 +24,8 @@
 , nix-prefetch-git
 , nix-prefetch-github
 , tightvnc
+, pythonLib
+, pythonInterpreter
 }:
 
 let
@@ -33,15 +33,6 @@ let
 bashCompletionLib = import ../../lib/bash-completions.nix {
   inherit lib;
 };
-
-pythonWPackages = python3.withPackages (pp: with pp; [
-  pytest
-  ipython
-  click
-  pyyaml
-  nixos-sf-ssh-auth-cli
-  nixos-sf-factory-common-install-py
-]);
 
 in
 
@@ -56,7 +47,7 @@ stdenv.mkDerivation rec {
     makeWrapper
     # Required as we have python shebangs that needs to be patched
     # with a python that has the proper libraries.
-    pythonWPackages
+    pythonInterpreter
   ];
 
   propagatedUserEnvPkgs = [
@@ -73,7 +64,6 @@ stdenv.mkDerivation rec {
   buildInputs = [
     nixos-sf-common-install
     nixos-sf-device-system-config
-    nixos-sf-ssh-auth-cli
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.
@@ -91,7 +81,7 @@ stdenv.mkDerivation rec {
     screen
     socat
     picocom
-    pythonWPackages
+    pythonInterpreter
 
     # TODO: Consider this. Not certain if nix would be capable
     # of introducing this dependency on non nix system as it
@@ -149,11 +139,6 @@ stdenv.mkDerivation rec {
     ]}
   '';
 
-  shellHook = ''
-    export PATH="${src}/bin''${binPathDeps:+:}$binPathDeps''${PATH:+:}$PATH"
-    export PYTHONPATH="${src}/python-lib''${pythonPathDeps:+:}$pythonPathDeps''${PYTHONPATH:+:}$PYTHONPATH"
-  '';
-
   meta = {
     description = ''
       Some scripts meant to be run by the factory technician
@@ -161,5 +146,8 @@ stdenv.mkDerivation rec {
     '';
   };
 
-  passthru.pname = pname;
+  passthru = {
+    inherit pname;
+    python-lib = pythonLib;
+  };
 }

@@ -7,7 +7,6 @@
 , click
 , pyyaml
 , nixos-sf-ssh-auth-cli
-, withDevTools ? false
 }:
 
 let
@@ -25,9 +24,16 @@ buildPythonPackage rec  {
     mypy
     pytest
     flake8
-  ] ++ lib.optionals withDevTools [
-    ipython
   ];
+
+  doCheck = false;
+
+  checkPhase = ''
+    mypy .
+    pytest .
+    flake8
+  '';
+
   propagatedBuildInputs = [
     click
     pyyaml
