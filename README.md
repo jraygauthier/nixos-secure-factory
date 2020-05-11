@@ -175,7 +175,7 @@ device configurations. Specific device factories are required to:
         Note that one could instead decide to use [google-repo] tool instead
         to tackle the multiple repositories problem.
 
-    And finally, a `my_factory_install/enter-factory-install-scripts-env.sh`
+    And finally, a `my_factory_install/env.sh`
     helper script should be provided to quickly enter the factory install
     environment.
 
