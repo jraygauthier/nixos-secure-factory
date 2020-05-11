@@ -1,4 +1,4 @@
-from nixos_sf_factory_install import my_fn
+from nsf_factory_install import my_fn
 
 
 def test_misc():

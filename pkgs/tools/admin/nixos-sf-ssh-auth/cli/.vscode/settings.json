@@ -1,0 +1,13 @@
+{
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.pythonPath": "${env:PYTHON_INTERPRETER}",
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "python.linting.mypyEnabled": true,
+    "python.linting.flake8Enabled": true,
+}

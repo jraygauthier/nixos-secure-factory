@@ -38,6 +38,9 @@ let
   env = mkShell {
     name = "${default.pname}-env";
 
+    PYTHONPATH = "";
+    MYPYPATH = "";
+
     buildInputs = [ default ];
 
     shellHook = ''
@@ -87,7 +90,7 @@ let
       ${oldAttrs.shellHook}
       source ${shellHookLib}
       sh_hook_py_set_interpreter_env_from_path
-      sh_hook_lib_mypy_5701_workaround_from_path
+      # sh_hook_lib_mypy_5701_workaround_from_path
       sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
       sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
       sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py
@@ -101,6 +104,10 @@ rec {
   shell = {
     dev = mkShell rec {
       name = "${default.pname}-dev-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [dev];
     };
   };

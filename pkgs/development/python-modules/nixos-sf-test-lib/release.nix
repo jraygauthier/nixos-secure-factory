@@ -32,6 +32,10 @@ rec {
   shell = {
     dev = mkShell rec {
       name = "${default.pname}-dev-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [dev];
     };
   };

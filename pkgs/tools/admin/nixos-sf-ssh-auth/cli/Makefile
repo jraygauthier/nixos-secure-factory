@@ -8,7 +8,7 @@ clean:
 	rm -f ./result*
 
 typechecks:
-	mypy . $(shell find ./tests -name "test_*.py")
+	mypy . ./src $(shell find ./tests -name "test_*.py")
 
 tests:
 	pytest
@@ -21,3 +21,9 @@ lint:
 
 release:
 	nix-build release.nix -A default
+
+shell.dev:
+	nix-shell release.nix -A shell.dev
+
+shell.installed:
+	nix-shell release.nix -A shell.installed

@@ -84,6 +84,10 @@ rec {
   shell = {
     build = mkShell rec {
       name = "${default.pname}-build-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [
         default
       ];
@@ -91,6 +95,10 @@ rec {
 
     installed = mkShell rec {
       name = "${default.pname}-installed-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       buildInputs = [
         env
       ];
@@ -98,6 +106,10 @@ rec {
 
     dev = mkShell rec {
       name = "${default.pname}-dev-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [
         default
       ];

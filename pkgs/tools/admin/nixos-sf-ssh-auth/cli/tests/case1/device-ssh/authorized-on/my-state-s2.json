@@ -1,0 +1,9 @@
+{
+  "device-users": {
+    "my-device-user-d": {
+      "ssh-users": [
+        "my-ssh-user-d"
+      ]
+    }
+  }
+}

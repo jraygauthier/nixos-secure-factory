@@ -1,20 +1,33 @@
-{ lib, buildPythonPackage
-, mypy, pytest, flake8, ipython
-, click, pyyaml
-, withDevTools ? false }:
+{ lib
+, buildPythonPackage
+, mypy
+, pytest
+, flake8
+, ipython
+, click
+, pyyaml
+}:
 
 buildPythonPackage rec  {
   pname = "nixos-sf-ssh-auth-cli";
   version = "0.0.0";
   src = ./.;
   buildInputs = [];
+
+  doCheck = false;
+
   checkInputs = [
     mypy
     pytest
     flake8
-  ] ++ lib.optionals withDevTools [
-    ipython
   ];
+
+  checkPhase = ''
+    mypy .
+    pytest .
+    flake8
+  '';
+
   propagatedBuildInputs = [
     click
     pyyaml

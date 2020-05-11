@@ -63,6 +63,10 @@ rec {
   shell = {
     build = mkShell rec {
       name = "${default.pname}-build-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [
         default
       ];
@@ -74,6 +78,9 @@ rec {
         env
         dieHook
       ];
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
 
       shellHook = ''
         source "${default.envShellHook}"
@@ -104,6 +111,9 @@ rec {
         devPython
         shellcheck
       ];
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
 
       shellHook = ''
         shell_dir="${toString ./.}"

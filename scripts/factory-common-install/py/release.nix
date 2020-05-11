@@ -23,14 +23,14 @@ let
       inherit pkgs;
     }).default;
 
-  sfSshAuthCliRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth";
+  sfSshAuthCliRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth/cli";
 
   nixos-sf-ssh-auth-cli = (import
     (sfSshAuthCliRootDir + "/release.nix") {
       inherit pkgs;
-    }).python-lib;
+    }).default;
 
-  pythonPackages = pkgs.python3Packages;
+  pythonPackages = python3Packages;
 
   default = pythonPackages.callPackage ./. {
     inherit nixos-sf-ssh-auth-cli;
@@ -38,6 +38,9 @@ let
 
   env = mkShell {
     name = "${default.pname}-env";
+
+    PYTHONPATH = "";
+    MYPYPATH = "";
 
     buildInputs = [ default ];
 
@@ -150,13 +153,15 @@ let
         mypy
         flake8
         ipython
+        autopep8
+        isort
       ]);
 
     shellHook = ''
       ${oldAttrs.shellHook}
       source ${shellHookLib}
       sh_hook_py_set_interpreter_env_from_path
-      sh_hook_lib_mypy_5701_workaround_from_path
+      # sh_hook_lib_mypy_5701_workaround_from_path
       sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
       sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
     '';
@@ -169,6 +174,10 @@ rec {
   shell = {
     dev = mkShell rec {
       name = "${default.pname}-dev-shell";
+
+      PYTHONPATH = "";
+      MYPYPATH = "";
+
       inputsFrom = [dev];
     };
   };

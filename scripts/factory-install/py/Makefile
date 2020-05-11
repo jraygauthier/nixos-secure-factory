@@ -8,7 +8,7 @@ clean:
 	rm -f ./result*
 
 typechecks:
-	mypy . $(shell find ./tests -name "test_*.py")
+	mypy . ./src $(shell find ./tests -name "test_*.py")
 
 tests:
 	pytest
