@@ -2,7 +2,6 @@
 import os
 import logging
 import subprocess
-import pytest
 
 from bash_utils import sanitize_bash_path_out
 

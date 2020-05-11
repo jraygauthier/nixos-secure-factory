@@ -33,7 +33,7 @@ launch_all_tests() {
   factory_common_install_pkg_root_dir="$(pkg-nixos-sf-factory-common-install-get-root-dir)"
 
   "$factory_common_install_pkg_root_dir/enter-build-env.sh" \
-    --run "pytest \"$factory_common_install_pkg_root_dir/tests/pytest_in_build_env\""
+    --run "pytest \"$factory_common_install_pkg_root_dir/tests/lib\""
 
-  pytest "$factory_common_install_pkg_root_dir/tests/pytest_in_env"
+  pytest "$factory_common_install_pkg_root_dir/tests/installed"
 }

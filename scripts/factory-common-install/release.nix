@@ -21,17 +21,13 @@ let
       inherit pkgs;
     };
 
-  devPython = pyRelease.python-interpreter.dev;
-  defaultPython = pyRelease.python-interpreter.default;
-
-  pyShellHookLib = pyRelease.nix-lib.shell-hook-lib;
+  nixos-sf-factory-common-install-py = pyRelease.default;
 
   default = (callPackage ./. {
     inherit nixos-sf-common-install;
     inherit nixos-sf-device-system-config;
     inherit nixos-sf-device-system-config-updater;
-    pythonLib = pyRelease.default;
-    pythonInterpreter = defaultPython;
+    inherit nixos-sf-factory-common-install-py;
   } // {
     envShellHook = writeScript "envShellHook.sh" ''
     '';
@@ -45,10 +41,24 @@ let
   envLib = import ../../lib/env.nix {
     inherit lib bash-completion;
   };
+
+  # defaultPython = default.python-interpreter;
+  devPython = python3.withPackages (pp: with pp; (
+      default.python-packages ++ [
+    pytest
+    mypy
+    flake8
+    ipython
+  ]));
+
+
+  pyShellHookLib = pyRelease.shell-hook-lib;
 in
 
 rec {
   inherit default env;
+  py-release = pyRelease;
+  python-lib = pyRelease.default;
 
   shell = {
     build = mkShell rec {
@@ -103,6 +113,7 @@ rec {
         . "$shell_dir/env.sh"
 
         export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_IN_BUILD_ENV=1
+        export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_IN_ENV=1
 
         export PATH="${builtins.toString ./bin}:$PATH"
 
@@ -110,10 +121,9 @@ rec {
         sh_hook_py_set_interpreter_env_from_nix_store_path "${devPython}"
         sh_hook_lib_mypy_5701_workaround "${devPython}"
         sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
+        sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
         sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py
       '';
     };
   };
-
-  python-lib = pyRelease.default;
 }

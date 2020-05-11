@@ -1,7 +1,5 @@
-import os
-import pytest
-import pathmagic  # noqa: F401
-
+# import os
+# import pytest
 
 def pytest_runtest_setup(item):
     pass

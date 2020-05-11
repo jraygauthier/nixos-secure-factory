@@ -10,23 +10,25 @@ let
     bash-completion
     writeShellScript;
 
-  envLib = import ../../../lib/env.nix {
+  repoRootDir = ../../..;
+
+  envLib = import (repoRootDir + "/lib/env.nix") {
       inherit lib bash-completion;
     };
 
-  nixos-sf-ssh-auth-cli-root-dir = ../../../pkgs/tools/admin/nixos-sf-ssh-auth;
-
-  nixos-sf-ssh-auth-cli = (import
-    (nixos-sf-ssh-auth-cli-root-dir + "/release.nix") {
-      inherit pkgs;
-    }).python-lib;
-
-  nixos-sf-test-lib-root-dir = ../../../pkgs/development/python-modules/nixos-sf-test-lib;
+  sfTestLibRootDir = repoRootDir + "/pkgs/development/python-modules/nixos-sf-test-lib";
 
   nixos-sf-test-lib = (import
-    (nixos-sf-test-lib-root-dir + "/release.nix") {
+    (sfTestLibRootDir + "/release.nix") {
       inherit pkgs;
     }).default;
+
+  sfSshAuthCliRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth";
+
+  nixos-sf-ssh-auth-cli = (import
+    (sfSshAuthCliRootDir + "/release.nix") {
+      inherit pkgs;
+    }).python-lib;
 
   pythonPackages = pkgs.python3Packages;
 
@@ -45,24 +47,9 @@ let
     '';
   };
 
-  python-packages = with pythonPackages; rec {
-    common = default.propagatedBuildInputs ++ [
-      default
-    ];
+  sfTestLibLocalSrcDir = sfTestLibRootDir + "/src";
 
-    test-only = [
-      pytest
-      mypy
-      flake8
-    ];
-
-    dev-only = [
-      ipython
-    ];
-
-    test = common ++ test-only;
-    dev = common ++ test-only ++ dev-only;
-  };
+  sfSshAuthCliLocalSrcDir = sfSshAuthCliRootDir + "/src";
 
   shellHookLib = writeShellScript "python-project-shell-hook-lib.sh" ''
       # TODO: Make this more concise while avoiding the vscode debugger issue
@@ -142,7 +129,12 @@ let
 
       sh_hook_py_add_local_pkg_src_nixos_sf_test_lib() {
         sh_hook_py_add_local_pkg_src_if_present \
-          "${builtins.toString nixos-sf-test-lib-root-dir}/src"
+          "${builtins.toString sfTestLibLocalSrcDir}"
+      }
+
+      sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli() {
+        sh_hook_py_add_local_pkg_src_if_present \
+          "${builtins.toString sfSshAuthCliLocalSrcDir}"
       }
 
       sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py() {
@@ -153,8 +145,12 @@ let
 
   dev = default.overrideAttrs (oldAttrs: {
     buildInputs = oldAttrs.buildInputs
-      ++ python-packages.test-only
-      ++ python-packages.dev-only;
+      ++ (with pythonPackages; [
+        pytest
+        mypy
+        flake8
+        ipython
+      ]);
 
     shellHook = ''
       ${oldAttrs.shellHook}
@@ -162,6 +158,7 @@ let
       sh_hook_py_set_interpreter_env_from_path
       sh_hook_lib_mypy_5701_workaround_from_path
       sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
+      sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
     '';
   });
 in
@@ -176,20 +173,5 @@ rec {
     };
   };
 
-  inherit python-packages;
-
-  python-interpreter = {
-    default = python3.withPackages (pp:
-      python-packages.common);
-
-    test = python3.withPackages (pp:
-      python-packages.test);
-
-    dev = python3.withPackages (pp:
-      python-packages.dev);
-  };
-
-  nix-lib = {
-    shell-hook-lib = shellHookLib;
-  };
+  shell-hook-lib = shellHookLib;
 }

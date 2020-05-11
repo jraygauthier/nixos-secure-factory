@@ -7,9 +7,9 @@ import subprocess
 import sys
 import textwrap
 from itertools import islice, chain
-from collections import OrderedDict
 
 from typing import List, Optional, Dict, Any
+
 
 def get_device_cfg_repo_root_dir() -> str:
     env_var_name = "PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR"
@@ -23,6 +23,7 @@ def get_device_cfg_repo_root_dir() -> str:
         )
 
     return out
+
 
 def get_device_cfg_device_dir() -> str:
     out_dir = os.path.join(get_device_cfg_repo_root_dir(), "device")
@@ -50,7 +51,7 @@ def sanitize_bash_path_out(in_path: bytes):
 
 
 def collect_process_stdout(process_name: str, *args, **kwargs) -> str:
-    cmd_w_args = [ process_name ]
+    cmd_w_args = [process_name]
     cmd_w_args.extend(args)
     return sanitize_bash_path_out(subprocess.check_output(cmd_w_args, **kwargs))
 
@@ -59,7 +60,7 @@ def prompt_for_user_approval(
         prompt_str: Optional[str] = None
 ) -> bool:
     if prompt_str is None:
-        prompt_str="Continue"
+        prompt_str = "Continue"
 
     r = input("{} (y/n)? ".format(prompt_str))
     print("\n")
@@ -68,7 +69,8 @@ def prompt_for_user_approval(
 
 
 def get_nixos_secure_factory_workspace_dir() -> str:
-    ws_dir = collect_process_stdout("pkg-nixos-sf-factory-common-install-get-workspace-dir")
+    ws_dir = collect_process_stdout(
+        "pkg-nixos-sf-factory-common-install-get-workspace-dir")
     assert os.path.exists(ws_dir)
     return ws_dir
 
@@ -95,21 +97,23 @@ def format_cfg_as_yaml_str(in_cfg: Dict[str, Any]) -> str:
 
 
 def list_available_device_ids() -> List[str]:
-  root_dir = get_device_cfg_device_dir()
-  out = list(chain.from_iterable(x[1] for x in islice(os.walk(root_dir), 0, 1)))
-  return out
+    root_dir = get_device_cfg_device_dir()
+    out = list(chain.from_iterable(x[1] for x in islice(os.walk(root_dir), 0, 1)))
+    return out
 
 
 def match_device_id(
-        search_str: str, available_devices: Optional[str] = None
+        search_str: str, available_devices: Optional[List[str]] = None
 ) -> List[str]:
     if available_devices is None:
         available_devices = list_available_device_ids()
+
     out = [x for x in available_devices if x.startswith(search_str)]
     if out:
         return out
 
     return [x for x in available_devices if search_str in x]
+
 
 def list_ac_available_device_ids(ctx, args, incomplete: str) -> List[str]:
     return match_device_id(incomplete)
@@ -121,7 +125,7 @@ def format_available_devices_str(devices: List[str]) -> str:
         "Available devices\n"
         "------------------\n\n"
         "{}\n"
-        ).format(devices_str)
+    ).format(devices_str)
     return available_devices_msg_str
 
 
@@ -131,7 +135,7 @@ def format_matching_devices_str(devices: List[str]) -> str:
         "Matching devices\n"
         "----------------\n\n"
         "{}\n"
-        ).format(devices_str)
+    ).format(devices_str)
     return available_devices_msg_str
 
 
@@ -148,10 +152,10 @@ def match_unique_device_id(search_str: str) -> str:
         raise MatchNotUniqueError((
             "ERROR: No device dirname match specified "
             "search string: '{}'.\n\n{}"
-            ).format(
-                search_str,
-                available_devices_msg_str
-            ))
+        ).format(
+            search_str,
+            available_devices_msg_str
+        ))
 
     matching_count = len(matching_devices)
     if matching_count > 1:
@@ -159,10 +163,10 @@ def match_unique_device_id(search_str: str) -> str:
         raise MatchNotUniqueError((
             "ERROR: Too many dirname match for the specified "
             "search string: '{}'\n\n{}"
-            ).format(
-                search_str,
-                matching_devices_msg_str
-            ))
+        ).format(
+            search_str,
+            matching_devices_msg_str
+        ))
 
     assert matching_count == 1
     return matching_devices[0]

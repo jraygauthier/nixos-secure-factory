@@ -2,7 +2,6 @@
 import os
 import logging
 import subprocess
-import pytest
 
 from bash_utils import sanitize_bash_path_out
 
@@ -19,7 +18,7 @@ def _get_cfi_sh_lib_dir():
         "../../sh-lib"))
 
     # return sanitize_bash_path_out(subprocess.check_output(
-        # "pkg-nixos-sf-factory-common-install-get-sh-lib-dir"))
+    # "pkg-nixos-sf-factory-common-install-get-sh-lib-dir"))
 
 
 def _get_cfi_sh_module_path(name):

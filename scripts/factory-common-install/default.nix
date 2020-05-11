@@ -24,11 +24,16 @@
 , nix-prefetch-git
 , nix-prefetch-github
 , tightvnc
-, pythonLib
-, pythonInterpreter
+, nixos-sf-factory-common-install-py
 }:
 
 let
+
+pythonLib = nixos-sf-factory-common-install-py;
+pythonPkgs = with python3.pkgs; [
+    pythonLib
+  ];
+pythonInterpreter = python3.withPackages (pp: pythonPkgs);
 
 bashCompletionLib = import ../../lib/bash-completions.nix {
   inherit lib;
@@ -148,6 +153,8 @@ stdenv.mkDerivation rec {
 
   passthru = {
     inherit pname;
+    python-interpreter = pythonInterpreter;
+    python-packages = pythonPkgs;
     python-lib = pythonLib;
   };
 }
