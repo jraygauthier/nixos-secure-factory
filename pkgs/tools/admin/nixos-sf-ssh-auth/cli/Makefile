@@ -2,7 +2,7 @@ MKF_CWD := $(shell pwd)
 
 .PHONY: all clean tests
 
-all: typechecks tests-lib lint release
+all: typechecks tests lint release
 
 clean:
 	rm -f ./result*
@@ -12,9 +12,6 @@ typechecks:
 
 tests:
 	pytest
-
-tests-lib:
-	pytest tests/lib
 
 lint:
 	flake8

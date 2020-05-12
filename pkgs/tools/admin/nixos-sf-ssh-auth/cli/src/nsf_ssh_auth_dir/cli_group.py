@@ -39,4 +39,5 @@ def deauthorize() -> None:
     """De-authorize a *ssh group* from *device user(s)*."""
     logging.info("group deauthorize")
 
+
 group.add_command(member)

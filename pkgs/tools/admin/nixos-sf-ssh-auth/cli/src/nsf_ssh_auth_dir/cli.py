@@ -1,3 +1,4 @@
+import sys
 import click
 import logging
 
@@ -12,12 +13,16 @@ from .cli_git import git
 
 @dataclass
 class CliInitCtx:
+    # The *ssh auth dir* over which to operate.
     cwd: Path
+    # The current user's id if available.
+    user_id: Optional[str]
 
 
 def mk_default_cli_init_ctx() -> CliInitCtx:
     return CliInitCtx(
-        cwd=Path.cwd()
+        cwd=Path.cwd(),
+        user_id=None
     )
 
 
@@ -27,9 +32,12 @@ class _MkDefaultCliInitCtx:
 
 
 def ensure_cli_init_ctx(ctx: click.Context) -> CliInitCtx:
-    out = ctx.ensure_object(_MkDefaultCliInitCtx)
-    assert isinstance(out, CliInitCtx)
-    return out
+    if ctx.obj is not None:
+        assert isinstance(ctx.obj, CliInitCtx)
+        return ctx.obj
+    # out = ctx.ensure_object(_MkDefaultCliInitCtx)
+    # assert isinstance(out, CliInitCtx)
+    return mk_default_cli_init_ctx()
 
 
 def setup_verbose(
@@ -52,7 +60,13 @@ def cli(ctx: click.Context) -> None:
     All commands operate on the current *ssh auth dir* which
     by default correspond to the *current working directory*.
     """
-    ensure_cli_init_ctx(ctx)
+
+    # assert ctx.obj is not None
+
+    # ensure_cli_init_ctx(ctx)
+
+    if ctx.obj:
+        logging.warning(f"user_id: {ctx.obj.user_id}")
 
     setup_verbose(1)
 
@@ -61,8 +75,12 @@ def cli(ctx: click.Context) -> None:
 @click.pass_context
 def info(ctx: click.Context) -> None:
     """Print information about the current *ssh auth dir*."""
+
     init_ctx = ensure_cli_init_ctx(ctx)
-    logging.info(f"info hello: {init_ctx.cwd}")
+
+    print(f"cwd: '{init_ctx.cwd}'")
+    if init_ctx.user_id is not None:
+        print(f"user-id: '{init_ctx.user_id}'")
 
 
 cli.add_command(user)
@@ -70,11 +88,11 @@ cli.add_command(group)
 cli.add_command(git)
 
 
-def mk_cli(init_ctx: Optional[CliInitCtx] = None) -> click.Command:
+def run_cli(init_ctx: Optional[CliInitCtx] = None) -> None:
     if init_ctx is None:
         init_ctx = mk_default_cli_init_ctx()
-    return cli(obj=init_ctx)
+    sys.exit(cli(obj=init_ctx))
 
 
 if __name__ == "__main__":
-    mk_cli()
+    run_cli()

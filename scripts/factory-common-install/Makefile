@@ -31,3 +31,8 @@ lint-shell:
 release:
 	nix-build release.nix
 
+shell.dev:
+	nix-shell release.nix -A shell.dev
+
+shell.installed:
+	nix-shell release.nix -A shell.installed

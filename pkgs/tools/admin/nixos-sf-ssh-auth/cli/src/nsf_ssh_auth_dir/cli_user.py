@@ -39,4 +39,5 @@ def deauthorize() -> None:
     """De-authorize a single *ssh user* from *device user(s)*."""
     logging.info("user deauthorize")
 
+
 user.add_command(pubkey)
