@@ -8,12 +8,10 @@ common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
 # instead of 'nix_src_update.sh' in order to encapsulate dependencies
 # required to implements the pin update tools.
 
-update_pinned_nix_src_by_name() {
+_get_pinned_nix_src_channel_in_filename() {
   local pinned_src_root_dir="${1?}"
   local src_name="${2?}"
   local src_channel="${3:-default}"
-
-  print_title_lvl2 "Updating pinned nix src '$src_name' at channel '$src_channel'."
 
   local channel_in_fp_prefix="$pinned_src_root_dir/$src_name/channel/${src_channel}.in"
   local channel_in_yaml_fp="${channel_in_fp_prefix}.yaml"
@@ -24,7 +22,35 @@ update_pinned_nix_src_by_name() {
     channel_in_yaml_or_json_fp="$channel_in_yaml_fp"
   fi
 
+  echo "$channel_in_yaml_or_json_fp"
+}
+
+
+_get_pinned_nix_src_channel_out_filename() {
+  local pinned_src_root_dir="${1?}"
+  local src_name="${2?}"
+  local src_channel="${3:-default}"
   local channel_out_json_fp="$pinned_src_root_dir/$src_name/channel/${src_channel}.json"
+  echo "$channel_out_json_fp"
+}
+
+
+update_pinned_nix_src_by_name() {
+  local pinned_src_root_dir="${1?}"
+  local src_name="${2?}"
+  local src_channel="${3:-default}"
+
+  print_title_lvl2 "Updating pinned nix src '$src_name' at channel '$src_channel'."
+
+  local channel_in_yaml_or_json_fp
+  channel_in_yaml_or_json_fp="$(\
+    _get_pinned_nix_src_channel_in_filename \
+      "$pinned_src_root_dir" "$src_name" "$src_channel")" || return 1
+
+  local channel_out_json_fp="$pinned_src_root_dir/$src_name/channel/${src_channel}.json"
+  channel_out_json_fp="$(\
+    _get_pinned_nix_src_channel_out_filename \
+      "$pinned_src_root_dir" "$src_name" "$src_channel")" || return 1
 
   factory-nix-src-update "$channel_in_yaml_or_json_fp" "$channel_out_json_fp"
 }
@@ -67,7 +93,15 @@ update_pinned_nix_srcs_all() {
     local pinned_src_channel="default"
     local pinned_src="${pinned_src_name}:${pinned_src_channel}"
     echo "$pinned_src"
-    all_nix_srcs+=( "$pinned_src" )
+
+    local pinned_channel_in_fn
+    pinned_channel_in_fn="$(\
+      _get_pinned_nix_src_channel_in_filename \
+        "$pinned_src_root_dir" "$pinned_src_name" "$pinned_src_channel")" || return 1
+
+    if [[ -f "$pinned_channel_in_fn" ]]; then
+      all_nix_srcs+=( "$pinned_src" )
+    fi
   done < <(find "$pinned_src_root_dir" -maxdepth 1 -mindepth 1)
 
   printf "\n"
