@@ -1,0 +1,4 @@
+type: fetchFromGitHub
+owner: jraygauthier
+repo: nixos-sf-ssh-auth
+ref: master

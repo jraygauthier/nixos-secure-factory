@@ -15,7 +15,7 @@ def setup_module(module):
 def _get_fi_sh_lib_dir():
     return os.path.abspath(os.path.join(
         os.path.dirname(__file__),
-        "../../zilia-ocular-factory-install/scripts/factory-install/sh-lib"))
+        "../../sh-lib"))
 
 
 def _get_cfi_sh_lib_dir():
