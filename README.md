@@ -41,6 +41,18 @@ External tools / extensions
 Those are standalone tools that were developed as a mean of extending the
 capabilities of the current framework but that can even find uses outside of it.
 
+ -  [nixos-sf-ssh-auth]
+
+    A nix lib to simplify the management of ssh public keys allowed remote
+    access to individual linux users. This introduce the concept of a *ssh auth
+    dir* which allows to define users, groups, per device user authorizations
+    and much more.
+
+    It comes with a nice command line helper whose underlying library is used by
+    some of `nixos-sf-factory-common-install` tools, namely
+    `device-common-ssh-auth-dir` and `device-ssh-auth-dir` to respectively
+    allow authorizations throughout all devices and on a per device basis.
+
  -  [nixos-sf-atlassian-tools]
 
     Of particular interest, provides a cli helper to manage **ssh authorizations**
@@ -71,6 +83,7 @@ capabilities of the current framework but that can even find uses outside of it.
     **free** mean of **remote access** to your devices (e.g.: through ssh, vnc,
     sftp, etc) even though these are *behind firewalls*.
 
+[nixos-sf-ssh-auth]: https://github.com/jraygauthier/nixos-sf-ssh-auth
 [nixos-sf-atlassian-tools]: https://github.com/amotus/nixos-sf-atlassian-tools
 [nixos-sf-zerotier-tools]: https://github.com/amotus/nixos-sf-zerotier-tools
 

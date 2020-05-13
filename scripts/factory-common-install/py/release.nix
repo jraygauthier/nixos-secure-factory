@@ -11,6 +11,7 @@ let
     writeShellScript;
 
   repoRootDir = ../../..;
+  wsRootDir = repoRootDir + "/..";
 
   envLib = import (repoRootDir + "/lib/env.nix") {
       inherit lib bash-completion;
@@ -23,12 +24,12 @@ let
       inherit pkgs;
     }).default;
 
-  sfSshAuthCliRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth/cli";
+  sfSshAuthRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth";
 
   nixos-sf-ssh-auth-cli = (import
-    (sfSshAuthCliRootDir + "/release.nix") {
+    (sfSshAuthRootDir + "/release.nix") {
       inherit pkgs;
-    }).default;
+    }).cli;
 
   pythonPackages = python3Packages;
 
@@ -52,7 +53,7 @@ let
 
   sfTestLibLocalSrcDir = sfTestLibRootDir + "/src";
 
-  sfSshAuthCliLocalSrcDir = sfSshAuthCliRootDir + "/src";
+  sfSshAuthCliLocalSrcDir = wsRootDir + "/nixos-sf-ssh-auth/cli/src";
 
   shellHookLib = writeShellScript "python-project-shell-hook-lib.sh" ''
       # TODO: Make this more concise while avoiding the vscode debugger issue
