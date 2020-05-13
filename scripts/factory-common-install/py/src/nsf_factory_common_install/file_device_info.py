@@ -24,6 +24,12 @@ def parse_device_info_id(in_d: DeviceInfoPlainT) -> str:
     return out
 
 
+def parse_device_info_type(in_d: DeviceInfoPlainT) -> str:
+    out = in_d['type']
+    assert isinstance(out, str)
+    return out
+
+
 def parse_device_info_factory_installed_by(
         in_d: DeviceInfoPlainT) -> Optional[List[str]]:
     out = in_d.get('factory-installed-by', None)
@@ -35,7 +41,7 @@ def parse_device_info_factory_installed_by(
 def parse_device_info(in_d: DeviceInfoPlainT) -> DeviceInfo:
     return DeviceInfo(
         id=parse_device_info_id(in_d),
-        type=in_d['type'],
+        type=parse_device_info_type(in_d),
         hostname=in_d['hostname'],
         ssh_port=in_d['ssh-port'],
         gpg_id=in_d.get('gpg-id', None),
@@ -80,3 +86,9 @@ def load_device_id_from_device_info_yaml_file(
         filename: Path) -> str:
     di_plain = load_device_info_from_yaml_file_plain(filename)
     return parse_device_info_id(di_plain)
+
+
+def load_device_type_from_device_info_yaml_file(
+        filename: Path) -> str:
+    di_plain = load_device_info_from_yaml_file_plain(filename)
+    return parse_device_info_type(di_plain)

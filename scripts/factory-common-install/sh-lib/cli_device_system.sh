@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 device_system_config_updater_sh_lib_dir="$(pkg-nixos-sf-device-system-config-updater-get-sh-lib-dir)"
+# shellcheck source=local_system_updater.sh
 . "$device_system_config_updater_sh_lib_dir/local_system_updater.sh"
 
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_config.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_config.sh"
 
 

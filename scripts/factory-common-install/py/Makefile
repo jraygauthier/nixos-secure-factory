@@ -18,3 +18,6 @@ lint:
 
 release:
 	nix-build release.nix -A default
+
+shell.dev:
+	nix-shell release.nix -A shell.dev

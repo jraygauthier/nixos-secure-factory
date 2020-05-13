@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_ssh.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_ssh.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_liveenv.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_liveenv.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/workspace_paths.sh
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_store.sh"
 
 
 device_system_update_sh_lib_dir="$(pkg-nixos-sf-device-system-config-get-sh-lib-dir)"
+# shellcheck source=device_system_config.sh
 . "$device_system_update_sh_lib_dir/device_system_config.sh"
 
 

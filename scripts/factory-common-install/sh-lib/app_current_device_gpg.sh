@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+# shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh
 . "$common_factory_install_sh_lib_dir/gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_gpg.sh
 . "$common_factory_install_sh_lib_dir/app_factory_gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_gopass.sh
 . "$common_factory_install_sh_lib_dir/app_factory_gopass.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_store.sh"
 
 

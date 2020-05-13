@@ -1,6 +1,9 @@
-from nsf_factory_common_install.ssh_auth_dir import common_cli, device_specific_cli
+from nsf_factory_common_install.cli_ssh_auth_dir import (
+    run_cli_common,
+    run_cli_device_specific,
+)
 
 
 def test_ssh_auth_dir_api():
-    assert common_cli
-    assert device_specific_cli
+    assert run_cli_common
+    assert run_cli_device_specific

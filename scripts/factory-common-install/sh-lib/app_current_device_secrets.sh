@@ -1,21 +1,33 @@
 #!/usr/bin/env bash
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
 # Source both dependencies.
+# shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/mount.sh
 . "$common_factory_install_sh_lib_dir/mount.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/ssh.sh
 . "$common_factory_install_sh_lib_dir/ssh.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh
 . "$common_factory_install_sh_lib_dir/gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gopass.sh
 . "$common_factory_install_sh_lib_dir/gopass.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/prompt.sh
 . "$common_factory_install_sh_lib_dir/prompt.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_store.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_gopass_vaults.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_gopass_vaults.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_ssh.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_ssh.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_secrets.sh
 . "$common_factory_install_sh_lib_dir/app_factory_secrets.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_liveenv.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_liveenv.sh"
 
 
 # From deps libs.
 common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
+# shellcheck source=device_secrets.sh
 . "$common_install_sh_lib_dir/device_secrets.sh"
 
 

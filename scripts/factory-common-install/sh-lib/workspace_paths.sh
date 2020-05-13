@@ -21,7 +21,7 @@ get_device_cfg_repo_root_dir() {
   # 1>&2 echo "root_dir=$root_dir"
   if ! is_device_cfg_repo_root_dir "$root_dir"; then
     1>&2 printf -- "ERROR: Env var'PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR' "
-    1>&2 printf -- "should be set to point to the device configuration core repository\n"
+    1>&2 printf -- "should be set to point to the device configuration repository\n"
     exit 1
   fi
 

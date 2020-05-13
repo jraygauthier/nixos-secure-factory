@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
-. "$common_sh_lib_dir"/permissions.sh
+# shellcheck source=permissions.sh
+. "$common_sh_lib_dir/permissions.sh"
 
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+# shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh
 . "$common_factory_install_sh_lib_dir/gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/git.sh
 . "$common_factory_install_sh_lib_dir/git.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/workspace_paths.sh
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
 
 # permissions

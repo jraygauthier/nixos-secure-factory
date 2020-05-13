@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
 # Source all dependencies:
+# shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/mount.sh
 . "$common_factory_install_sh_lib_dir/mount.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/ssh.sh
 . "$common_factory_install_sh_lib_dir/ssh.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh
 . "$common_factory_install_sh_lib_dir/gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/prompt.sh
 . "$common_factory_install_sh_lib_dir/prompt.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_info_store.sh
 . "$common_factory_install_sh_lib_dir/app_factory_info_store.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_gopass.sh
 . "$common_factory_install_sh_lib_dir/app_factory_gopass.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_gpg.sh
 . "$common_factory_install_sh_lib_dir/app_factory_gpg.sh"
 
 

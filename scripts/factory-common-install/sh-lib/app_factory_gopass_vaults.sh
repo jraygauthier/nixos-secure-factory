@@ -3,10 +3,15 @@ common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
 . "$common_sh_lib_dir/sh_stream.sh"
 
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+# shellcheck source=SCRIPTDIR/../sh-lib/prompt.sh
 . "$common_factory_install_sh_lib_dir/prompt.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh
 . "$common_factory_install_sh_lib_dir/gpg.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/gopass.sh
 . "$common_factory_install_sh_lib_dir/gopass.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_info_store.sh
 . "$common_factory_install_sh_lib_dir/app_factory_info_store.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/workspace_paths.sh
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
 
 

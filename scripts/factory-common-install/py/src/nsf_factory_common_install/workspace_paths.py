@@ -19,15 +19,8 @@ def get_device_cfg_repo_root_dir_path() -> Path:
         raise Exception((
             "ERROR: Env var '{}' "
             "should be set to point to the device "
-            "configuration core repository!").format(
+            "configuration repository!").format(
                 env_var_name)
         )
 
     return Path(out)
-
-
-def get_device_cfg_device_dir_path() -> Path:
-    out_dir = get_device_cfg_repo_root_dir_path().joinpath("device")
-    if not out_dir.exists():
-        raise Exception("ERROR: Directory '{}' does not exists!".format(out_dir))
-    return out_dir

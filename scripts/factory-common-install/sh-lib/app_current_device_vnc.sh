@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
 # Source all dependencies:
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_ssh.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_ssh.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_store.sh"
 
 

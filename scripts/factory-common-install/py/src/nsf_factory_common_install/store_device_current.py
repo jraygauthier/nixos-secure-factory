@@ -6,7 +6,7 @@ from .workspace_paths import (
     get_nsf_workspace_dir_path,
 )
 
-from .store_device import load_device_id_from_device_info_yaml_file
+from .file_device_info import load_device_id_from_device_info_yaml_file
 from .store_devices import get_device_specific_cfg_dir_path
 
 

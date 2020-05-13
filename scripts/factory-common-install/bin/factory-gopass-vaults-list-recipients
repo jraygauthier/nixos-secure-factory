@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
 common_factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-common-install-get-sh-lib-dir")"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_factory_secrets.sh
 . "$common_factory_install_sh_lib_dir/app_factory_secrets.sh"
 
 list_factory_secrets_vaults_gopass_recipients_cli
