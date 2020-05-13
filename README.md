@@ -104,3 +104,12 @@ Contributing
 ------------
 
 Contributing implies licensing those contributions under the terms of [LICENSE](./LICENSE), which is an *Apache 2.0* license.
+
+
+Acknowledgements
+----------------
+
+Thanks to [Zilia Health] for being the first innovative corporate user /
+supporter of this project allowing it to grow both in quality and features.
+
+[Zilia Health]: https://ziliahealth.com/
