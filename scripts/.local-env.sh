@@ -24,5 +24,6 @@ export PKG_NIXOS_SF_DEVICE_SYSTEM_CONFIG_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/dev
 export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory-common-install"
 export PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory-install"
 
+export PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_REPO_ROOT_DIR="$factory_install_repo_root_dir"
 
 export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_WORKSPACE_DIR="$project_top_level_root_dir"

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+if test -z ${PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_REPO_ROOT_DIR+x}; then
+  default_pkg_dir="$(cd "$(dirname "$0")/../../.." > /dev/null && pwd)"
+  pkg_root_dir="$default_pkg_dir"
+else
+  pkg_root_dir="$PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_REPO_ROOT_DIR"
+fi
+
+# echo "pkg_root_dir='$pkg_root_dir'"
+if ! [[ -w "$pkg_root_dir" ]]; then
+  1>&2 echo "ERROR: $(basename "$0"): factory install repository root dir at '$pkg_root_dir' is not writable as expected."
+  exit 1
+fi
+
+echo "$pkg_root_dir"
