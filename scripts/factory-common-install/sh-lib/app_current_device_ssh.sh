@@ -170,8 +170,9 @@ deploy_file_to_device() {
 
 
 retrieve_file_from_device() {
-  local local_f="$1"
-  local remote_f="$2"
+  local local_f="${1?}"
+  local remote_f="${2?}"
+  local user="${3:-root}"
 
   local local_dirname
   local_dirname="$(dirname "$local_f")"
@@ -186,7 +187,7 @@ retrieve_file_from_device() {
 
   mkdir -p "$local_dirname"
   chmod 700 "$local_dirname"
-  scp "${scp_port_args[@]}" "root@${device_hostname}:${remote_f}" "${local_f}"
+  scp "${scp_port_args[@]}" "${user}@${device_hostname}:${remote_f}" "${local_f}"
 }
 
 
