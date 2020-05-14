@@ -11,7 +11,7 @@ let
     }).default;
 in
 
-nixpkgs.callPackage ./. {
+pkgs.callPackage ./. {
   inherit deviceIdentifier deviceSystemConfigDir;
   inherit nixos-sf-device-system-config-updater;
 }
