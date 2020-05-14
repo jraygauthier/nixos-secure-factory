@@ -3,6 +3,7 @@
 , makeWrapper
 , coreutils
 , gnugrep
+, nixos-sf-shell-complete-nix-lib
 , nixos-sf-common-install
 , nixos-sf-device-system-config
 , nixos-sf-device-system-config-updater
@@ -34,10 +35,6 @@ pythonPkgs = with python3.pkgs; [
     pythonLib
   ];
 pythonInterpreter = python3.withPackages (pp: pythonPkgs);
-
-bashCompletionLib = import ../../lib/bash-completions.nix {
-  inherit lib;
-};
 
 in
 
@@ -119,7 +116,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = ''
+  installPhase = with nixos-sf-shell-complete-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 
@@ -137,7 +134,7 @@ stdenv.mkDerivation rec {
     # completions just below.
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
-    ${bashCompletionLib.installClickExesBashCompletion [
+    ${shComp.pkg.installClickExesBashCompletion [
       "device-state-checkout"
       "device-common-ssh-auth-dir"
       "device-ssh-auth-dir"

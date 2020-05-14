@@ -3,6 +3,12 @@
 with pkgs;
 
 let
+  repoRootDir = ../..;
+  nixos-sf-shell-complete-nix-lib = (import (
+    repoRootDir + "/pkgs/build-support/nixos-sf-shell-complete/release.nix") {
+      inherit pkgs;
+    }).nix-lib;
+
   nixos-sf-common-install = (import
     ../common-install/release.nix {
       inherit pkgs;
@@ -24,6 +30,7 @@ let
   nixos-sf-factory-common-install-py = pyRelease.default;
 
   default = (callPackage ./. {
+    inherit nixos-sf-shell-complete-nix-lib;
     inherit nixos-sf-common-install;
     inherit nixos-sf-device-system-config;
     inherit nixos-sf-device-system-config-updater;
@@ -36,10 +43,6 @@ let
   env = buildEnv {
     name = "${default.pname}-build-env";
     paths = [ default ];
-  };
-
-  envLib = import ../../lib/env.nix {
-    inherit lib bash-completion;
   };
 
   # defaultPython = default.python-interpreter;
@@ -82,11 +85,11 @@ rec {
       PYTHONPATH = "";
       MYPYPATH = "";
 
-      shellHook = ''
+      shellHook = with nixos-sf-shell-complete-nix-lib; ''
         source "${default.envShellHook}"
 
-        ${envLib.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
-        ${envLib.ensureDynamicBashCompletionLoaderInstalled}
+        ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
+        ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
 
         shell_dir="${toString ./.}"
         test -e "$shell_dir/env.sh" || die "Cannot find expected '$shell_dir/env.sh'!"

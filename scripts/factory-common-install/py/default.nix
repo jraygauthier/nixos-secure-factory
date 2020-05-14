@@ -6,14 +6,9 @@
 , ipython
 , click
 , pyyaml
+, nixos-sf-shell-complete-nix-lib
 , nixos-sf-ssh-auth-cli
 }:
-
-let
-  bashCompletionLib = import ../../../lib/bash-completions.nix {
-    inherit lib;
-  };
-in
 
 buildPythonPackage rec  {
   pname = "nixos-sf-factory-common-install-py";
@@ -40,8 +35,8 @@ buildPythonPackage rec  {
     nixos-sf-ssh-auth-cli
   ];
 
-  postInstall = ''
-    ${bashCompletionLib.installClickExesBashCompletion [
+  postInstall = with nixos-sf-shell-complete-nix-lib; ''
+    ${shComp.pkg.installClickExesBashCompletion [
     ]}
   '';
 

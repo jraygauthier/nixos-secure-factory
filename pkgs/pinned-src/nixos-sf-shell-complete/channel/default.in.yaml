@@ -1,4 +1,4 @@
 type: fetchFromGitHub
 owner: jraygauthier
-repo: nixos-sf-ssh-auth
+repo: nixos-sf-shell-complete
 ref: master

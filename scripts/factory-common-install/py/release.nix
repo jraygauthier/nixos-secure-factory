@@ -13,9 +13,10 @@ let
   repoRootDir = ../../..;
   wsRootDir = repoRootDir + "/..";
 
-  envLib = import (repoRootDir + "/lib/env.nix") {
-      inherit lib bash-completion;
-    };
+  nixos-sf-shell-complete-nix-lib = (import (
+    repoRootDir + "/pkgs/build-support/nixos-sf-shell-complete/release.nix") {
+      inherit pkgs;
+    }).nix-lib;
 
   sfTestLibRootDir = repoRootDir + "/pkgs/development/python-modules/nixos-sf-test-lib";
 
@@ -34,6 +35,7 @@ let
   pythonPackages = python3Packages;
 
   default = pythonPackages.callPackage ./. {
+    inherit nixos-sf-shell-complete-nix-lib;
     inherit nixos-sf-ssh-auth-cli;
   };
 
@@ -45,9 +47,9 @@ let
 
     buildInputs = [ default ];
 
-    shellHook = ''
-      ${envLib.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
-      ${envLib.ensureDynamicBashCompletionLoaderInstalled}
+    shellHook = with nixos-sf-shell-complete-nix-lib; ''
+      ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
+      ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
     '';
   };
 

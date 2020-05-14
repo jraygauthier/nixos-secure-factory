@@ -12,9 +12,10 @@ let
 
   repoRootDir = ../../..;
 
-  envLib = import (repoRootDir + "/lib/env.nix") {
-      inherit lib bash-completion;
-    };
+  nixos-sf-shell-complete-nix-lib = (import (
+    repoRootDir + "/pkgs/build-support/nixos-sf-shell-complete/release.nix") {
+      inherit pkgs;
+    }).nix-lib;
 
   sffciPyRelease = (import
     (repoRootDir + "/scripts/factory-common-install/release.nix") {
@@ -32,6 +33,7 @@ let
   pythonPackages = pkgs.python3Packages;
 
   default = pythonPackages.callPackage ./. {
+    inherit nixos-sf-shell-complete-nix-lib;
     inherit nixos-sf-factory-common-install-py;
   };
 
@@ -43,9 +45,9 @@ let
 
     buildInputs = [ default ];
 
-    shellHook = ''
-      ${envLib.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
-      ${envLib.ensureDynamicBashCompletionLoaderInstalled}
+    shellHook = with nixos-sf-shell-complete-nix-lib; ''
+      ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
+      ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
     '';
   };
 

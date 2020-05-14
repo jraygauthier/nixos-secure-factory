@@ -1,0 +1,8 @@
+{
+  "type": "fetchFromGitHub",
+  "owner": "jraygauthier",
+  "repo": "nixos-sf-shell-complete",
+  "ref": "master",
+  "rev": "3f928dbcbd7f944354617fb4e896d5a750ab9db7",
+  "sha256": "0wi4vdw23mx72zzzgb3rjkyj646by0rylq0rmx7vvraanab4wlss"
+}

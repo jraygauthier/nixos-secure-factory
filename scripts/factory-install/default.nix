@@ -7,15 +7,12 @@
 , yq
 , python3
 , bashInteractive
+, nixos-sf-shell-complete-nix-lib
 , nixos-sf-factory-common-install
 , nixos-sf-factory-install-py
 }:
 
 let
-
-bashCompletionLib = (import ../../lib/default.nix {}).bashCompletions {
-  inherit lib;
-};
 
 pythonLib = nixos-sf-factory-install-py;
 pythonPkgs = with python3.pkgs; [
@@ -71,7 +68,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = ''
+  installPhase = with nixos-sf-shell-complete-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 
@@ -89,7 +86,7 @@ stdenv.mkDerivation rec {
     # completions just below.
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
-    ${bashCompletionLib.installClickExesBashCompletion [
+    ${shComp.pkg.installClickExesBashCompletion [
     ]}
   '';
 
