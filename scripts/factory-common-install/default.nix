@@ -22,8 +22,6 @@
 , xclip
 , diffutils
 , bashInteractive
-, nix-prefetch-git
-, nix-prefetch-github
 , tightvnc
 , nixos-sf-factory-common-install-py
 }:
@@ -92,9 +90,6 @@ stdenv.mkDerivation rec {
 
     xclip
     diffutils
-
-    nix-prefetch-git
-    nix-prefetch-github
 
     nixos-sf-device-system-config-updater
   ];

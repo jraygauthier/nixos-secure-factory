@@ -5,6 +5,11 @@ with pkgs;
 let
   repoRootDir = ../..;
 
+  nsf-pin-cli = (import (
+    repoRootDir + "/pkgs/tools/package-management/nsf-pin/release.nix") {
+      inherit pkgs;
+    }).cli;
+
   nsf-shell-complete-nix-lib = (import (
     repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
       inherit pkgs;
@@ -23,6 +28,7 @@ let
   nixos-sf-factory-install-py = pyRelease.default;
 
   default = (callPackage ./. {
+      inherit nsf-pin-cli;
       inherit nsf-shell-complete-nix-lib;
       inherit nixos-sf-factory-common-install;
       inherit nixos-sf-factory-install-py;

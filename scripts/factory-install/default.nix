@@ -7,6 +7,7 @@
 , yq
 , python3
 , bashInteractive
+, nsf-pin-cli
 , nsf-shell-complete-nix-lib
 , nixos-sf-factory-common-install
 , nixos-sf-factory-install-py
@@ -46,6 +47,7 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
+    nsf-pin-cli
     nixos-sf-factory-common-install
     coreutils
     gnugrep

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
-. "$common_factory_install_sh_lib_dir/nix_src_update_helpers.sh"
+nsf_pin_sh_lib_dir="$(pkg-nsf-pin-get-sh-lib-dir)"
+. "$nsf_pin_sh_lib_dir/nix_src_update_helpers.sh"
 
 factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-install-get-sh-lib-dir)"
 . "$factory_install_sh_lib_dir/workspace_paths.sh"
@@ -27,9 +27,9 @@ update_factory_install_pinned_nix_srcs_all_cli() {
 }
 
 
-update_factory_install_pinned_nix_srcs_sf_ssh_auth_repo_cli() {
+update_factory_install_pinned_nix_srcs_sf_pin_repo_cli() {
   local channel="${1:-default}"
-  local src_w_channel="nixos-sf-ssh-auth:${channel}"
+  local src_w_channel="nsf-pin:${channel}"
   print_title_lvl1 "Updating device os config pinned '$src_w_channel' src."
   update_factory_install_pinned_nix_srcs "$src_w_channel"
 }
@@ -38,6 +38,14 @@ update_factory_install_pinned_nix_srcs_sf_ssh_auth_repo_cli() {
 update_factory_install_pinned_nix_srcs_sf_shell_complete_repo_cli() {
   local channel="${1:-default}"
   local src_w_channel="nsf-shell-complete:${channel}"
+  print_title_lvl1 "Updating device os config pinned '$src_w_channel' src."
+  update_factory_install_pinned_nix_srcs "$src_w_channel"
+}
+
+
+update_factory_install_pinned_nix_srcs_sf_ssh_auth_repo_cli() {
+  local channel="${1:-default}"
+  local src_w_channel="nixos-sf-ssh-auth:${channel}"
   print_title_lvl1 "Updating device os config pinned '$src_w_channel' src."
   update_factory_install_pinned_nix_srcs "$src_w_channel"
 }

@@ -4,6 +4,7 @@ with pkgs;
 
 let
   repoRootDir = ../..;
+
   nsf-shell-complete-nix-lib = (import (
     repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
       inherit pkgs;
