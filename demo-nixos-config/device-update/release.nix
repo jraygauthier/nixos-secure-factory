@@ -4,16 +4,18 @@
 }:
 
 let
-  nixpkgsSrc = libSrc.getPinnedSrc "nixpkgs";
-  nixpkgs = import nixpkgsSrc.src {};
-  inherit (nixpkgs) nix-gitignore;
+  pinnedSrcs = (
+    import ../.nix/default.nix { inherit workspaceDir; }).pinned;
 
-  libSrc = import ../lib/src.nix { inherit workspaceDir; };
-  sfSrc = libSrc.getPinnedSrc "nixos-secure-factory";
+  nixpkgs = pinnedSrcs.nixpkgs.default;
+  pkgs = import nixpkgs.src {};
+  inherit (pkgs) nix-gitignore;
+  sfSrc = pinnedSrcs.nixos-secure-factory.default;
 
   deviceUpdate = import (sfSrc.src + "/device-update/release.nix") {
     inherit deviceIdentifier deviceSystemConfigDir workspaceDir;
-    inherit nixpkgs;
+    # TODO: Non standard interface. Change this.
+    nixpkgs = pkgs;
   };
 in
 

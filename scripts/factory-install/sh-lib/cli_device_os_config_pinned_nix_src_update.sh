@@ -43,6 +43,14 @@ update_device_os_cfg_pinned_nix_srcs_sf_cli() {
   update_device_os_cfg_pinned_nix_srcs "$src_w_channel"
 }
 
+update_device_os_cfg_pinned_nix_srcs_sf_pin_cli() {
+  local channel="${1:-default}"
+  local src_w_channel="nsf-pin:${channel}"
+  print_title_lvl1 "Updating device os config pinned '$src_w_channel' src."
+  update_device_os_cfg_pinned_nix_srcs "$src_w_channel"
+}
+
+
 update_device_os_cfg_pinned_nix_srcs_cli() {
   local src_list_str="$*"
   print_title_lvl1 "Updating specific device os config pinned nix srcs: '$src_list_str'."

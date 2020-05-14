@@ -1,4 +1,5 @@
 { lib }:
+# TODO: Remove and use new framework.
 {
   getUserKeyFileFromPerUserAuthKeys = username: inAttrSet: let
       userAuthKeyAttrSet = inAttrSet."${username}" or {};

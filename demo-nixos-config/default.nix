@@ -88,6 +88,7 @@ stdenv.mkDerivation rec {
       "nixos" \
       "pkgs" \
       "lib" \
+      ".nix" \
     )
 
     for in_f in "''${config_std_deps[@]}"; do
