@@ -152,6 +152,7 @@ uninstall_factory_tools_from_device() {
 deploy_file_to_device() {
   local local_f="$1"
   local remote_f="$2"
+  local user="${3:-root}"
 
   local local_dirname
   local_dirname="$(dirname "$local_f")"
@@ -165,7 +166,7 @@ deploy_file_to_device() {
   build_scp_port_args_for_ssh_port_a "scp_port_args" "$device_ssh_port"
 
   run_cmd_as_device_root "mkdir -m 700 -p '$local_dirname'"
-  scp "${scp_port_args[@]}" "${local_f}" "root@${device_hostname}:${remote_f}"
+  scp "${scp_port_args[@]}" "${local_f}" "${user}@${device_hostname}:${remote_f}"
 }
 
 
