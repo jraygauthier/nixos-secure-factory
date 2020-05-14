@@ -7,7 +7,7 @@
 , yq
 , python3
 , bashInteractive
-, nixos-sf-shell-complete-nix-lib
+, nsf-shell-complete-nix-lib
 , nixos-sf-factory-common-install
 , nixos-sf-factory-install-py
 }:
@@ -68,7 +68,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = with nixos-sf-shell-complete-nix-lib; ''
+  installPhase = with nsf-shell-complete-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 

@@ -5,8 +5,8 @@ with pkgs;
 let
   repoRootDir = ../..;
 
-  nixos-sf-shell-complete-nix-lib = (import (
-    repoRootDir + "/pkgs/build-support/nixos-sf-shell-complete/release.nix") {
+  nsf-shell-complete-nix-lib = (import (
+    repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
       inherit pkgs;
     }).nix-lib;
 
@@ -23,7 +23,7 @@ let
   nixos-sf-factory-install-py = pyRelease.default;
 
   default = (callPackage ./. {
-      inherit nixos-sf-shell-complete-nix-lib;
+      inherit nsf-shell-complete-nix-lib;
       inherit nixos-sf-factory-common-install;
       inherit nixos-sf-factory-install-py;
   } // {
@@ -76,7 +76,7 @@ rec {
         dieHook
       ];
 
-      shellHook = with nixos-sf-shell-complete-nix-lib; ''
+      shellHook = with nsf-shell-complete-nix-lib; ''
         source "${default.envShellHook}"
 
         ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}

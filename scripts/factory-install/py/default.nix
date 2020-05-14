@@ -6,7 +6,7 @@
 , ipython
 , click
 , pyyaml
-, nixos-sf-shell-complete-nix-lib
+, nsf-shell-complete-nix-lib
 , nixos-sf-factory-common-install-py
 }:
 
@@ -35,7 +35,7 @@ buildPythonPackage rec  {
     nixos-sf-factory-common-install-py
   ];
 
-  postInstall = with nixos-sf-shell-complete-nix-lib; ''
+  postInstall = with nsf-shell-complete-nix-lib; ''
     ${shComp.pkg.installClickExesBashCompletion [
     ]}
   '';

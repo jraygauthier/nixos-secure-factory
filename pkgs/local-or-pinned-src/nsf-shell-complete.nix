@@ -1,7 +1,7 @@
 {}:
 
 let
-  repoName = "nixos-sf-shell-complete";
+  repoName = "nsf-shell-complete";
   wsDir = ../../..;
   localRepoDir = wsDir + "/${repoName}";
   out = if builtins.pathExists localRepoDir

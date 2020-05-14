@@ -6,7 +6,7 @@
 , ipython
 , click
 , pyyaml
-, nixos-sf-shell-complete-nix-lib
+, nsf-shell-complete-nix-lib
 , nixos-sf-ssh-auth-cli
 }:
 
@@ -35,7 +35,7 @@ buildPythonPackage rec  {
     nixos-sf-ssh-auth-cli
   ];
 
-  postInstall = with nixos-sf-shell-complete-nix-lib; ''
+  postInstall = with nsf-shell-complete-nix-lib; ''
     ${shComp.pkg.installClickExesBashCompletion [
     ]}
   '';

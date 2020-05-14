@@ -3,7 +3,7 @@
 , makeWrapper
 , coreutils
 , gnugrep
-, nixos-sf-shell-complete-nix-lib
+, nsf-shell-complete-nix-lib
 , nixos-sf-common-install
 , nixos-sf-device-system-config
 , nixos-sf-device-system-config-updater
@@ -116,7 +116,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = with nixos-sf-shell-complete-nix-lib; ''
+  installPhase = with nsf-shell-complete-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 

@@ -13,8 +13,8 @@ let
   repoRootDir = ../../..;
   wsRootDir = repoRootDir + "/..";
 
-  nixos-sf-shell-complete-nix-lib = (import (
-    repoRootDir + "/pkgs/build-support/nixos-sf-shell-complete/release.nix") {
+  nsf-shell-complete-nix-lib = (import (
+    repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
       inherit pkgs;
     }).nix-lib;
 
@@ -35,7 +35,7 @@ let
   pythonPackages = python3Packages;
 
   default = pythonPackages.callPackage ./. {
-    inherit nixos-sf-shell-complete-nix-lib;
+    inherit nsf-shell-complete-nix-lib;
     inherit nixos-sf-ssh-auth-cli;
   };
 
@@ -47,7 +47,7 @@ let
 
     buildInputs = [ default ];
 
-    shellHook = with nixos-sf-shell-complete-nix-lib; ''
+    shellHook = with nsf-shell-complete-nix-lib; ''
       ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
       ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
     '';
