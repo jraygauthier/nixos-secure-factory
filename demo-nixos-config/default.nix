@@ -5,8 +5,8 @@
 , deviceIdentifier
 , extraNixSearchPath
 , deviceInfoJsonPath
-, nixpkgsSrc
 , nixpkgs
+, pkgs
 , nixos-secure-factory
 }:
 
@@ -20,12 +20,11 @@ let
   deviceType = deviceInfo.type;
   deviceId = deviceInfo.identifier;
 
-  nixos_src = nixpkgsSrc;
 
   nixSearchPath = extraNixSearchPath // {
-    nixpkgs = nixpkgsSrc;
-    nixos = nixos_src;
+    inherit nixpkgs;
     inherit nixos-secure-factory;
+    nixos = nixpkgs;
   };
 
   configurationGenerated = writeTextFile { name = "configuration_generated.nix"; text = ''

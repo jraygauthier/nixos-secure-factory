@@ -5,8 +5,8 @@
 
 let
   deviceInfoJsonPath = null;
-  nixpkgsSrc = <nixpkgs>;
-  pkgs = import nixpkgsSrc {};
+  nixpkgs = <nixpkgs>;
+  pkgs = import nixpkgs {};
   inherit (pkgs) nix-gitignore;
   nixos-secure-factory =
     nix-gitignore.gitignoreSourcePure [
@@ -18,7 +18,7 @@ in
 
 pkgs.callPackage ./. {
   inherit deviceIdentifier extraNixSearchPath deviceInfoJsonPath;
-  inherit nixpkgsSrc nixos-secure-factory;
-  # TODO: Non standard interface. Change this.
-  nixpkgs = pkgs;
+  inherit nixos-secure-factory;
+  inherit nixpkgs;
+  inherit pkgs;
 }

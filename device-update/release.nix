@@ -1,13 +1,13 @@
 { deviceIdentifier
 , deviceSystemConfigDir
 , workspaceDir ? null
-, nixpkgs ? import <nixpkgs> {}
+, pkgs ? import <nixpkgs> {}
 }:
 
 let
   nixos-sf-device-system-config-updater = (import
     ../scripts/device-system-config-updater/release.nix {
-      pkgs = nixpkgs;
+      inherit pkgs;
     }).default;
 in
 

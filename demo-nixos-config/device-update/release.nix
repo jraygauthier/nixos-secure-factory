@@ -7,15 +7,14 @@ let
   pinnedSrcs = (
     import ../.nix/default.nix { inherit workspaceDir; }).pinned;
 
-  nixpkgs = pinnedSrcs.nixpkgs.default;
-  pkgs = import nixpkgs.src {};
+  nixpkgsChan = pinnedSrcs.nixpkgs.default;
+  pkgs = import nixpkgsChan.src {};
   inherit (pkgs) nix-gitignore;
-  sfSrc = pinnedSrcs.nixos-secure-factory.default;
+  sfChan = pinnedSrcs.nixos-secure-factory.default;
 
-  deviceUpdate = import (sfSrc.src + "/device-update/release.nix") {
+  deviceUpdate = import (sfChan.src + "/device-update/release.nix") {
     inherit deviceIdentifier deviceSystemConfigDir workspaceDir;
-    # TODO: Non standard interface. Change this.
-    nixpkgs = pkgs;
+    inherit pkgs;
   };
 in
 
