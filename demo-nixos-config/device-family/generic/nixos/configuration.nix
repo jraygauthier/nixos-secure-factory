@@ -26,7 +26,10 @@ in
     [
     ];
 
-  nixpkgs.overlays = (import ../../../.nix/default.nix { inherit pkgs; }).overlays;
+  nixpkgs.overlays = (import
+    ../../../.nix/default.nix
+    { inherit pkgs; fromNixosModule = true; }
+    ).overlays;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.editor = false;

@@ -7,6 +7,7 @@
 , deviceInfoJsonPath
 , nixpkgs
 , nixos-secure-factory
+, pickedSrcs
 }:
 
 let
@@ -19,12 +20,12 @@ let
   deviceType = deviceInfo.type;
   deviceId = deviceInfo.identifier;
 
-
+  # TODO: Take care of the version too.
   nixSearchPath = extraNixSearchPath // {
     inherit nixpkgs;
     inherit nixos-secure-factory;
     nixos = nixpkgs;
-  };
+  } // builtins.mapAttrs (k: v: v.src) pickedSrcs;
 
   configurationGenerated = writeTextFile { name = "configuration_generated.nix"; text = ''
     { lib, config, pkgs, ... }:

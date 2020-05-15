@@ -5,7 +5,7 @@
 
 let
   pinnedSrcs = (
-    import ../.nix/default.nix { inherit workspaceDir; }).pinned;
+    import ../.nix/default.nix { inherit workspaceDir; }).srcs.pinned;
 
   nixpkgsChan = pinnedSrcs.nixpkgs.default;
   pkgs = import nixpkgsChan.src {};

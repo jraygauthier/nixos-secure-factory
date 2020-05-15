@@ -1,5 +1,6 @@
 { pkgs ? null
 , workspaceDir ? null
+, fromNixosModule ? false
 }:
 
 # When `pkgs == null`, the drawbacks are:
@@ -67,11 +68,31 @@ rec {
     };
   };
 
+  # TODO: Automate this.
+  # TODO: At least, ensure that nothing is missing.
+  nixosPickedSrcs = {
+    # TODO: Missing name attr.
+    nixos-secure-factory =
+      { src = <nixos-secure-factory>; version = <nixos-secure-factory-version>; };
+    nixos-sf-ssh-auth =
+      { src = <nixos-sf-ssh-auth>; version = <nixos-sf-ssh-auth-version>; };
+    nixpkgs =
+      { src = <nixpkgs>; version = <nixpkgs-version>; };
+    nsf-pin =
+      { src = <nsf-pin>; version = <nsf-pin-version>; };
+  };
+
+  pickedSrcs =
+    if fromNixosModule
+      then nixosPickedSrcs
+    else
+      builtins.mapAttrs (k: v: v.default) srcs.localOrPinned;
+
   # This repo's overlay.
   overlay = self: super:
     let
       nixos-sf-ssh-auth = (import
-        (srcs.localOrPinned.nixos-sf-ssh-auth.default.src + "/release.nix")
+        (pickedSrcs.nixos-sf-ssh-auth.src + "/release.nix")
         { pkgs = self; });
     in
   {

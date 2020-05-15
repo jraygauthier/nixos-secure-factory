@@ -14,10 +14,18 @@ let
       "/demo-nixos-config/\n"
     ]
     ../.;
+
+  pinnedSrcs = (
+    import ../.nix/default.nix { inherit workspaceDir; }).srcs.pinned;
+
+  pickedSrcs = {
+    nixos-sf-ssh-auth = pinnedSrcs.nixos-sf-ssh-auth.default;
+  };
 in
 
 pkgs.callPackage ./. {
   inherit deviceIdentifier extraNixSearchPath deviceInfoJsonPath;
   inherit nixos-secure-factory;
   inherit nixpkgs;
+  inherit pickedSrcs;
 }
