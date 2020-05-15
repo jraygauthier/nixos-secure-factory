@@ -35,6 +35,14 @@ update_factory_install_pinned_nix_srcs_sf_pin_repo_cli() {
 }
 
 
+update_factory_install_pinned_nix_srcs_nixpkgs_repo_cli() {
+  local channel="${1:-default}"
+  local src_w_channel="nixpkgs:${channel}"
+  print_title_lvl1 "Updating device os config pinned '$src_w_channel' src."
+  update_factory_install_pinned_nix_srcs "$src_w_channel"
+}
+
+
 update_factory_install_pinned_nix_srcs_sf_shell_complete_repo_cli() {
   local channel="${1:-default}"
   local src_w_channel="nsf-shell-complete:${channel}"
