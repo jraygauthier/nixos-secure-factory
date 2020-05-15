@@ -117,7 +117,7 @@ device configurations. Specific device factories are required to:
 
         This directory will be managed according to `nixos-sf-ssh-auth`'s policy.
 
-        See [nixos-sf-ssh-auth - Readme](../pkgs/tools/admin/nixos-sf-ssh-auth/README.md)
+        See [nixos-sf-ssh-auth - Readme](../.nix/pkgs/tools/admin/nixos-sf-ssh-auth/README.md)
         for more details.
 
         You configuration will then be able to exploit this information

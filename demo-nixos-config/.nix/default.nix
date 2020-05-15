@@ -50,7 +50,7 @@ let
   };
 in
 
-{
+rec {
   srcs = nsfp.nixLib.mkSrcDir {
     inherit pinnedSrcsDir;
     inherit workspaceDir;
@@ -66,4 +66,21 @@ in
       '';
     };
   };
+
+  # This repo's overlay.
+  overlay = self: super:
+    let
+      nixos-sf-ssh-auth = (import
+        (srcs.localOrPinned.nixos-sf-ssh-auth.default.src + "/release.nix")
+        { pkgs = self; });
+    in
+  {
+    nixos-sf-ssh-auth-nix-lib = nixos-sf-ssh-auth.nix-lib;
+    # TODO: Remove. Only to demonstrate the
+    # expected overlay behavior.
+    nixos-sf-ssh-auth-cli = nixos-sf-ssh-auth.cli;
+  };
+
+  # The set of overlays used by this repo.
+  overlays = [ overlay ];
 }

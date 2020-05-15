@@ -1,37 +1,16 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? null } @ args:
 
 let
-  inherit (pkgs)
-    lib
-    callPackage
-    python3
-    python3Packages
-    mkShell
-    bash-completion
-    writeShellScript;
-
   repoRootDir = ../../..;
+  pkgs = (import (
+      repoRootDir + "/.nix/default.nix") {}
+    ).ensurePkgs args;
   wsRootDir = repoRootDir + "/..";
+in
 
-  nsf-shell-complete-nix-lib = (import (
-    repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
-      inherit pkgs;
-    }).nix-lib;
+with pkgs;
 
-  sfTestLibRootDir = repoRootDir + "/pkgs/development/python-modules/nixos-sf-test-lib";
-
-  nixos-sf-test-lib = (import
-    (sfTestLibRootDir + "/release.nix") {
-      inherit pkgs;
-    }).default;
-
-  sfSshAuthRootDir = repoRootDir + "/pkgs/tools/admin/nixos-sf-ssh-auth";
-
-  nixos-sf-ssh-auth-cli = (import
-    (sfSshAuthRootDir + "/release.nix") {
-      inherit pkgs;
-    }).cli;
-
+let
   pythonPackages = python3Packages;
 
   default = pythonPackages.callPackage ./. {
@@ -53,6 +32,7 @@ let
     '';
   };
 
+  sfTestLibRootDir = repoRootDir + "/.nix/pkgs/development/python-modules/nixos-sf-test-lib";
   sfTestLibLocalSrcDir = sfTestLibRootDir + "/src";
 
   sfSshAuthCliLocalSrcDir = wsRootDir + "/nixos-sf-ssh-auth/cli/src";

@@ -20,5 +20,4 @@ pkgs.callPackage ./. {
   inherit deviceIdentifier extraNixSearchPath deviceInfoJsonPath;
   inherit nixos-secure-factory;
   inherit nixpkgs;
-  inherit pkgs;
 }

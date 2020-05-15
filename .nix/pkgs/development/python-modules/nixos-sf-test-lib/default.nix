@@ -9,7 +9,7 @@
 }:
 
 buildPythonPackage rec  {
-  pname = "nixos-sf-data-deploy-python-lib";
+  pname = "nixos-sf-test-lib";
   version = "0.0.0";
   src = nix-gitignore.gitignoreSourcePure [
     ../../../../.gitignore

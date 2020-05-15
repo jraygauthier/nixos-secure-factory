@@ -1,22 +1,15 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? null } @ args:
 
 let
-  inherit (pkgs)
-    lib
-    callPackage
-    python3
-    python3Packages
-    mkShell
-    bash-completion
-    writeShellScript;
-
   repoRootDir = ../../..;
+  pkgs = (import (
+      repoRootDir + "/.nix/default.nix") {}
+    ).ensurePkgs args;
+in
 
-  nsf-shell-complete-nix-lib = (import (
-    repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
-      inherit pkgs;
-    }).nix-lib;
+with pkgs;
 
+let
   sffciPyRelease = (import
     (repoRootDir + "/scripts/factory-common-install/release.nix") {
       inherit pkgs;
@@ -24,11 +17,6 @@ let
 
   nixos-sf-factory-common-install-py =
     sffciPyRelease.default;
-
-  nixos-sf-test-lib = (import
-    (repoRootDir + "/pkgs/development/python-modules/nixos-sf-test-lib/release.nix") {
-      inherit pkgs;
-    }).default;
 
   pythonPackages = pkgs.python3Packages;
 
@@ -55,7 +43,7 @@ let
   sfRepoLocalRootDir = repoRootDir;
 
   sfTestLibLocalSrcDir = sfRepoLocalRootDir
-    + "/pkgs/development/python-modules/nixos-sf-test-lib/src";
+    + "/.nix/pkgs/development/python-modules/nixos-sf-test-lib/src";
 
   sffciPyLocalSrcDir = sfRepoLocalRootDir
     + "/scripts/factory-common-install/py/src";

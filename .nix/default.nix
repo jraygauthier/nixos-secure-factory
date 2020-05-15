@@ -50,11 +50,50 @@ let
   };
 in
 
-{
+rec {
   srcs = nsfp.nixLib.mkSrcDir {
     inherit pinnedSrcsDir;
     inherit workspaceDir;
     srcPureIgnores = {};
     inherit pkgs;
   };
+
+  # This repo's overlay.
+  overlay = import ./overlay.nix;
+
+  # The set of overlays used by this repo.
+  overlays = [ overlay ];
+
+
+  #
+  # Both of the following can be used from release files.
+  #
+  importPkgs = { nixpkgs ? null } @ args:
+      let
+        nixpkgs =
+          if args ? "nixpkgs" && null != args.nixpkgs
+            then args.nixpkgs
+            # This constitutes our default nixpkgs.
+            else <nixpkgs>;
+      in
+    assert null != nixpkgs;
+    import nixpkgs { inherit overlays; };
+
+
+  ensurePkgs = { pkgs ? null, nixpkgs ? null }:
+    if null != pkgs
+      then
+        if pkgs ? "has-overlay-nixos-secure-factory"
+            # Avoid extending a `pkgs` that already has our overlays.
+          then pkgs
+        else
+          # TODO: Check is already has proper overlays.
+          # Prefer to initialize with the right overlays
+          # in one go when calling Nixpkgs, for performance and simplicity.
+          pkgs.appendOverlays overlays
+          # Unnecessary double-import of nixpkgs. This might break
+          # cross-system builds
+          # importPkgs { nixpkgs = pkgs.path; }; }
+    else
+      importPkgs { inherit nixpkgs; };
 }

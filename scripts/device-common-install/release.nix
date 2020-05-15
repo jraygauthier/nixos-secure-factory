@@ -1,13 +1,13 @@
-{ pkgs ? import <nixpkgs> {} }:
-
-with pkgs;
+{ pkgs ? null } @ args:
 
 let
-  nixos-sf-common-install = (import
-    ../common-install/release.nix {
-      inherit pkgs;
-    }).default;
+  repoRootDir = ../..;
+  pkgs = (import (
+      repoRootDir + "/.nix/default.nix") {}
+    ).ensurePkgs args;
 in
+
+with pkgs;
 
 {
   default = callPackage ./. {

@@ -1,6 +1,8 @@
 { lib, config, pkgs, ... }:
 
 let
+  # pkgs.nixos-sf-ssh-auth-nix-lib
+
   sshAuthLib = import ../../../lib/ssh-auth.nix { inherit lib; };
   inherit (sshAuthLib) getUserKeyFileFromPerUserAuthKeys;
   perUserAuthKeysJsonFile = ../../../device-ssh/authorized/per-user-authorized-keys.json;
@@ -23,6 +25,8 @@ in
   imports =
     [
     ];
+
+  nixpkgs.overlays = (import ../../../.nix/default.nix { inherit pkgs; }).overlays;
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.systemd-boot.editor = false;
@@ -65,4 +69,10 @@ in
       };
     };
   };
+
+  environment.systemPackages = [
+    # TODO: Remove. Only to demonstrate the
+    # expected overlay behavior.
+    pkgs.nixos-sf-ssh-auth-cli
+  ];
 }

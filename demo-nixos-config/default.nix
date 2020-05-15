@@ -6,7 +6,6 @@
 , extraNixSearchPath
 , deviceInfoJsonPath
 , nixpkgs
-, pkgs
 , nixos-secure-factory
 }:
 

@@ -1,25 +1,15 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? null } @ args:
+
+let
+  repoRootDir = ../..;
+  pkgs = (import (
+      repoRootDir + "/.nix/default.nix") {}
+    ).ensurePkgs args;
+in
 
 with pkgs;
 
 let
-  repoRootDir = ../..;
-
-  nsf-pin-cli = (import (
-    repoRootDir + "/pkgs/tools/package-management/nsf-pin/release.nix") {
-      inherit pkgs;
-    }).cli;
-
-  nsf-shell-complete-nix-lib = (import (
-    repoRootDir + "/pkgs/build-support/nsf-shell-complete/release.nix") {
-      inherit pkgs;
-    }).nix-lib;
-
-  nixos-sf-factory-common-install = (import
-    ../factory-common-install/release.nix {
-      inherit pkgs;
-    }).default;
-
   pyRelease = import
     ./py/release.nix {
       inherit pkgs;

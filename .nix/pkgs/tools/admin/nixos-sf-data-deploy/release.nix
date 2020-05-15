@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {}}:
 
 let
   nixos-sf-deploy-core-nix-lib =
@@ -11,28 +11,23 @@ let
       inherit pkgs;
     }).default;
 
-  nixos-sf-secrets-deploy-tools =
-    (import ../nixos-sf-secrets-deploy-tools/release.nix {
-      inherit pkgs;
-    }).default;
-
   nix-lib =
     pkgs.callPackage ./lib.nix {
       inherit nixos-sf-deploy-core-nix-lib;
       inherit nixos-sf-data-deploy-tools;
-      inherit nixos-sf-secrets-deploy-tools;
     };
 
-  mkSecretsDeployPackage =
+  # TODO: Move under `nix-lib`.
+  mkDataDeployPackage =
       { bundleDir
       , defaultImportsFn ? bundleDir: []
       }:
-    nix-lib.mkSecretsDeployDerivation bundleDir {
+    nix-lib.mkDataDeployDerivation bundleDir {
       inherit defaultImportsFn;
     };
 in
 
 {
   inherit nix-lib;
-  inherit mkSecretsDeployPackage;
+  inherit mkDataDeployPackage;
 }
