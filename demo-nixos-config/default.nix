@@ -85,7 +85,6 @@ stdenv.mkDerivation rec {
       "device-ssh" \
       "device-update" \
       "nixos" \
-      "pkgs" \
       "lib" \
       ".nix" \
     )

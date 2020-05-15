@@ -18,7 +18,7 @@ assert null == workspaceDir
   || ("/" == builtins.substring 0 1 workspaceDir);
 
 let
-  pinnedSrcsDir = ../pkgs/pinned-src;
+  pinnedSrcsDir = ./pinned-src;
   nsfp = rec {
     localPath = /. + workspaceDir + "/nsf-pin";
     srcInfoJson = pinnedSrcsDir + "/nsf-pin/channel/default.json";

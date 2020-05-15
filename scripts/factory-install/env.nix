@@ -1,3 +1,3 @@
-{ pkgs ? import ../../pkgs/pinned/nixpkgs.nix {} } @ args:
+{ pkgs ? import <nixpkgs> {} } @ args:
 
 (import ./release.nix args).shell.installed

@@ -1,8 +1,0 @@
-{
-  "type": "fetchFromGitHub",
-  "owner": "jraygauthier",
-  "repo": "nixos-secure-factory",
-  "ref": "master",
-  "rev": "8d2df026cd175fc082bab6b72b5059b57b838d20",
-  "sha256": "01xgshh3h41qdg0pqw9kn1pxc0631fgs71qw8l5ablgb98kwc2mb"
-}

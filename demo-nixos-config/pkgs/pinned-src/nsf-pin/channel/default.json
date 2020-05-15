@@ -1,8 +1,0 @@
-{
-  "type": "fetchFromGitHub",
-  "owner": "jraygauthier",
-  "repo": "nsf-pin",
-  "ref": "master",
-  "rev": "05da449de46bc241e23111204facebe26831719d",
-  "sha256": "13rzmr0l0v84d32im6jxr5w8ipx046dxh8vpfqp6zl4mpggmpxrx"
-}

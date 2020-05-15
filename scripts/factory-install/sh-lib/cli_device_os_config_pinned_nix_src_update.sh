@@ -13,7 +13,7 @@ update_device_os_cfg_pinned_nix_srcs() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)" || return 1
 
-  local pinned_src_root_dir="$device_cfg_repo_root_dir/pkgs/pinned-src"
+  local pinned_src_root_dir="$device_cfg_repo_root_dir/.nix/pinned-src"
   update_pinned_nix_srcs_by_names "$pinned_src_root_dir" "$@"
 }
 
@@ -22,7 +22,7 @@ update_device_os_cfg_pinned_nix_srcs_all_cli() {
   local device_cfg_repo_root_dir
   device_cfg_repo_root_dir="$(get_writable_device_cfg_repo_root_dir)" || return 1
 
-  local pinned_src_root_dir="$device_cfg_repo_root_dir/pkgs/pinned-src"
+  local pinned_src_root_dir="$device_cfg_repo_root_dir/.nix/pinned-src"
 
   print_title_lvl1 "Updating all device os config pinned nix srcs under '$pinned_src_root_dir'."
   update_pinned_nix_srcs_all "$pinned_src_root_dir" "$@"
