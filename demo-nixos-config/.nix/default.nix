@@ -88,6 +88,8 @@ rec {
     else
       builtins.mapAttrs (k: v: v.default) srcs.localOrPinned;
 
+  nixpkgs = <nixpkgs>;
+
   # This repo's overlay.
   overlay = self: super:
     let

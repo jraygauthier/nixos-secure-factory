@@ -1,4 +1,4 @@
-{ pkgs ? import <nixpkgs> {}  # Can be set `null`.
+{ pkgs ? import (import ./default.nix {}).nixpkgs {}  # Can be set `null`.
 , workspaceDir ? builtins.toString ../..
 }:
 

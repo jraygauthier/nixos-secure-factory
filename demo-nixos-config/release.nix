@@ -5,7 +5,7 @@
 
 let
   deviceInfoJsonPath = null;
-  nixpkgs = <nixpkgs>;
+  nixpkgs = (import ./.nix/default.nix {}).nixpkgs;
   pkgs = import nixpkgs {};
   inherit (pkgs) nix-gitignore;
   nixos-secure-factory =
