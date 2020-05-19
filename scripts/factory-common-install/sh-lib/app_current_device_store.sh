@@ -59,7 +59,7 @@ rm_current_device_state() {
   print_title_lvl2 "Content is:"
   cat "$filename"
 
-  if ! prompt_for_user_approval; then
+  if ! prompt_for_user_approval ""; then
     return 1
   fi
 
@@ -225,6 +225,25 @@ get_current_device_gpg_id_or_email() {
   local gpg_id
   gpg_id="$(get_value_from_current_device_yaml_or_if_null_then_replace_with '."gpg-id"' "$default_gpg_id")"
   echo "$gpg_id"
+}
+
+
+store_current_device_hostname() {
+  local hostname="$1"
+  ensure_current_device_specified
+  local store_yaml
+  store_yaml="$(get_current_device_store_yaml_filename)"
+
+  local yaml_str
+  # shellcheck disable=SC2016
+  yaml_str="$(\
+    yq -y --arg hostname "$hostname" '."hostname" = $hostname' \
+      < "$(get_current_device_store_yaml_filename)")"
+
+  echo "Writing device configuration to '$store_yaml'."
+  echo "$yaml_str" > "$store_yaml"
+
+  update_device_json_from_current_yaml
 }
 
 
@@ -504,7 +523,7 @@ EOF
 
   printf -- "%s\n\n" "$yaml_str"
 
-  if ! prompt_for_user_approval; then
+  if ! prompt_for_user_approval ""; then
     return 1
   fi
 

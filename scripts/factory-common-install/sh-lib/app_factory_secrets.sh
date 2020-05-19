@@ -95,7 +95,7 @@ wipe_factory_secure_dir_content() {
   echo "The following files / directories will be wipped:"
   echo "$to_be_wiped"
   printf -- "\n"
-  prompt_for_user_approval
+  prompt_for_user_approval ""
 
   echo "$to_be_wiped" | xargs -r rm -r --
 }

@@ -613,7 +613,7 @@ rm_device_secrets_cli() {
   # TODO: Return early when nothing to remove.
 
   # TODO: Print all the secrets that will be deleted.
-  prompt_for_user_approval
+  prompt_for_user_approval ""
   rm_no_prompt_device_secrets_prim
   # wipe_device_secure_dir_content
 }

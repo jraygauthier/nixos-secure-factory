@@ -132,7 +132,7 @@ prompt_before_rm_ssh_identity() {
     echo " -> '$id_f'"
   done
 
-  prompt_for_user_approval
+  prompt_for_user_approval ""
 }
 
 

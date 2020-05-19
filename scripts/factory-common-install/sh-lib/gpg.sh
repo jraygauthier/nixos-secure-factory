@@ -320,7 +320,7 @@ rm_gpg_secret_keys() {
   done
 
   test "1" == "${GPG_TOOLS_PROMPT_BEFORE_IDENTITY_REMOVAL:-}" && \
-    prompt_for_user_approval
+    prompt_for_user_approval ""
 
   echo "$secret_keys_w_email" | \
   while read k eml; do
@@ -352,7 +352,7 @@ rm_gpg_public_keys() {
   done
 
   test "1" == "${GPG_TOOLS_PROMPT_BEFORE_IDENTITY_REMOVAL:-}" && \
-    prompt_for_user_approval
+    prompt_for_user_approval ""
 
   echo "$public_keys_w_email" | \
   while read k eml; do

@@ -136,7 +136,7 @@ rm_factory_gopass_main_store_and_config() {
 
   echo "The following files will be removed:"
   echo "$to_be_rm_files" | awk '{ print "  " $0 }'
-  prompt_for_user_approval || return 1
+  prompt_for_user_approval "" || return 1
 
   echo "Removing the files."
   echo "$to_be_rm_files" | xargs -r rm -r --

@@ -57,7 +57,7 @@ rm_factory_info_state() {
   print_title_lvl2 "Content is:"
   cat "$filename"
 
-  if ! prompt_for_user_approval; then
+  if ! prompt_for_user_approval ""; then
     return 1
   fi
 
@@ -341,7 +341,7 @@ EOF
 
   printf -- "$yaml_str\n\n"
 
-  if ! prompt_for_user_approval; then
+  if ! prompt_for_user_approval ""; then
     exit 1
   fi
 
