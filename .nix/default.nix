@@ -65,6 +65,8 @@ rec {
   overlays = [ overlay ];
 
 
+  nixpkgs = <nixpkgs>;
+
   #
   # Both of the following can be used from release files.
   #
@@ -74,7 +76,7 @@ rec {
           if args ? "nixpkgs" && null != args.nixpkgs
             then args.nixpkgs
             # This constitutes our default nixpkgs.
-            else <nixpkgs>;
+            else nixpkgs;
       in
     assert null != nixpkgs;
     import nixpkgs { inherit overlays; };

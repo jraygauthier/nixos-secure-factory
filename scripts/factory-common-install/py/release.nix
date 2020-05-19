@@ -3,7 +3,7 @@
 let
   repoRootDir = ../../..;
   pkgs = (import (
-      repoRootDir + "/.nix/default.nix") {}
+      repoRootDir + "/.nix/release.nix") {}
     ).ensurePkgs args;
   wsRootDir = repoRootDir + "/..";
 in
