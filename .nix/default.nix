@@ -6,9 +6,6 @@
 #  -  `nsf-pin` cli tools are not available.
 #  -  A pin's `default.nix` file won't be able to receive packages
 #     from `pkgs` as input.
-#  -  Local sources won't be filtered using `nix-gitignore`.
-#     TODO: We might be able to provide some alternative for that
-#     (alternative ignore lib?).
 # Usually, one should set pkgs to null only when pinning `nixpkgs`
 # itself or when one want to avoid using `nixpkgs`.
 

@@ -39,7 +39,7 @@ in
 
 {
   # Tag to check that our overlay is already available.
-  has-overlay.nixos-secure-factory = true;
+  has-overlay-nixos-secure-factory = true;
 
   nsf-shell-complete-nix-lib = (import
     ./pkgs/build-support/nsf-shell-complete/release.nix
