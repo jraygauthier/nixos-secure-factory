@@ -12,7 +12,7 @@ buildPythonPackage rec  {
   pname = "nixos-sf-test-lib";
   version = "0.0.0";
   src = nix-gitignore.gitignoreSourcePure [
-    ../../../../.gitignore
+    ../../../../../.gitignore
     ''
       *.nix
       /nix-lib/

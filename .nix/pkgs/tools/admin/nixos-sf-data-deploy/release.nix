@@ -16,18 +16,10 @@ let
       inherit nixos-sf-deploy-core-nix-lib;
       inherit nixos-sf-data-deploy-tools;
     };
-
-  # TODO: Move under `nix-lib`.
-  mkDataDeployPackage =
-      { bundleDir
-      , defaultImportsFn ? bundleDir: []
-      }:
-    nix-lib.mkDataDeployDerivation bundleDir {
-      inherit defaultImportsFn;
-    };
 in
 
 {
   inherit nix-lib;
-  inherit mkDataDeployPackage;
+  # TODO: Remove at some point. Kept for backward compat.
+  inherit (nix-lib) mkDataDeployPackage;
 }

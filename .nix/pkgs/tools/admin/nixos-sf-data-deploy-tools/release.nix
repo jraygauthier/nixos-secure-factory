@@ -37,7 +37,7 @@ let
   ];
 
   commonGitIgnores = [
-    ../../../../.gitignore
+    ../../../../../.gitignore
     "*.nix\n"
   ];
 

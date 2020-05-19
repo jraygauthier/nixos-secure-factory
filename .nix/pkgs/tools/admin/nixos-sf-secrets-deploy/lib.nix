@@ -402,6 +402,14 @@ let
       drv = mkSecretsDeployDerivationFromResolvedBundle bundle;
     in
       drv;
+
+  mkSecretsDeployPackage =
+      { bundleDir
+      , defaultImportsFn ? bundleDir: []
+      }:
+    mkSecretsDeployDerivation bundleDir {
+      inherit defaultImportsFn;
+    };
 in
 
 rec {
@@ -413,5 +421,5 @@ rec {
   };
 
   inherit filterOutPropagatedBundleAttrsFromFlatRules;
-  inherit mkSecretsDeployDerivation;
+  inherit mkSecretsDeployDerivation mkSecretsDeployPackage;
 }

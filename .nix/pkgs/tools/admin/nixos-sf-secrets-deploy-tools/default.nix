@@ -30,7 +30,7 @@ stdenv.mkDerivation rec {
   shLibInstallDir = "${placeholder "out"}/share/${pname}/sh-lib";
 
   src = nix-gitignore.gitignoreSourcePure [
-    ../../../../.gitignore
+    ../../../../../.gitignore
     "*.nix\n"
     ] ./.;
 

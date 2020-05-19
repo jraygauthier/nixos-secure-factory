@@ -22,18 +22,10 @@ let
       inherit nixos-sf-data-deploy-tools;
       inherit nixos-sf-secrets-deploy-tools;
     };
-
-  # TODO: Move under `nix-lib`.
-  mkSecretsDeployPackage =
-      { bundleDir
-      , defaultImportsFn ? bundleDir: []
-      }:
-    nix-lib.mkSecretsDeployDerivation bundleDir {
-      inherit defaultImportsFn;
-    };
 in
 
 {
   inherit nix-lib;
-  inherit mkSecretsDeployPackage;
+  # TODO: Remove at some point. Kept for backward compat.
+  inherit (nix-lib) mkSecretsDeployPackage;
 }

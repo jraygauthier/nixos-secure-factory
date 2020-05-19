@@ -209,6 +209,14 @@ let
       drv = mkDataDeployDerivationFromResolvedBundle bundle;
     in
       drv;
+
+  mkDataDeployPackage =
+      { bundleDir
+      , defaultImportsFn ? bundleDir: []
+      }:
+    mkDataDeployDerivation bundleDir {
+      inherit defaultImportsFn;
+    };
 in
 
 rec {
@@ -219,5 +227,5 @@ rec {
     inherit mkDataDeployDerivationFromResolvedBundle;
   };
 
-  inherit mkDataDeployDerivation;
+  inherit mkDataDeployDerivation mkDataDeployPackage;
 }
