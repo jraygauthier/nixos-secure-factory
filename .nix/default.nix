@@ -55,14 +55,24 @@ rec {
     inherit pkgs;
   };
 
-  # This repo's overlay.
-  overlay = import ./overlay.nix;
+  pickedSrcs =
+    builtins.mapAttrs (k: v: v.default) srcs.localOrPinned;
+
+  # This repo's publicly exposed overlay.
+  overlay = import ./overlay.nix { inherit srcs pickedSrcs; };
+
+  # This repo's internal overlay.
+  overlayInternal = import ./overlay-internal.nix { inherit srcs pickedSrcs; };
 
   # The set of overlays used by this repo.
-  overlays = [ overlay ];
+  overlays = [
+    overlay
+    overlayInternal
+  ];
 
-
-  nixpkgs = <nixpkgs>;
+  # This constitutes our default nixpkgs.
+  nixpkgsSrc = <nixpkgs>;
+  nixpkgs = nixpkgsSrc;
 
   #
   # Both of the following can be used from release files.
@@ -72,8 +82,7 @@ rec {
         nixpkgs =
           if args ? "nixpkgs" && null != args.nixpkgs
             then args.nixpkgs
-            # This constitutes our default nixpkgs.
-            else nixpkgs;
+            else nixpkgsSrc;  # From top level.
       in
     assert null != nixpkgs;
     import nixpkgs { inherit overlays; };
@@ -82,7 +91,7 @@ rec {
   ensurePkgs = { pkgs ? null, nixpkgs ? null }:
     if null != pkgs
       then
-        if pkgs ? "has-overlay-nixos-secure-factory"
+        if pkgs ? "has-overlay-nixos-secure-factory-internal"
             # Avoid extending a `pkgs` that already has our overlays.
           then pkgs
         else

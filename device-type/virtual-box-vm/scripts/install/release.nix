@@ -1,13 +1,13 @@
-{ pkgs ? import <nixpkgs> {} }:
-
-with pkgs;
+{ pkgs ? null } @ args:
 
 let
-  nixos-sf-device-common-install = (import
-    ../../../../scripts/device-common-install/release.nix {
-      inherit pkgs;
-    }).default;
+  repoRootDir = ../../../..;
+  pkgs = (import (
+      repoRootDir + "/.nix/release.nix") {}
+    ).ensurePkgs args;
 in
+
+with pkgs;
 
 rec {
   default = callPackage ./. {
