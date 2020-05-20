@@ -367,7 +367,8 @@ _load_gopass_device_text_file_secret_from_repo() {
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Loading gopass text secret at '$full_store_key' to file '$out_file'."
-  mkdir -m 700 -p "$out_dirname"
+  mkdir -p "$out_dirname"
+  chmod 700 "$out_dirname"
   # Gopass seems to trim trailing newlines on insert.
   # Ensure the secrets gets back its original newline.
   echo_eval "factory-gopass show -f '$full_store_key' > '$out_file'" || return 1
@@ -388,7 +389,8 @@ _load_gopass_device_bin_file_secret_from_repo() {
   local full_store_key
   full_store_key="$(_get_gopass_device_full_store_key_for "$repo_store_key" "$store_key" "$device_id")"
   echo "Loading gopass binary secret at '$full_store_key' to file '$out_file'."
-  mkdir -m 700 -p "$out_dirname"
+  mkdir -p "$out_dirname"
+  chmod 700 "$out_dirname"
   echo_eval "factory-gopass binary cp '$full_store_key' '$out_file'"
 }
 

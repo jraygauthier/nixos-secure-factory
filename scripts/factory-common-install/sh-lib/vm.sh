@@ -94,7 +94,8 @@ list_vbox_vm_storage_controllers() {
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
   ensure_vbox_vm_exists "$vm_name"
 
-  local controllers="$(show_existing_vbox_vm_info "$vm_name" | \
+  local controllers
+  controllers="$(show_existing_vbox_vm_info "$vm_name" | \
     grep -e '^Storage Controller Name' | \
     cut -d':' -f2 | \
     trim_leading_ws)"
@@ -107,7 +108,8 @@ list_vbox_vm_nic_x_rules() {
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
   local defaul_nic_id="1"
   local nic_id="${2:-"${defaul_nic_id}"}"
-  local rules="$(show_existing_vbox_vm_info "$vm_name" | \
+  local rules
+  rules="$(show_existing_vbox_vm_info "$vm_name" | \
     grep -E -e "^NIC ${nic_id} Rule\([0-9]+\):" | \
     cut -d':' -f2 | cut -d',' -f1 | cut -d'=' -f2 | \
     trim_leading_ws)"
@@ -141,7 +143,8 @@ unregister_vbox_vm_hd() {
   echo "unregister_vbox_vm_hd"
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
 
-  local default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
+  local default_vm_hd_file
+  default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
   local vm_hd_file="${2:-"${default_vm_hd_file}"}"
 
   if list_registered_hdds |  grep -q "$vm_hd_file"; then
@@ -153,7 +156,8 @@ unregister_vbox_vm_hd() {
 unregister_and_destroy_vbox_vm_hd() {
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
 
-  local default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
+  local default_vm_hd_file
+  default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
   local vm_hd_file="${2:-"${default_vm_hd_file}"}"
 
   if list_registered_hdds |  grep -q "$vm_hd_file"; then
@@ -189,16 +193,18 @@ remove_vbox_vm_storage_controller_sata() {
 create_or_update_vbox_vm_hd() {
   local vm_name="${1:-${_DEFAULT_VM_NAME}}"
 
-  local default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
+  local default_vm_hd_file
+  default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
   local vm_hd_file="${2:-"${default_vm_hd_file}"}"
 
   local default_vm_hd_size_mb="25600"
   local vm_hd_size_mb="${3:-"${default_vm_hd_size_mb}"}"
 
   if ! test -f "$vm_hd_file"; then
-    VBoxManage createmedium disk --filename "$vm_hd_file" --size $vm_hd_size_mb --format VDI --variant Standard
+    VBoxManage createmedium disk --filename "$vm_hd_file" \
+      --size "$vm_hd_size_mb" --format VDI --variant Standard
   else
-    VBoxManage modifymedium disk "$vm_hd_file" --resize $vm_hd_size_mb
+    VBoxManage modifymedium disk "$vm_hd_file" --resize "$vm_hd_size_mb"
   fi
 }
 
@@ -212,7 +218,8 @@ configure_vbox_vm_main_storage_aspect() {
 
   remove_vbox_vm_storage_controller_sata "$vm_name" "$storagectl_name"
 
-  local default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
+  local default_vm_hd_file
+  default_vm_hd_file="$(get_vbox_vm_main_hd_filename "$vm_name")"
   local vm_hd_file="${2:-"${default_vm_hd_file}"}"
 
   # Create or update the main hard drive.
@@ -386,6 +393,7 @@ insert_vbox_vm_livecd_iso_into_empty_dvd_drive() {
     remove_vbox_vm_media_from_dvd_drive "$vm_name"
   fi
 
+  local livecd_iso_file
   ensure_by_reading_livecd_iso_filename "livecd_iso_file" "${2:-}"
 
   local storagectl_name="IDE Controller"

@@ -7,11 +7,9 @@ common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-
 
 # From dependency libs.
 common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
+# shellcheck disable=SC1093
 # shellcheck source=ssh.sh
 . "$common_install_sh_lib_dir/ssh.sh"
-
-
-
 
 
 create_ssh_identity() {
@@ -41,7 +39,8 @@ create_ssh_identity() {
   fi
 
   echo "Creating ssh dir at '$ssh_homedir'."
-  mkdir -m 0700 -p "$ssh_homedir"
+  mkdir -p "$ssh_homedir"
+  chmod 0700 "$ssh_homedir"
 
   echo "Generating the public and private keys:"
   for id_f in ${id_path_pub} ${id_path}; do
@@ -54,7 +53,7 @@ create_ssh_identity() {
     ssh-keygen "${pw_args[@]}" -t "$id_key_type" -f "$id_path" -C "$comment"
   fi
 
-  find "$ssh_homedir" | xargs -r stat -c '%a %n'
+  find "$ssh_homedir" -exec stat -c '%a %n' {} +
   printf -- "\n"
 }
 
@@ -65,34 +64,33 @@ force_create_ssh_identity() {
 }
 
 
-build_ssh_port_args_for_ssh_port() {
-  local ssh_port="${1:-}"
-  if [[ "${ssh_port:-}" == "" ]]; then
-    echo "" # No args, use default port.
-  else
-    echo " -p $ssh_port"
-  fi
-}
-
-
 build_ssh_port_args_for_ssh_port_a() {
-  local -n _out_args_a="$1"
+  # shellcheck disable=SC2178
+  declare -n _out_args_a="$1"
   local ssh_port="${2:-}"
-  if [[ "${ssh_port:-}" == "" ]]; then
-    _out_args_a=() # No args, use default port.
+
+  # shellcheck disable=SC2034
+  if [[ "${ssh_port:-}" = "" ]]; then
+    # No args, use default port.
+    _out_args_a=()
   else
     _out_args_a=( "-p" "$ssh_port" )
   fi
 }
 
 
-build_scp_port_args_for_ssh_port() {
-  local ssh_port="${1:-}"
-  if [[ "${ssh_port:-}" == "" ]]; then
-    echo "" # No args, use default port.
+build_scp_port_args_for_ssh_port_a() {
+  # shellcheck disable=SC2178
+  declare -n _out_args_a="$1"
+  local ssh_port="${2:-}"
+
+  # shellcheck disable=SC2034
+  if [[ "${ssh_port:-}" = "" ]]; then
+    # No args, use default port.
+    _out_args_a=()
   else
     # Note how scp use the big P instead of the small like ssh.
-    echo " -P $ssh_port"
+    _out_args_a=( "-P" "$ssh_port" )
   fi
 }
 
@@ -112,10 +110,9 @@ build_hostname_with_optional_colon_port_fragment() {
 build_knownhost_id_from_hostname_and_opt_port() {
   local hostname="${1:-}"
   local port="${2:-}"
-  if [[ "${port:-}" == "" ]]; then
+  if [[ "${port:-}" = "" ]]; then
     echo "${hostname}" # No args, use default port.
   else
-    # Note how scp use the big P instead of the small like ssh.
     echo "[${hostname}]:${port}"
   fi
 }

@@ -315,7 +315,7 @@ rm_gpg_secret_keys() {
 
   echo "Will remove the following secret keys from gpghomedir '$gpg_home_dir':"
   echo "$secret_keys_w_email" | \
-  while read k eml; do
+  while read -r k eml; do
     echo " -> key: '$k', email: '$eml'"
   done
 
@@ -323,7 +323,7 @@ rm_gpg_secret_keys() {
     prompt_for_user_approval ""
 
   echo "$secret_keys_w_email" | \
-  while read k eml; do
+  while read -r k eml; do
     echo "Removing gpghomedir: '$gpg_home_dir', key: '$k', email: '$eml'."
     nix-gpg --homedir "$gpg_home_dir" \
       --batch --passphrase "$passphrase" --yes \
@@ -347,7 +347,7 @@ rm_gpg_public_keys() {
 
   echo "Will remove the following public keys from gpghomedir '$gpg_home_dir':"
   echo "$public_keys_w_email" | \
-  while read k eml; do
+  while read -r k eml; do
     echo " -> key: '$k', email: '$eml'"
   done
 
@@ -355,7 +355,7 @@ rm_gpg_public_keys() {
     prompt_for_user_approval ""
 
   echo "$public_keys_w_email" | \
-  while read k eml; do
+  while read -r k eml; do
     echo "Removing gpghomedir: '$gpg_home_dir', key: '$k', email: '$eml'."
     nix-gpg --homedir "$gpg_home_dir" \
       --batch --passphrase "$passphrase" --yes --delete-secret-and-public-keys "$k"
@@ -448,7 +448,8 @@ create_gpg_parentdir_for_exported_file() {
   local out_filename="$1"
   local parent_dir
   parent_dir="$(dirname "$out_filename")"
-  mkdir -p -m 0700 "$parent_dir"
+  mkdir -p "$parent_dir"
+  chmod 0700 "$parent_dir"
 }
 
 
@@ -585,25 +586,6 @@ export_gpg_master_keys_to_dir() {
     "${out_prefix}gpg-otrust" \
     "${out_prefix}subkeys.gpg-keys" \
     "$in_gpg_homedir" "$email" "$passphrase"
-}
-
-
-# TODO: Remove, not used.
-list_gpg_agent_files_to_rm() {
-  local out
-  local gpg_agent_home="$(gpgconf --list-dirs | grep homedir | awk -F':' '{ print $2}')"
-  out="$(find "$gpg_agent_home" -mindepth 1 -maxdepth 1 | grep '\-migrated$')"
-  echo "$out"
-}
-
-
-# TODO: Remove, not used.
-run_gpg_agent_reset_hack() {
-  gpgconf --kill gpg-agent
-  local files_to_rm
-  files_to_rm="$(list_gpg_agent_files_to_rm)"
-  echo "$files_to_rm" | xargs -r rm -- -r
-  gpgconf --kill gpg-agent
 }
 
 
@@ -782,8 +764,10 @@ import_gpg_public_key_from_user_home_keyring() {
 export_gpg_public_key_to_user_home_keyring() {
   local gpg_id_or_email="${1:-}"
 
-  local source_gpg_args=()
-  local target_gpg_args=()
+  # shellcheck disable=SC2034  # Taken by ref.
+  declare -a source_gpg_args=()
+  # shellcheck disable=SC2034  # Taken by ref.
+  declare -a target_gpg_args=()
   transfer_gpg_public_key_from_keyring_to_keyring \
     "factory-gpg" "source_gpg_args" \
     "gpg" "target_gpg_args" \
@@ -805,16 +789,18 @@ select_unique_gpg_id() {
 
 
 select_unique_gpg_id_w_secrets() {
-  local -n _out_ref="$1"
+  declare -n _out_ref="$1"
   local gpg_id_or_email="${2:-}"
   _out_ref=""
 
 
   local key_type="secrets"
   local matching_gpg_id_inner_1=""
+  # shellcheck disable=SC2034  # Taken by ref.
   local source_gpg_args=()
   select_unique_gpg_key_in_keyring \
     "matching_gpg_id_inner_1" "factory-gpg" "source_gpg_args" "$key_type" "$gpg_id_or_email"
+  # shellcheck disable=SC2034  # Out by ref.
   _out_ref="$matching_gpg_id_inner_1"
 }
 

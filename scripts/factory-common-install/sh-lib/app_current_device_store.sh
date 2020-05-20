@@ -29,8 +29,10 @@ is_current_device_specified() {
 ensure_current_device_specified() {
   local store_yaml
   store_yaml="$(get_current_device_store_yaml_filename)"
-  local store_yaml_basename="$(basename "$store_yaml")"
-  local store_yaml_dirname="$(dirname "$store_yaml")"
+  local store_yaml_basename
+  store_yaml_basename="$(basename "$store_yaml")"
+  local store_yaml_dirname
+  store_yaml_dirname="$(dirname "$store_yaml")"
   is_current_device_specified || \
     { 1>&2 echo "ERROR: '$store_yaml_basename' file does not exists in '$store_yaml_dirname'."; return 1; }
 }
@@ -75,7 +77,7 @@ get_value_from_current_device_yaml() {
   store_yaml="$(get_current_device_store_yaml_filename)"
 
   local out
-  out="$(cat "$store_yaml" | yq -j "$jq_filter")"
+  out="$(yq -j "$jq_filter" < "$store_yaml")"
   echo "$out"
 }
 
@@ -341,13 +343,15 @@ update_device_json_from_current_yaml() {
 
   local store_yaml
   store_yaml="$(get_current_device_store_yaml_filename)"
-  local store_yaml_basename="$(basename "$store_yaml")"
-  local store_yaml_dirname="$(dirname "$store_yaml")"
+  local store_yaml_basename
+  store_yaml_basename="$(basename "$store_yaml")"
+  local store_yaml_dirname
+  store_yaml_dirname="$(dirname "$store_yaml")"
 
   local device_dirname
   device_dirname="$(get_required_current_device_dirname)"
   local json_str
-  json_str="$(cat "$store_yaml" | yq '.')"
+  json_str="$(yq '.' < "$store_yaml")"
 
   local dev_cfg_dir="$device_cfg_repo_root_dir/device/$device_dirname"
   echo "Creating device config directory: \`$dev_cfg_dir\`"
@@ -361,16 +365,17 @@ list_available_device_types() {
   local device_cfg_type_defs_dir
   device_cfg_type_defs_dir="$(get_device_cfg_type_definitions_root_dir)" || return 1
 
-  find "$device_cfg_type_defs_dir" -mindepth 1 -maxdepth 1 | xargs -r -l1 basename
+  find "$device_cfg_type_defs_dir" -mindepth 1 -maxdepth 1 -exec basename {} \;
 }
 
 
 prompt_for_device_mandatory__device_type() {
-  local avail_types
-  avail_types="$(list_available_device_types)" || return 1
-  echo -e "\"type\" \u2208 {$(echo "$avail_types" | sed -E -e "s/^(.+)$/\'\1\'/g" | paste -d',' -s | sed 's/,/, /g')}"
+  local out_var_name="${1?}"
+  declare -a avail_types_a
+  mapfile -t "avail_types_a" < <(list_available_device_types) || return 1
+  echo -e "\"type\" \u2208 {$(printf "%s\n" "${avail_types_a[@]}" | sed -E -e "s/^(.+)$/\'\1\'/g" | paste -d',' -s | sed 's/,/, /g')}"
   # TODO: This is weak. We're lucky that our elements do not have spaces.
-  prompt_for_custom_choices_strict_loop "$1" "type: " $(echo "$avail_types" | paste -s -d' ')
+  prompt_for_custom_choices_strict_loop "$1" "type: " "${avail_types_a[@]}"
 }
 
 
@@ -389,9 +394,9 @@ prompt_for_device_mandatory__hostname() {
 
 
 prompt_for_device_mandatory__x() {
-  local out_var_name="$1"
-  local param="$2"
-  prompt_for_device_mandatory__${param} "$out_var_name"
+  local out_var_name="${1?}"
+  local param="${2?}"
+  "prompt_for_device_mandatory__${param}" "$out_var_name"
 }
 
 
@@ -410,9 +415,9 @@ prompt_for_device_optional__uart_pty() {
 
 
 prompt_for_device_optional__x() {
-  local out_var_name="$1"
-  local param="$2"
-  prompt_for_device_optional__${param} "$out_var_name"
+  local out_var_name="${1?}"
+  local param="${2?}"
+  "prompt_for_device_optional__${param}" "$out_var_name"
 }
 
 
@@ -439,7 +444,8 @@ init_new_current_device_state_cli() {
   local uart_pty
   local backend
 
-  local _REQ_PARAMS=$(cat <<EOF
+  local _REQ_PARAMS
+  _REQ_PARAMS=$(cat <<EOF
 device_id
 device_type
 EOF
@@ -449,12 +455,14 @@ EOF
     prompt_for_device_mandatory__x "$param" "$param"
   done
 
-  local _NON_VM_REQ_PARAMS=$(cat <<EOF
+  local _NON_VM_REQ_PARAMS
+  _NON_VM_REQ_PARAMS=$(cat <<EOF
 hostname
 EOF
 )
 
-  local _NON_VM_OPT_PARAMS=$(cat <<EOF
+  local _NON_VM_OPT_PARAMS
+  _NON_VM_OPT_PARAMS=$(cat <<EOF
 ssh_port
 uart_pty
 EOF

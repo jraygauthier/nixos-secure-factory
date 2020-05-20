@@ -2,8 +2,6 @@
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
-# shellcheck source=SCRIPTDIR/../sh-lib/vcs.sh
-. "$common_factory_install_sh_lib_dir/vcs.sh"
 # shellcheck source=SCRIPTDIR/../sh-lib/workspace_paths.sh
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
 

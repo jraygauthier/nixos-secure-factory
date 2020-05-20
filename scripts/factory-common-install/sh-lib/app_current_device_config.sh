@@ -82,7 +82,7 @@ _add_factory_user_to_cfg_ssh_auth_dir() {
   local json_path="$cfg_ssh_auth_dir/users.json"
 
   local factory_pub_key_filename
-  factory_pub_key_filename="$(get_current_user_ssh_public_key_path)"
+  factory_pub_key_filename="$(get_current_user_ssh_public_key_path "")"
 
   # local factory_pub_key_basename
   # factory_pub_key_basename="$(basename "$factory_pub_key_filename")"
@@ -187,9 +187,10 @@ sent_config_closure_to_device() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local ssh_port_args
-  ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
-  NIX_SSHOPTS="${ssh_port_args}" \
+  declare -a ssh_port_args
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args" "$device_ssh_port"
+
+  NIX_SSHOPTS="${ssh_port_args[*]}" \
     nix copy --to "ssh://root@${device_hostname}" "$cfg_closure"
 }
 
@@ -214,9 +215,9 @@ _send_system_closure_to_device_impl() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local ssh_port_args
-  ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
-  NIX_SSHOPTS="${ssh_port_args}" \
+  declare -a ssh_port_args
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args" "$device_ssh_port"
+  NIX_SSHOPTS="${ssh_port_args[*]}" \
     nix copy --to "$remote" "$system_closure"
 }
 
@@ -321,12 +322,10 @@ _build_and_deploy_device_config_impl() {
 
 
 _parse_build_device_config_args() {
-  local -n _out_config_name="$1"
-  local -n _out_nix_build_fwd_flags="$2"
+  declare -n _out_config_name="$1"
+  declare -n _out_nix_build_fwd_flags="$2"
   local default_config_name="$3"
   shift 3
-
-  local available_cfgs_case_opts="release|local|dev"
 
   _out_config_name="$default_config_name"
   _out_nix_build_fwd_flags=()
@@ -339,6 +338,7 @@ _parse_build_device_config_args() {
       i="$1"; shift 1
       case "$i" in
         release|local|dev)
+          # shellcheck disable=SC2034  # Out by ref.
           _out_config_name="$i"
           ;;
         --max-jobs|-j|--cores|-I|--builders)

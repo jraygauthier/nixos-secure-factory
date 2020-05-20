@@ -23,33 +23,33 @@ typechecks:
 tests:
 	pytest
 
-lint: lint-shell lint-python
+lint: lint.shell lint.python
 
-lint-python:
+lint.python:
 	flake8
 	flake8 $(PYTHON_BINS)
 
-lint-shell: lint-shell-modules lint-shell-bins
+lint.shell: lint.shell.modules lint.shell.bins
 
-lint-shell-deep: lint-shell-modules-deep lint-shell-bins-deep
+lint.shell.deep: lint.shell.modules.deep lint.shell.bins.deep
 
 
-lint-shell-modules:
+lint.shell.modules:
 	for m in $(SH_MODULES); do \
 	  shellcheck -e SC1091 -P "$(SH_DEPS_SRC_PATHS)" $$m; \
 	done
 
-lint-shell-bins:
+lint.shell.bins:
 	shellcheck -e SC1091 -P \
 	  "$(SH_DEPS_SRC_PATHS)" \
   	  $(SH_BINS)
 
-lint-shell-modules-deep:
+lint.shell.modules.deep:
 	shellcheck -a -x -P \
 	  "$(SH_DEPS_SRC_PATHS)" \
 	  $(SH_MODULES)
 
-lint-shell-bins-deep:
+lint.shell.bins.deep:
 	shellcheck -a -x -P \
 	  "$(SH_DEPS_SRC_PATHS)" \
   	  $(SH_BINS)

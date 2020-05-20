@@ -36,7 +36,9 @@ prompt_for_passphrase_impl() {
   local _repeat_prompt_str="${3:-Enter same passphrase again: }"
   local _not_match_error_str="${4:-Passphrases do not match. Try again.}"
 
+  local to_be_confirmed_pw
   prompt_for_passphrase_no_repeat_impl "to_be_confirmed_pw" "$_prompt_str"
+  local repeated_pw
   prompt_for_passphrase_no_repeat_impl "repeated_pw" "$_repeat_prompt_str"
 
   if test "$to_be_confirmed_pw" != "$repeated_pw"; then
@@ -78,10 +80,11 @@ prompt_for_passphrase_no_repeat_loop() {
 
 
 _prompt_for_custom_choices_impl() {
-  local -n _out_var_ref="$1"
+  declare -n _out_var_ref="${1?}"
   shift 1
 
-  local _out_file="$(mktemp)"
+  local _out_file
+  _out_file="$(mktemp)"
   rm_out_file() {
     # echo "rm_out_file: $_out_file"
     rm -f "$_out_file"
@@ -103,6 +106,7 @@ _prompt_for_custom_choices_impl() {
     fi
     return $_return_code
   fi
+  # shellcheck disable=SC2034
   _out_var_ref="$(cat "$_out_file")"
   # echo "out=$_out_var_ref"
   trap - EXIT
@@ -119,8 +123,8 @@ prompt_for_custom_choices_strict() {
 
 
 prompt_for_custom_choices_strict_loop() {
-  local _out_var_name="$1"
-  local _prompt_str="$2"
+  local _out_var_name="${1?}"
+  local _prompt_str="${2?}"
   shift 2
   _prompt_for_custom_choices_impl "$_out_var_name" -p "$_prompt_str" --strict -r 0 -dc "$@" || exit
 }

@@ -174,5 +174,6 @@ read_or_prompt_for_factory_user_gpg_default_id() {
     return 1
   fi
 
+  # shellcheck disable=SC2034  # Out by ref.
   _out_gpg_id="$(echo "$matching_gpg_ids" | awk '{ printf $1 }' | head -n 1)"
 }

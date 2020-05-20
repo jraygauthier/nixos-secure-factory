@@ -102,8 +102,8 @@ wipe_factory_secure_dir_content() {
 
 
 rm_factory_ssh_identity_impl() {
-  prompt_before_rm_ssh_identity && \
-  rm_current_user_ssh_identity
+  prompt_before_rm_ssh_identity "" && \
+  rm_current_user_ssh_identity ""
 }
 
 
@@ -112,17 +112,19 @@ create_factory_ssh_identity_cli() {
   printf -- "Creating factory ssh identity\n"
   printf -- "=============================\n\n"
 
+  local user_full_name
   read_or_prompt_for_factory_info__user_full_name "user_full_name"
+  local user_email
   read_or_prompt_for_factory_info__user_email "user_email"
 
   SSH_TOOLS_KEYGEN_COMMENT="${user_full_name} <${user_email}>" \
-    create_current_user_ssh_identity
+    create_current_user_ssh_identity ""
 
   printf -- "\n"
   printf -- "Copying factory ssh public key to clipboard\n"
   printf -- "-------------------------------------------\n\n"
 
-  copy_current_user_ssh_public_key_to_clipboard
+  copy_current_user_ssh_public_key_to_clipboard ""
   printf -- "\n"
   echo "Note that you will be able to retrieve this information "
   echo "at any time using the 'copy_factory_ssh_identity_to_clipboard' tool."
@@ -134,7 +136,7 @@ copy_factory_ssh_identity_to_clipboard_cli() {
   printf -- "Copying factory ssh public key to clipboard\n"
   printf -- "===========================================\n\n"
 
-  copy_current_user_ssh_public_key_to_clipboard
+  copy_current_user_ssh_public_key_to_clipboard ""
 }
 
 

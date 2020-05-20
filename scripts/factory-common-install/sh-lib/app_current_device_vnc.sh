@@ -32,7 +32,7 @@ exit_x11vnc() {
   echo "Closing X11VNC"
   if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" 'x11vnc -remote stop -display :0' >/dev/null; then
     local err="$?"
-    1>&2 echo "Error: $FUNCNAME: $err"
+    1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
   fi
 }
@@ -63,7 +63,7 @@ close_x11vnc_systemd_process() {
   echo "Closing systemd process"
   if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "systemctl -q --no-pager --user stop '${systemd_service_name}'" >/dev/null; then
     local err="$?"
-    1>&2 echo "Error: $FUNCNAME: $err"
+    1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
   fi
 }
@@ -103,6 +103,7 @@ enter_vnc_as_user() {
 
     return 0
   }
+  # shellcheck disable=SC2064
   trap "cleanup '${vnc_user}' '${vnc_hostname}' '${device_ssh_port}' '${vnc_remote_port}' '${systemd_service_name}'" EXIT SIGINT SIGQUIT
 
   # Validation that the service that we are about to launch does not exist yet.
@@ -116,7 +117,7 @@ enter_vnc_as_user() {
     echo "${active_session_info}"
     echo ""
     local user_input
-    read -n 1 -p 'Do you want to close the session? (Y)es or (N)o' user_input
+    read -r -n 1 -p 'Do you want to close the session? (Y)es or (N)o' user_input
     echo ""
     case $user_input in
       [yY] )
@@ -146,7 +147,8 @@ enter_vnc_as_user() {
   user_info="$(get_factory_info__user_full_name)<$(get_factory_info__user_email)>"
   local vnc_passwd
   vnc_passwd="$(pwgen -cn 32 | head -n1)"
-  local cmd="$(cat <<EOF
+  local cmd
+  cmd="$(cat <<EOF
 systemd-run \
 --remain-after-exit \
 --property=Type=forking \
@@ -157,7 +159,7 @@ EOF
 )"
   if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "${cmd}"; then
     local err="$?"
-    1>&2 echo "Error: $FUNCNAME: $err"
+    1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
   fi
 
@@ -167,7 +169,7 @@ EOF
   echo " -> Creating an SSH tunnel"
   if ! ssh -f -T -L "${vnc_local_port}:localhost:${vnc_remote_port}" "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "sleep 10"; echo "${vnc_passwd}" | vncviewer -autopass localhost:"${vnc_local_port}"; then
     local err="$?"
-    1>&2 echo "Error: $FUNCNAME: $err"
+    1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
   fi
 }

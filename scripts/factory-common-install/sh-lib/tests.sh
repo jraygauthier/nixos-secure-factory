@@ -3,6 +3,8 @@ common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-
 # shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
 
+# TODO: Replace all this by a pytest test.
+
 TESTED_PACKAGE_NAME="nixos-sf-factory-common-install"
 
 _list_all_modules() {
@@ -17,6 +19,7 @@ for m in $(_list_all_modules); do
   # Avoid circular dependency.
   if ! [[ "$m" == "$common_factory_install_sh_lib_dir/tests.sh" ]]; then
     echo "Sourcing module '$m'"
+    # shellcheck disable=SC1090  # By design.
     . "$m"
   fi
 done

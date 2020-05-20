@@ -6,9 +6,12 @@ common_factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-commo
 # shellcheck source=SCRIPTDIR/../sh-lib/app_current_device.sh
 . "$common_factory_install_sh_lib_dir/app_current_device.sh"
 
+declare device_hostname
 read_or_prompt_for_current_device__hostname "device_hostname"
+declare device_ssh_port
 read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
+declare -a ssh_port_args
+build_ssh_port_args_for_ssh_port_a "ssh_port_args" "$device_ssh_port"
 
-ssh${ssh_port_args} root@${device_hostname} "hw-config-partition-and-format"
+ssh "${ssh_port_args[@]}" "root@${device_hostname}" "hw-config-partition-and-format"

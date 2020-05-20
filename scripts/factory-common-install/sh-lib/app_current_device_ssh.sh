@@ -72,19 +72,11 @@ copy_nix_closure_to_device() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
+  declare -a ssh_port_args
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args" "$device_ssh_port"
 
-  # local runtime_deps_store_paths
-  # echo "nix-store -q --references '$store_path'"
-  # runtime_deps_store_paths="$(nix-store -q --references "$store_path")"
-
-  # echo "runtime_deps_store_paths:"
-  # echo "$runtime_deps_store_paths" | awk '{ print "  "$0}'
-
-  local ssh_port_args
-  ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
-
-  echo "NIX_SSHOPTS='${ssh_port_args}' nix copy --to root@${device_hostname} '\$store_path'"
-  export NIX_SSHOPTS="${ssh_port_args}"
+  echo "NIX_SSHOPTS='${ssh_port_args[*]}' nix copy --to root@${device_hostname} '\$store_path'"
+  export NIX_SSHOPTS="${ssh_port_args[*]}"
   # echo "$runtime_deps_store_paths" | xargs nix copy --to root@${device_hostname}
   echo "$store_path" | xargs nix copy --to "ssh://root@${device_hostname}"
 }
@@ -117,23 +109,25 @@ deploy_factory_ssh_id_to_device() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local ssh_port_args="$(build_ssh_port_args_for_ssh_port "$device_ssh_port")"
+  declare -a ssh_port_args
+  build_ssh_port_args_for_ssh_port_a "ssh_port_args" "$device_ssh_port"
 
   # The following is to prevent the "ERROR: Host key verification failed."
   # and / or "WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!"
   # one gets when attempting ssh to different machines (with different
   # host id) through the same hostname:port.
-  local knownhost_id="$(build_knownhost_id_from_hostname_and_opt_port "$device_hostname" "$device_ssh_port")"
+  local knownhost_id
+  knownhost_id="$(build_knownhost_id_from_hostname_and_opt_port "$device_hostname" "$device_ssh_port")"
   echo "ssh-keygen -R '$knownhost_id'"
   ssh-keygen -R "$knownhost_id"
 
   # Note the "PubkeyAuthentication=no" option. This is to prevent the
   # "Too many Authentication Failures for user root" one gets if he
   # has too many public keys on his system.
-  echo "ssh-copy-id${ssh_port_args} .. root@${device_hostname}"
-  ssh-copy-id${ssh_port_args} \
+  echo "ssh-copy-id" "${ssh_port_args[@]}" ".. root@${device_hostname}"
+  ssh-copy-id "${ssh_port_args[@]}" \
     -o PubkeyAuthentication=no -o StrictHostKeyChecking=no \
-    root@${device_hostname}
+    "root@${device_hostname}"
 }
 
 
@@ -167,10 +161,11 @@ deploy_file_to_device() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local scp_port_args="$(build_scp_port_args_for_ssh_port "$device_ssh_port")"
+  declare -a scp_port_args
+  build_scp_port_args_for_ssh_port_a "scp_port_args" "$device_ssh_port"
 
   run_cmd_as_device_root "mkdir -m 700 -p '$local_dirname'"
-  scp${scp_port_args} "${local_f}" root@${device_hostname}:${remote_f}
+  scp "${scp_port_args[@]}" "${local_f}" "root@${device_hostname}:${remote_f}"
 }
 
 
@@ -186,8 +181,10 @@ retrieve_file_from_device() {
   read_or_prompt_for_current_device__hostname "device_hostname"
   read_or_prompt_for_current_device__ssh_port "device_ssh_port"
 
-  local scp_port_args="$(build_scp_port_args_for_ssh_port "$device_ssh_port")"
+  declare -a scp_port_args
+  build_scp_port_args_for_ssh_port_a "scp_port_args" "$device_ssh_port"
 
-  mkdir -m 700 -p "$local_dirname"
-  scp${scp_port_args} "root@${device_hostname}:${remote_f}" "${local_f}"
+  mkdir -p "$local_dirname"
+  chmod 700 "$local_dirname"
+  scp "${scp_port_args[@]}" "root@${device_hostname}:${remote_f}" "${local_f}"
 }

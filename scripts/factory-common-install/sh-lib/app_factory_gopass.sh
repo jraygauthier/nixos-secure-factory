@@ -234,6 +234,7 @@ _parse_factory_user_authorization_args() {
       case "$i" in
         --shallow)
           # --shallow flag. Allow to deauthorize only from top level stores.
+          # shellcheck disable=SC2034  # Out by ref.
           _out_shallow=true
           ;;
         *)
@@ -241,6 +242,7 @@ _parse_factory_user_authorization_args() {
           gpg_id_or_email_regexp="$(get_gpg_id_or_email_regexpr)" || return 1
           if ! echo "$i" | grep -E -q '^-' \
               && echo "$i" | grep -E -q "$gpg_id_or_email_regexp"; then
+            # shellcheck disable=SC2034  # Out by ref.
             _out_gpg_id="$i"
           else
             1>&2 echo "ERROR: $0: _parse_build_device_config_args: unknown option '$i'"

@@ -44,21 +44,21 @@ umount_device_secure_dir_impl() {
 mount_device_secret_vaults() {
   print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  mount_gopass_factory_cdevice_substores
+  mount_gopass_factory_cdevice_substores ""
 }
 
 
 umount_device_secret_vaults() {
   print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  umount_gopass_factory_cdevice_substores
+  umount_gopass_factory_cdevice_substores ""
 }
 
 
 rm_no_prompt_device_secret_vaults() {
   print_title_lvl4 "${FUNCNAME[0]}"
   mount_factory_secret_vaults
-  rm_no_prompt_gopass_factory_cdevice_substores
+  rm_no_prompt_gopass_factory_cdevice_substores ""
 }
 
 wipe_device_secure_dir_content() {
@@ -499,11 +499,11 @@ ls_device_secrets_ops_by_id() {
 
 
 _run_device_secrets_op_on_matchin_sgroups() {
-  local op_id="$1"
+  local op_id="${1?}"
   local search_str="${2:-}"
 
   for sg in $(ls_matching_device_secrets_groups_by_id "$search_str"); do
-    ${op_id}_device_${sg} || exit 1
+    "${op_id}_device_${sg}" || exit 1
   done
 }
 

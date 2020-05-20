@@ -16,6 +16,7 @@ _build_ssh_cmd_args() {
   if [[ "0" -eq "$#" ]]; then
     _out_cmd_args=""
   else
+    # shellcheck disable=SC2034  # Out by ref.
     printf -v _out_cmd_args '%q ' "$@"
   fi
 }

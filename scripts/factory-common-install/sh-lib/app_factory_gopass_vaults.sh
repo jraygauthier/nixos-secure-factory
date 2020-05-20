@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
+# shellcheck source=sh_stream.sh
 . "$common_sh_lib_dir/sh_stream.sh"
 
 common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
@@ -497,6 +498,7 @@ select_unique_factory_user_gopass_gpg_id() {
     return 1
   fi
 
+  # shellcheck disable=SC2034  # Out by ref.
   _out_ref="$matching_gpg_id_outer_1"
 }
 

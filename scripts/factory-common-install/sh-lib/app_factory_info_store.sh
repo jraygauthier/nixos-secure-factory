@@ -27,8 +27,10 @@ is_factory_info_specified() {
 ensure_factory_info_specified() {
   local store_yaml
   store_yaml="$(get_factory_info_store_yaml_filename)"
-  local store_yaml_basename="$(basename "$store_yaml")"
-  local store_yaml_dirname="$(dirname "$store_yaml")"
+  local store_yaml_basename
+  store_yaml_basename="$(basename "$store_yaml")"
+  local store_yaml_dirname
+  store_yaml_dirname="$(dirname "$store_yaml")"
   is_factory_info_specified || \
     { 1>&2 echo "ERROR: '$store_yaml_basename' file does not exists in '$store_yaml_dirname'."; exit 1; }
 }
@@ -73,7 +75,7 @@ get_required_value_from_factory_info_yaml() {
   store_yaml="$(get_factory_info_store_yaml_filename)" || return 1
 
   local out
-  out="$(cat "$store_yaml" | yq -j "$jq_filter")"
+  out="$(yq -j "$jq_filter" < "$store_yaml")"
   echo "$out"
 }
 
@@ -90,7 +92,7 @@ get_value_from_factory_info_yaml() {
   fi
 
   local out
-  out="$(cat "$store_yaml" | yq -j "$jq_filter")"
+  out="$(yq -j "$jq_filter" < "$store_yaml")"
   echo "$out"
 }
 
@@ -241,23 +243,23 @@ prompt_for_factory_info_mandatory__gopass_default_device_vault_repo_name() {
 
 
 prompt_for_factory_info_mandatory__x() {
-  local out_var_name="$1"
-  local param="$2"
-  prompt_for_factory_info_mandatory__${param} "$out_var_name"
+  local out_var_name="${1?}"
+  local param="${2?}"
+  "prompt_for_factory_info_mandatory__${param}" "$out_var_name"
 }
 
 
 read_or_prompt_for_factory_info__x() {
-  local out_varname="$1"
-  local param="$2"
+  local out_varname="${1?}"
+  local param="${2?}"
   local param_value="null"
   if is_factory_info_specified; then
     local param_value
-  param_value="$(get_factory_info__${param})"
+  param_value="$("get_factory_info__${param}")"
   fi
 
   if [[ "$param_value" == "null" ]] || [[ "$param_value" == "" ]]; then
-    prompt_for_factory_info_mandatory__${param} "$out_varname"
+    "prompt_for_factory_info_mandatory__${param}" "$out_varname"
   else
     eval "${out_varname}=\"${param_value}\""
   fi
@@ -289,7 +291,8 @@ init_factory_state() {
 
   # TODO: Cli app taking these parameters.
 
-  local _REQ_PARAMS=$(cat <<EOF
+  local _REQ_PARAMS
+  _REQ_PARAMS=$(cat <<EOF
 user_id
 user_full_name
 user_email
@@ -300,6 +303,14 @@ gopass_default_device_vault_repo_name
 EOF
 )
 
+  local user_id
+  local user_full_name
+  local user_email
+  local user_gpg_default_id
+  local device_defaults_email_domain
+  local gopass_factory_only_vault_repo_name
+  local gopass_default_device_vault_repo_name
+
   for param in $_REQ_PARAMS; do
     prompt_for_factory_info_mandatory__x "$param" "$param"
   done
@@ -309,7 +320,8 @@ EOF
   local gopass_default_device_vault_id
   gopass_default_device_vault_id="$(basename "$gopass_default_device_vault_repo_name")"
 
-  local _JQ_FILTER=$(cat <<EOF
+  local _JQ_FILTER
+  _JQ_FILTER=$(cat <<EOF
 .user.id = \$user_id | \
 .user."full-name" = \$user_full_name | \
 .user.email = \$user_email | \
@@ -339,7 +351,7 @@ EOF
   printf -- "Factory info\n"
   printf -- "----------\n\n"
 
-  printf -- "$yaml_str\n\n"
+  printf -- "%s\n\n" "$yaml_str"
 
   if ! prompt_for_user_approval ""; then
     exit 1
