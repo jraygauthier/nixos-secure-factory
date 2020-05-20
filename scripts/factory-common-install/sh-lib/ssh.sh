@@ -110,8 +110,8 @@ build_hostname_with_optional_colon_port_fragment() {
 build_knownhost_id_from_hostname_and_opt_port() {
   local hostname="${1:-}"
   local port="${2:-}"
-  if [[ "${port:-}" = "" ]]; then
-    echo "${hostname}" # No args, use default port.
+  if [[ "${port:-}" = "" ]] || [[ "${port:-}" = "22" ]]; then
+    echo "${hostname}" # No args or default port, no need for special syntax.
   else
     echo "[${hostname}]:${port}"
   fi

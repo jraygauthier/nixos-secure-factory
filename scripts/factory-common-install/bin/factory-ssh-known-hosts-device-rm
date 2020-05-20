@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+common_factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-common-install-get-sh-lib-dir")"
+# shellcheck source=SCRIPTDIR/../sh-lib/cli_device_ssh.sh
+. "$common_factory_install_sh_lib_dir/cli_factory_ssh_known_hosts.sh"
+
+rm_factory_ssh_known_hosts_device_entry_cli "$@"
