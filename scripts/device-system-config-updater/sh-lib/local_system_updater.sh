@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-device_system_update_sh_lib_dir="$(pkg-nixos-sf-device-system-config-get-sh-lib-dir)"
-. "$device_system_update_sh_lib_dir/device_system_config.sh"
+device_system_config_sh_lib_dir="$(pkg-nixos-sf-device-system-config-get-sh-lib-dir)"
+# shellcheck source=device_system_config.sh
+. "$device_system_config_sh_lib_dir/device_system_config.sh"
 
 
 _get_default_install_action() {
@@ -279,6 +280,7 @@ _build_system_config_dir() {
   local config_name="release"
 
   local system_config_src_dir_inner_0
+  # shellcheck disable=SC2034  # Taken by ref.
   local cfg_src_git_info_json
   _fetch_current_system_config_repo "system_config_src_dir_inner_0" "cfg_src_git_info_json"
 
@@ -372,7 +374,10 @@ _install_system_closure() {
   if [ "$action" = "switch" ] || [ "$action" = "boot" ]; then
     if [ "$profile_name" != system ]; then
       profile="/nix/var/nix/profiles/system-profiles/$system_closure"
-      mkdir -p -m 0755 "$(dirname "$profile")"
+      local profile_dirname
+      profile_dirname="$(dirname "$profile")"
+      mkdir -p "$profile_dirname"
+      chmod 0755 "$profile_dirname"
     fi
     nix-env -p "$profile" --set "$system_closure"
   fi

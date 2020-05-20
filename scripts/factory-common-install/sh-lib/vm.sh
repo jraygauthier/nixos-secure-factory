@@ -163,7 +163,10 @@ unregister_and_destroy_vbox_vm_hd() {
   if list_registered_hdds |  grep -q "$vm_hd_file"; then
     VBoxManage closemedium disk "$vm_hd_file" --delete
     # Assert that was properly deleted by previous command.
-    ! test -f "$vm_hd_file"
+    if test -f "$vm_hd_file"; then
+      1>&2 echo "ERROR: ${FUNCNAME[0]}: '$vm_hd_file' should have be deleted."
+      exit 1
+    fi
   else
     # When was not registered, make sure it is deleted.
     rm -f "$vm_hd_file"

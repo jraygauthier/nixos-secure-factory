@@ -30,7 +30,9 @@ exit_x11vnc() {
   shift 3
 
   echo "Closing X11VNC"
-  if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" 'x11vnc -remote stop -display :0' >/dev/null; then
+  if ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" 'x11vnc -remote stop -display :0' >/dev/null; then
+    true
+  else
     local err="$?"
     1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
@@ -61,7 +63,9 @@ close_x11vnc_systemd_process() {
   shift 4
 
   echo "Closing systemd process"
-  if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "systemctl -q --no-pager --user stop '${systemd_service_name}'" >/dev/null; then
+  if ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "systemctl -q --no-pager --user stop '${systemd_service_name}'" >/dev/null; then
+    true
+  else
     local err="$?"
     1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
@@ -157,7 +161,9 @@ systemd-run \
  -c 'echo "${user_info}"'; x11vnc -bg -once -localhost -passwd "${vnc_passwd}" -display :0
 EOF
 )"
-  if ! ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "${cmd}"; then
+  if ssh "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "${cmd}"; then
+    true
+  else
     local err="$?"
     1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"
@@ -167,7 +173,9 @@ EOF
   # The sleep 10 is executed on the remote machine and allows the tunnel to remain open
   # while we are launching the vncviewer.
   echo " -> Creating an SSH tunnel"
-  if ! ssh -f -T -L "${vnc_local_port}:localhost:${vnc_remote_port}" "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "sleep 10"; echo "${vnc_passwd}" | vncviewer -autopass localhost:"${vnc_local_port}"; then
+  if ssh -f -T -L "${vnc_local_port}:localhost:${vnc_remote_port}" "${vnc_user}@${vnc_hostname}" -p "${device_ssh_port}" "sleep 10"; echo "${vnc_passwd}" | vncviewer -autopass localhost:"${vnc_local_port}"; then
+    true
+  else
     local err="$?"
     1>&2 echo "Error: ${FUNCNAME[0]}: $err"
     return "$err"

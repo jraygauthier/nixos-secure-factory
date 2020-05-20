@@ -9,7 +9,8 @@ create_and_assign_proper_permissions_to_dir_lazy() {
       chmod "$octal_mode" "$target_dir"
     fi
   else
-    mkdir -m "$octal_mode" -p "$target_dir"
+    mkdir -p "$target_dir"
+    chmod "$octal_mode" "$target_dir"
   fi
 }
 

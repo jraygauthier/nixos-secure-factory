@@ -322,9 +322,10 @@ _build_and_deploy_device_config_impl() {
 
 
 _parse_build_device_config_args() {
-  declare -n _out_config_name="$1"
-  declare -n _out_nix_build_fwd_flags="$2"
-  local default_config_name="$3"
+  declare -n _out_config_name="${1?}"
+  # shellcheck disable=SC2178
+  declare -n _out_nix_build_fwd_flags="${2?}"
+  local default_config_name="${3?}"
   shift 3
 
   _out_config_name="$default_config_name"

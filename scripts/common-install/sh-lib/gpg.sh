@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
+# shellcheck source=permissions.sh
 . "$common_sh_lib_dir"/permissions.sh
+# shellcheck source=sh_stream.sh
 . "$common_sh_lib_dir"/sh_stream.sh
-# common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
+
 
 
 wipe_gpg_home_dir() {
@@ -46,8 +48,10 @@ create_and_assign_proper_permissions_to_gpg_home_dir() {
     chmod 700 "$target_gpg_home_dir/private-keys-v1.d"
   else
     echo "Creating initial gpghome at: '$target_gpg_home_dir'."
-    mkdir -m 700 -p "$target_gpg_home_dir"
-    mkdir -m 700 -p "$target_gpg_home_dir/private-keys-v1.d"
+    mkdir -p "$target_gpg_home_dir"
+    chmod 700 "$target_gpg_home_dir"
+    mkdir -p "$target_gpg_home_dir/private-keys-v1.d"
+    chmod 700 "$target_gpg_home_dir/private-keys-v1.d"
     # Force automated creation of missing files.
     nix-gpg --homedir "$target_gpg_home_dir" --list-keys
   fi
@@ -98,7 +102,8 @@ get_email_for_gpg_id_generic() {
   local gpg_id_or_email="$2"
   shift 2
 
-  local gpg_keys_w_email="$("$gpg_exe" "$@" --list-options show-only-fpr-mbox --list-public-keys)"
+  local gpg_keys_w_email
+  gpg_keys_w_email="$("$gpg_exe" "$@" --list-options show-only-fpr-mbox --list-public-keys)"
 
   local found_gpg_ids_w_emails
   if ! found_gpg_ids_w_emails="$(echo "$gpg_keys_w_email" | grep -E "$gpg_id_or_email")"; then
@@ -116,7 +121,8 @@ get_email_for_gpg_id_generic() {
     return 1
   fi
 
-  local found_email="$(echo "$found_gpg_ids_w_emails" | head -n 1 | awk '{ print $2 }')"
+  local found_email
+  found_email="$(echo "$found_gpg_ids_w_emails" | head -n 1 | awk '{ print $2 }')"
   echo "$found_email"
 }
 
@@ -131,9 +137,10 @@ select_unique_gpg_key_in_keyring() {
 
   _out_ref=""
 
-  local all_keys_of_type="$(\
+  local all_keys_of_type
+  all_keys_of_type="$(\
     "$gpg_exe" "${_gpg_args_a[@]}" \
-      --list-options show-only-fpr-mbox --list-${key_type}-keys)"
+      --list-options show-only-fpr-mbox "--list-${key_type}-keys")"
 
   local matched_keys="$all_keys_of_type"
   if [[ -n "$gpg_id_or_email" ]]; then
@@ -156,6 +163,7 @@ select_unique_gpg_key_in_keyring() {
     return 1
   fi
 
+  # shellcheck disable=SC2034  # Out by ref.
   _out_ref="$(echo "$matched_keys" | head -n 1 | awk '{ printf $1 }')"
   # echo "matched_key='$matched_key'"
 }

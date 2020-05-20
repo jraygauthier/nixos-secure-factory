@@ -21,8 +21,10 @@ scripts_dir="$CURRENT_REPOSITORY_SCRIPTS_DIR"
 export PKG_NIXOS_SF_COMMON_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/common"
 export PKG_NIXOS_SF_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/common-install"
 export PKG_NIXOS_SF_DEVICE_SYSTEM_CONFIG_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/device-system-config"
+export PKG_NIXOS_SF_DEVICE_SYSTEM_CONFIG_UPDATE_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/device-system-config-updater"
 export PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory-common-install"
 export PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR="$scripts_dir/factory-install"
+
 
 export PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_REPO_ROOT_DIR="$factory_install_repo_root_dir"
 

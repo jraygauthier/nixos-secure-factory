@@ -9,7 +9,7 @@ common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
 . "$common_install_sh_lib_dir/gpg.sh"
 # shellcheck source=device_secrets.sh
 . "$common_install_sh_lib_dir/device_secrets.sh"
-# shellcheck source=workspace_paths.sh
+# shellcheck source=SCRIPTDIR/../sh-lib/workspace_paths.sh
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
 
 get_gpg_sandbox_dir() {

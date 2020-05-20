@@ -18,7 +18,8 @@ get_search_path_srcs_from_system_cfg_dir() {
 
 build_nix_search_path_args_from_search_path_srcs() {
   # Use name ref for the output.
-  local -n out_array="$1"
+  # shellcheck disable=SC2178
+  declare -n out_array="$1"
   local search_path_srcs="$2"
 
   out_array=()
@@ -91,7 +92,8 @@ build_device_config_dir() {
 
 
 _parse_user_search_path_overrides_args() {
-  local -n _out_nix_search_path_overrides_a="$1"
+  # shellcheck disable=SC2178
+  declare -n _out_nix_search_path_overrides_a="$1"
   shift 1
 
   _out_nix_search_path_overrides_a=()
@@ -130,7 +132,8 @@ _parse_user_search_path_overrides_args() {
 
 
 create_aa_from_parsed_serach_path_override_args() {
-    local -n _out_nix_search_path_overrides_aa="$1"
+    # shellcheck disable=SC2178
+    declare -n _out_nix_search_path_overrides_aa="${1?}"
     shift 1
 
     declare -gA _out_nix_search_path_overrides_aa=() # Global associative array.
@@ -143,6 +146,7 @@ create_aa_from_parsed_serach_path_override_args() {
       local value
       value="$(echo "$sp_override" | awk -F '=' '{ print $2}')"
       # echo "key='$key'; value='$value'"
+      # shellcheck disable=SC2034
       _out_nix_search_path_overrides_aa["$key"]="$value"
     done < <(printf "%s\0" "$@")
 }
