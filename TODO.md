@@ -60,4 +60,12 @@ Exploring some ideas
     our `nsf-pin` system so that we have a mean to allow `-I` nix paths to
     be effective for any of the srcs.
 
+ -  Consider a `factory-ssh-known-hosts-device-update` variant that update the
+    factory user's known host file for all devices. Would it be useful?
+
+ -  Consider a `device-state-network-reset-to-default` to make easier to switch
+    back to default network when something bad occurs (mostly useful for vm).
+    This raise the question as to what should be done for non vm case? Should we
+    prompt the user, providing him some recent history selection for the values?
+
 [nix-deploy]: https://awakesecurity.com/blog/deploy-software-easily-securely-using-nix-deploy/

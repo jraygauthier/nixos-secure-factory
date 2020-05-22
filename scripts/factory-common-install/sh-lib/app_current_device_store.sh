@@ -249,6 +249,25 @@ store_current_device_hostname() {
 }
 
 
+store_current_device_ssh_port() {
+  local ssh_port="$1"
+  ensure_current_device_specified
+  local store_yaml
+  store_yaml="$(get_current_device_store_yaml_filename)"
+
+  local yaml_str
+  # shellcheck disable=SC2016
+  yaml_str="$(\
+    yq -y --arg ssh_port "$ssh_port" '."ssh-port" = $ssh_port' \
+      < "$(get_current_device_store_yaml_filename)")"
+
+  echo "Writing device configuration to '$store_yaml'."
+  echo "$yaml_str" > "$store_yaml"
+
+  update_device_json_from_current_yaml
+}
+
+
 store_current_device_gpg_id() {
   local gpg_id="$1"
   ensure_current_device_specified
