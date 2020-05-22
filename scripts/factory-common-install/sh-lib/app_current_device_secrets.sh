@@ -23,12 +23,8 @@ common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-
 . "$common_factory_install_sh_lib_dir/app_factory_secrets.sh"
 # shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_liveenv.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_liveenv.sh"
-
-
-# From deps libs.
-common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
-# shellcheck source=device_secrets.sh
-. "$common_install_sh_lib_dir/device_secrets.sh"
+# shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_secrets_ro.sh
+. "$common_factory_install_sh_lib_dir/app_current_device_secrets_ro.sh"
 
 
 mount_device_secure_dir_impl() {
@@ -294,19 +290,6 @@ load_device_root_user_ssh_identity() {
   _load_device_secret_files \
     "$(list_rel_expected_root_user_ssh_key_files)" \
     "$(get_rel_root_user_ssh_homedir)"
-}
-
-
-print_device_root_user_ssh_public_key() {
-  mount_device_secret_vaults > /dev/null
-
-  local store_key
-  store_key="$(get_rel_root_user_ssh_rsa_public_key)"
-
-  local full_store_key
-  full_store_key="$(get_gopass_device_full_store_key_for "$store_key")"
-
-  cat_gopass_device_bin_secret "$store_key"
 }
 
 
@@ -647,21 +630,6 @@ install_deployed_device_secrets_cli() {
   install_device_secrets_prim
 }
 
-
-copy_device_ssh_identity_to_clipboard_cli() {
-  print_title_lvl1 "Copying current device ssh identity (root public key) to your clipboard"
-  local store_key
-  store_key="$(get_rel_root_user_ssh_rsa_public_key)"
-
-  local full_store_key
-  full_store_key="$(get_gopass_device_full_store_key_for "$store_key")"
-
-  # echo "full_store_key='$full_store_key'"
-
-  cat_gopass_device_bin_secret "$store_key" \
-    | DISPLAY="${DISPLAY:-":0"}" xclip -selection clipboard
-  echo "Device public key at '$full_store_key' has been placed in your clipboard. Paste it where you need."
-}
 
 deauthorize_user_from_device_vault_cli() {
   deauthorize_gopass_cdevice_from_device_private_substore "$@"

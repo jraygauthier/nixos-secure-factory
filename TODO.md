@@ -55,4 +55,9 @@ Exploring some ideas
     building the effective configuration. This would supplement what's offered
     by ssh auth.
 
+ -  It would be nice if we can avoid the config generation part and simply have
+    a pure derivation to build. In order to do that, we would have to refine
+    our `nsf-pin` system so that we have a mean to allow `-I` nix paths to
+    be effective for any of the srcs.
+
 [nix-deploy]: https://awakesecurity.com/blog/deploy-software-easily-securely-using-nix-deploy/

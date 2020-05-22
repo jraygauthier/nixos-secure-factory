@@ -31,14 +31,38 @@ get_installed_device_factory_sent_secret_dir() {
 }
 
 
-list_expected_device_host_ssh_key_types() {
-  echo "rsa"
+get_prefered_device_host_ssh_key_type() {
   echo "ed25519"
+}
+
+
+list_expected_device_host_ssh_key_types() {
+  get_prefered_device_host_ssh_key_type
+  echo "rsa"
 }
 
 
 get_rel_host_ssh_homedir() {
   echo "etc/ssh"
+}
+
+
+get_rel_host_ssh_public_key_for_key_type() {
+  local default_kt
+  default_kt="$(get_prefered_device_host_ssh_key_type)"
+  local kt="${1:-"${default_kt}"}"
+
+  if ! list_expected_device_host_ssh_key_types | grep -q -x "$kt"; then
+    1>&2 echo "ERROR: ${FUNCNAME[0]}: unsupported host ssh key type: '$kt'."
+    return 1
+  fi
+
+  local rx_ssh_rel_homedir
+  rel_host_ssh_homedir="$(get_rel_host_ssh_homedir)"
+
+  local key_basename
+  key_basename="$(get_host_key_basename_from_key_type "${kt}")"
+  echo "$rel_host_ssh_homedir/${key_basename}.pub"
 }
 
 
@@ -134,6 +158,7 @@ get_rel_gpg_public_key_filename() {
 list_rel_expected_host_ssh_key_files() {
   local rx_ssh_rel_homedir
   rx_ssh_rel_homedir="$(get_rel_host_ssh_homedir)"
+  local kt
   for kt in $(list_expected_device_host_ssh_key_types); do
     key_basename="$(get_host_key_basename_from_key_type "${kt}")"
     echo "$rx_ssh_rel_homedir/$key_basename"

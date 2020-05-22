@@ -188,3 +188,17 @@ retrieve_file_from_device() {
   chmod 700 "$local_dirname"
   scp "${scp_port_args[@]}" "root@${device_hostname}:${remote_f}" "${local_f}"
 }
+
+
+get_current_device_known_hosts_id() {
+  local device_hostname
+  device_hostname="$(get_required_current_device_hostname)" || return 1
+  local device_ssh_port
+  device_ssh_port="$(get_required_current_device_ssh_port)" || return 1
+
+  local kh_id
+  kh_id="$(build_knownhost_id_from_hostname_and_opt_port \
+    "$device_hostname" "$device_ssh_port")" || return 1
+
+  echo "$kh_id"
+}
