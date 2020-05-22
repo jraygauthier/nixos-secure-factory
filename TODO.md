@@ -48,4 +48,11 @@ Exploring some ideas
      -  We might also offer a way to completely disable some of the tools to
         make room for rewriting them.
 
+ -  Use the state field as a way to change the system update channel (a bit
+    like what has been done for ssh auth.
+
+ -  A nsf-fi tool that would re return the effective authorized user of key by
+    building the effective configuration. This would supplement what's offered
+    by ssh auth.
+
 [nix-deploy]: https://awakesecurity.com/blog/deploy-software-easily-securely-using-nix-deploy/
