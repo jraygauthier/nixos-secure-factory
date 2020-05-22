@@ -20,10 +20,7 @@ let
 
   pythonPackages = pkgs.python3Packages;
 
-  default = pythonPackages.callPackage ./. {
-    inherit nsf-shell-complete-nix-lib;
-    inherit nixos-sf-factory-common-install-py;
-  };
+  default = pythonPackages.callPackage ./. {};
 
   env = mkShell {
     name = "${default.pname}-env";

@@ -13,10 +13,7 @@ with pkgs;
 let
   pythonPackages = python3Packages;
 
-  default = pythonPackages.callPackage ./. {
-    inherit nsf-shell-complete-nix-lib;
-    inherit nixos-sf-ssh-auth-cli;
-  };
+  default = pythonPackages.callPackage ./. {};
 
   env = mkShell {
     name = "${default.pname}-env";

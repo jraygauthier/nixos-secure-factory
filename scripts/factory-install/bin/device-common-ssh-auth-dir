@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from nsf_factory_common_install.cli_ssh_auth_dir import run_cli_common
+from nsf_factory_install.cli_ssh_auth_dir import run_cli_common
 
 if __name__ == "__main__":
     run_cli_common()

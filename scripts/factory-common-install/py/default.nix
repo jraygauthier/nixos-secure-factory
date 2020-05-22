@@ -7,7 +7,6 @@
 , click
 , pyyaml
 , nsf-shell-complete-nix-lib
-, nixos-sf-ssh-auth-cli
 }:
 
 buildPythonPackage rec  {
@@ -32,7 +31,6 @@ buildPythonPackage rec  {
   propagatedBuildInputs = [
     click
     pyyaml
-    nixos-sf-ssh-auth-cli
   ];
 
   postInstall = with nsf-shell-complete-nix-lib; ''

@@ -3,9 +3,10 @@ import os
 import sys
 from typing import Optional
 
+from nsf_factory_common_install.store_factory_info import \
+    get_factory_info_user_id
 from nsf_ssh_auth_dir.cli import CliInitCtx, run_cli
 
-from .store_factory_info import get_factory_info_user_id
 from .store_ssh_auth import (get_common_ssh_auth_dir_path,
                              get_device_specific_ssh_auth_dir_path)
 

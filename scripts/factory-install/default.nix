@@ -89,6 +89,8 @@ stdenv.mkDerivation rec {
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
     ${shComp.pkg.installClickExesBashCompletion [
+      "device-common-ssh-auth-dir"
+      "device-ssh-auth-dir"
     ]}
   '';
 

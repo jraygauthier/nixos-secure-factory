@@ -131,8 +131,6 @@ stdenv.mkDerivation rec {
 
     ${shComp.pkg.installClickExesBashCompletion [
       "device-state-checkout"
-      "device-common-ssh-auth-dir"
-      "device-ssh-auth-dir"
     ]}
   '';
 
