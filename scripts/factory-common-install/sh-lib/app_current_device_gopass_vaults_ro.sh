@@ -254,10 +254,14 @@ _get_by_ref_gopass_device_bin_secret_from_repo() {
   local gpg_args=( -d "$full_path" )
   local base64_args=( -d "-" )
 
-  echo "$ factory-gpg" "${gpg_args[@]}" "2>/dev/null" "|" "base64" "${base64_args[@]}"
+  printf "$ factory-gpg "
+  printf "%q " "${gpg_args[@]}"
+  printf "2>/dev/null | base64"
+  printf "%q " "${base64_args[@]}"
+  printf "\n"
   # shellcheck disable=SC2034
   _out_decrypted_secret="$(factory-gpg "${gpg_args[@]}" 2>/dev/null | base64 "${base64_args[@]}")"
-  echo "$_out_decrypted_secret"
+  printf "%s\n" "$_out_decrypted_secret"
 }
 
 

@@ -36,6 +36,25 @@ Required refactors
 
      -  Update package.
 
+ -  Use plain gpg instead of gopass.
+
+    Has already been completed for reading secrets. What remains is the
+    mutable operations (creating secrets, updating secrets, authorizing
+    users to secrets, etc). The mutable operations will be much more
+    complex to implement then reading.
+
+    This way, we can completly circumvent the store mount / unmount and avoid
+    the fragile gopass states generated / managed by gopass under the workspace.
+
+    We can then do whatever we want with the storage of gpg public keys
+    (see [gopass/issues/1238]) and the space it takes. We should however
+    maintain full compatibility with gopass / pass.
+
+    We can decide to preserve some of the gopass code but only in order
+    launch the a gui with mounted stores.
+
+[gopass/issues/1238]: https://github.com/gopasspw/gopass/issues/1238
+
 
 Exploring some ideas
 --------------------

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_factory_ssh_known_hosts.sh"
 
@@ -14,7 +16,9 @@ print_factory_ssh_known_hosts_device_entry_cli() {
   print_title_lvl1 "Printing factory user known host entry for host '$kh_id'"
 
   local kg_args=( -f "$kh_fn" -H -F "$kh_id" )
-  echo "$ ssh-keygen" "${kg_args[@]}"
+  printf "$ ssh-keygen "
+  printf "%q " "${kg_args[@]}"
+  printf "\n"
   ssh-keygen "${kg_args[@]}"
 }
 
