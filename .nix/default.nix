@@ -71,7 +71,11 @@ rec {
   ];
 
   # This constitutes our default nixpkgs.
-  nixpkgsSrc = <nixpkgs>;
+  nixpkgsSrc = builtins.fetchTarball {
+      # Latest `release-19.09`.
+      url = "https://github.com/jraygauthier/nixpkgs/archive/289466dd6a11c65a7de4a954d6ebf66c1ad07652.tar.gz";
+      sha256 = "0r5ja052s86fr54fm1zlhld3fwawz2w1d1gd6vbvpjrpjfyajibn";
+    };
   nixpkgs = nixpkgsSrc;
 
   #
@@ -85,7 +89,7 @@ rec {
             else nixpkgsSrc;  # From top level.
       in
     assert null != nixpkgs;
-    import nixpkgs { inherit overlays; };
+    import nixpkgs { inherit overlays; config = { allowUnfree = false; }; };
 
 
   ensurePkgs = { pkgs ? null, nixpkgs ? null }:

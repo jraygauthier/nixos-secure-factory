@@ -1,5 +1,3 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? null } @ args:
 
-import ./scripts/factory-install/env.nix {
-  inherit pkgs;
-}
+import ./scripts/factory-install/env.nix args
