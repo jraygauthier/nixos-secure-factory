@@ -71,8 +71,8 @@ rec {
     # TODO: Missing name attr.
     nixos-secure-factory =
       { src = <nixos-secure-factory>; version = <nixos-secure-factory-version>; };
-    nixos-sf-ssh-auth =
-      { src = <nixos-sf-ssh-auth>; version = <nixos-sf-ssh-auth-version>; };
+    nsf-ssh-auth =
+      { src = <nsf-ssh-auth>; version = <nsf-ssh-auth-version>; };
     nixpkgs =
       { src = <nixpkgs>; version = <nixpkgs-version>; };
     nsf-pin =
@@ -90,15 +90,15 @@ rec {
   # This repo's overlay.
   overlay = self: super:
     let
-      nixos-sf-ssh-auth = (import
-        (pickedSrcs.nixos-sf-ssh-auth.src + "/release.nix")
+      nsf-ssh-auth = (import
+        (pickedSrcs.nsf-ssh-auth.src + "/release.nix")
         { pkgs = self; });
     in
   {
-    nixos-sf-ssh-auth-nix-lib = nixos-sf-ssh-auth.nix-lib;
+    nsf-ssh-auth-nix-lib = nsf-ssh-auth.nix-lib;
     # TODO: Remove. Only to demonstrate the
     # expected overlay behavior.
-    nixos-sf-ssh-auth-cli = nixos-sf-ssh-auth.cli;
+    nsf-ssh-auth-cli = nsf-ssh-auth.cli;
   };
 
   # The set of overlays used by this repo.

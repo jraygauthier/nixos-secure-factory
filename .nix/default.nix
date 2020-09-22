@@ -64,6 +64,14 @@ rec {
   # This repo's internal overlay.
   overlayInternal = import ./overlay-internal.nix { inherit srcs pickedSrcs; };
 
+  overlayInternalReqs = builtins.attrNames (overlayInternal {} {});
+
+  hasOverlayInternal = pkgs: builtins.all (x: x) (
+    builtins.map (
+      x: builtins.hasAttr x pkgs)
+      overlayInternalReqs
+  );
+
   # The set of overlays used by this repo.
   overlays = [
     overlay
@@ -71,11 +79,7 @@ rec {
   ];
 
   # This constitutes our default nixpkgs.
-  nixpkgsSrc = builtins.fetchTarball {
-      # Latest `release-19.09`.
-      url = "https://github.com/jraygauthier/nixpkgs/archive/289466dd6a11c65a7de4a954d6ebf66c1ad07652.tar.gz";
-      sha256 = "0r5ja052s86fr54fm1zlhld3fwawz2w1d1gd6vbvpjrpjfyajibn";
-    };
+  nixpkgsSrc = pickedSrcs.nixpkgs.src;
   nixpkgs = nixpkgsSrc;
 
   #
@@ -95,8 +99,8 @@ rec {
   ensurePkgs = { pkgs ? null, nixpkgs ? null }:
     if null != pkgs
       then
-        if pkgs ? "has-overlay-nixos-secure-factory-internal"
-            # Avoid extending a `pkgs` that already has our overlays.
+        if hasOverlayInternal pkgs
+          # Avoid extending a `pkgs` that already has our overlays.
           then pkgs
         else
           # TODO: Check is already has proper overlays.

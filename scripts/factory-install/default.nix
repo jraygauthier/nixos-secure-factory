@@ -8,7 +8,7 @@
 , python3
 , bashInteractive
 , nsf-pin-cli
-, nsf-shell-complete-nix-lib
+, nsf-shc-nix-lib
 , nixos-sf-factory-common-install
 , nixos-sf-factory-install-py
 }:
@@ -70,7 +70,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = with nsf-shell-complete-nix-lib; ''
+  installPhase = with nsf-shc-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 
@@ -81,17 +81,6 @@ stdenv.mkDerivation rec {
         --prefix PATH : "${stdenv.lib.makeBinPath buildInputs}" \
         --prefix PATH : "$out/share/${pname}/bin"
     done
-
-    # Principally required for read -e -i 'Default value'
-    # but also, we need to patch programs earlier as we
-    # need to run some of these in order to produce bash
-    # completions just below.
-    PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
-
-    ${shComp.pkg.installClickExesBashCompletion [
-      "device-common-ssh-auth-dir"
-      "device-ssh-auth-dir"
-    ]}
   '';
 
   meta = {

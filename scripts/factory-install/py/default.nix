@@ -6,9 +6,8 @@
 , ipython
 , click
 , pyyaml
-, nsf-shell-complete-nix-lib
+, nsf-shc-nix-lib
 , nixos-sf-factory-common-install-py
-, nixos-sf-ssh-auth-cli
 }:
 
 buildPythonPackage rec  {
@@ -34,11 +33,10 @@ buildPythonPackage rec  {
     click
     pyyaml
     nixos-sf-factory-common-install-py
-    nixos-sf-ssh-auth-cli
   ];
 
-  postInstall = with nsf-shell-complete-nix-lib; ''
-    ${shComp.pkg.installClickExesBashCompletion [
+  postInstall = with nsf-shc-nix-lib; ''
+    ${nsfShC.pkg.installClickExesBashCompletion [
     ]}
   '';
 

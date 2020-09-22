@@ -1,7 +1,7 @@
 {
   "type": "fetchFromGitHub",
   "owner": "jraygauthier",
-  "repo": "nixos-sf-ssh-auth",
+  "repo": "nsf-ssh-auth",
   "ref": "master",
   "rev": "aee7f97a941577f15f04599b985e83dda995c806",
   "sha256": "1rrmsiipzmwnj5snnj89iqqq6kp0qgpalg92fznd9i11by2xg25w"

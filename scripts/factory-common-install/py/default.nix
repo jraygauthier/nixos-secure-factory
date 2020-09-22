@@ -1,12 +1,9 @@
 { lib
 , buildPythonPackage
-, mypy
-, pytest
-, flake8
-, ipython
 , click
 , pyyaml
-, nsf-shell-complete-nix-lib
+, nsf-ssh-auth-cli
+, nsf-shc-nix-lib
 }:
 
 buildPythonPackage rec  {
@@ -14,34 +11,26 @@ buildPythonPackage rec  {
   version = "0.0.0";
   src = ./.;
   buildInputs = [];
-  checkInputs = [
-    mypy
-    pytest
-    flake8
-  ];
 
   doCheck = false;
-
-  checkPhase = ''
-    mypy .
-    pytest .
-    flake8
-  '';
 
   propagatedBuildInputs = [
     click
     pyyaml
+    nsf-ssh-auth-cli
   ];
 
-  postInstall = with nsf-shell-complete-nix-lib; ''
-    ${shComp.pkg.installClickExesBashCompletion [
-    ]}
-  '';
+  # dontWrapPythonPrograms = true;
 
-  # Allow nix-shell inside nix-shell.
-  # See `pkgs/development/interpreters/python/hooks/setuptools-build-hook.sh`
-  # for the reason why.
-  shellHook = ''
-    setuptoolsShellHook
+  postFixup = with nsf-shc-nix-lib; ''
+    # We need to patch programs earlier as we
+    # need to run some of these in order to produce bash
+    # completions just below.
+    patchShebangs "$out/bin"
+
+    ${nsfShC.pkg.installClickExesBashCompletion [
+      "device-common-ssh-auth-dir"
+      "device-ssh-auth-dir"
+    ]}
   '';
 }

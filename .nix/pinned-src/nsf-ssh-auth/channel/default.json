@@ -1,0 +1,8 @@
+{
+  "type": "fetchFromGitHub",
+  "owner": "jraygauthier",
+  "repo": "nsf-ssh-auth",
+  "ref": "master",
+  "rev": "6a3f52605c9b0dc307aee93481d5b2da35fefc43",
+  "sha256": "0vkcmqp1ddgln4fjhn3aky4v6bjaavvbc03726m4cs2hc2cvfk46"
+}

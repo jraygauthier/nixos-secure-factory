@@ -3,7 +3,7 @@
 , makeWrapper
 , coreutils
 , gnugrep
-, nsf-shell-complete-nix-lib
+, nsf-shc-nix-lib
 , nixos-sf-common-install
 , nixos-sf-device-system-config
 , nixos-sf-device-system-config-updater
@@ -53,6 +53,7 @@ stdenv.mkDerivation rec {
   propagatedUserEnvPkgs = [
     nixos-sf-common-install
     nixos-sf-device-system-config
+    nixos-sf-factory-common-install-py
   ];
 
   propagatedBuildInputs = [
@@ -111,7 +112,7 @@ stdenv.mkDerivation rec {
 
   buildPhase = "true";
 
-  installPhase = with nsf-shell-complete-nix-lib; ''
+  installPhase = with nsf-shc-nix-lib; ''
     mkdir -p "$out/share/${pname}"
     find . -mindepth 1 -maxdepth 1 -exec mv -t "$out/share/${pname}" {} +
 
@@ -129,7 +130,7 @@ stdenv.mkDerivation rec {
     # completions just below.
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
-    ${shComp.pkg.installClickExesBashCompletion [
+    ${nsfShC.pkg.installClickExesBashCompletion [
       "device-state-checkout"
     ]}
   '';

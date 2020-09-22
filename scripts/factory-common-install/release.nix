@@ -18,7 +18,7 @@ let
   nixos-sf-factory-common-install-py = pyRelease.default;
 
   default = (callPackage ./. {
-    inherit nsf-shell-complete-nix-lib;
+    inherit nsf-shc-nix-lib;
     inherit nixos-sf-common-install;
     inherit nixos-sf-device-system-config;
     inherit nixos-sf-device-system-config-updater;
@@ -73,11 +73,11 @@ rec {
       PYTHONPATH = "";
       MYPYPATH = "";
 
-      shellHook = with nsf-shell-complete-nix-lib; ''
+      shellHook = with nsf-shc-nix-lib; ''
         source "${default.envShellHook}"
 
-        ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
-        ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
+        ${nsfShC.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
+        ${nsfShC.env.ensureDynamicBashCompletionLoaderInstalled}
 
         shell_dir="${toString ./.}"
         test -e "$shell_dir/env.sh" || die "Cannot find expected '$shell_dir/env.sh'!"
@@ -119,8 +119,8 @@ rec {
         export PATH="${builtins.toString ./bin}:$PATH"
 
         source ${pyShellHookLib}
-        sh_hook_py_set_interpreter_env_from_nix_store_path "${devPython}"
-        sh_hook_lib_mypy_5701_workaround "${devPython}"
+        nsf_py_set_interpreter_env_from_nix_store_path "${devPython}"
+        nsf_py_mypy_5701_workaround "${devPython}"
         sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
         sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
         sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py

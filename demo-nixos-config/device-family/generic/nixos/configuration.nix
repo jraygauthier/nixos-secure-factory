@@ -1,7 +1,7 @@
 { lib, config, pkgs, ... }:
 
 let
-  # pkgs.nixos-sf-ssh-auth-nix-lib
+  # pkgs.nsf-ssh-auth-nix-lib
 
   sshAuthLib = import ../../../lib/ssh-auth.nix { inherit lib; };
   inherit (sshAuthLib) getUserKeyFileFromPerUserAuthKeys;
@@ -76,6 +76,6 @@ in
   environment.systemPackages = [
     # TODO: Remove. Only to demonstrate the
     # expected overlay behavior.
-    pkgs.nixos-sf-ssh-auth-cli
+    pkgs.nsf-ssh-auth-cli
   ];
 }

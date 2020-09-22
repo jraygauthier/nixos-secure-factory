@@ -28,7 +28,8 @@ def format_cfg_as_yaml_str(in_cfg: Dict[str, Any]) -> str:
 @click.argument(
     "device-id",
     type=click.STRING,
-    autocompletion=list_ac_available_device_ids)
+    autocompletion=list_ac_available_device_ids
+)
 def checkout_cli(device_id) -> None:
     """Checkout a particular device state."""
     print((

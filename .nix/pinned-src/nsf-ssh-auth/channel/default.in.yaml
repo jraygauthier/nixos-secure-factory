@@ -1,4 +1,4 @@
 type: fetchFromGitHub
 owner: jraygauthier
-repo: nsf-shell-complete
+repo: nsf-ssh-auth
 ref: master

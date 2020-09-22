@@ -115,9 +115,9 @@ device configurations. Specific device factories are required to:
         be able to create / read and modify a set of files related to the
         allowed access to devices through ssh.
 
-        This directory will be managed according to `nixos-sf-ssh-auth`'s policy.
+        This directory will be managed according to `nsf-ssh-auth`'s policy.
 
-        See [nixos-sf-ssh-auth - Readme](../.nix/pkgs/tools/admin/nixos-sf-ssh-auth/README.md)
+        See [nsf-ssh-auth - Readme](../.nix/pkgs/tools/admin/nsf-ssh-auth/README.md)
         for more details.
 
         You configuration will then be able to exploit this information

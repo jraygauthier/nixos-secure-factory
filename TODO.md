@@ -87,4 +87,11 @@ Exploring some ideas
     This raise the question as to what should be done for non vm case? Should we
     prompt the user, providing him some recent history selection for the values?
 
+ -  When building a device configuration, allow for a cli option to be provided
+    to write an `out-link` symlink in `workspaceDir`. This would allow one to
+    protect the build from being garbage collected.
+
+    NOTE: Might already be available by specifying the `--out-link` option as
+    options are currently forwarded to nix build.
+
 [nix-deploy]: https://awakesecurity.com/blog/deploy-software-easily-securely-using-nix-deploy/

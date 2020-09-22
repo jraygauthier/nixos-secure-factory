@@ -19,7 +19,7 @@ let
     import ../.nix/default.nix { inherit workspaceDir; }).srcs.pinned;
 
   pickedSrcs = {
-    nixos-sf-ssh-auth = pinnedSrcs.nixos-sf-ssh-auth.default;
+    nsf-ssh-auth = pinnedSrcs.nsf-ssh-auth.default;
   };
 in
 

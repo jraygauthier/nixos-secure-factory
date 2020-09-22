@@ -30,9 +30,9 @@ let
 
     buildInputs = [ default ];
 
-    shellHook = with nsf-shell-complete-nix-lib; ''
-      ${shComp.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
-      ${shComp.env.ensureDynamicBashCompletionLoaderInstalled}
+    shellHook = with nsf-shc-nix-lib; ''
+      ${nsfShC.env.exportXdgDataDirsOf ([ default ] ++ default.buildInputs)}
+      ${nsfShC.env.ensureDynamicBashCompletionLoaderInstalled}
     '';
   };
 
@@ -45,21 +45,21 @@ let
   sffciPyLocalSrcDir = sfRepoLocalRootDir
     + "/scripts/factory-common-install/py/src";
 
-  shellHookLib = writeShellScript "python-project-shell-hook-lib.sh" ''
+  shellHookLib = with nsf-py-nix-lib; writeShellScript "python-project-shell-hook-lib.sh" ''
     source "${sffciPyRelease.shell-hook-lib}"
 
     sh_hook_py_add_local_pkg_src_nixos_sf_test_lib() {
-      sh_hook_py_add_local_pkg_src_if_present \
+      nsf_py_add_local_pkg_src_if_present \
         "${builtins.toString sfTestLibLocalSrcDir}"
     }
 
     sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py() {
-      sh_hook_py_add_local_pkg_src_if_present \
+      nsf_py_add_local_pkg_src_if_present \
         "${builtins.toString sffciPyLocalSrcDir}"
     }
 
     sh_hook_py_add_local_pkg_src_nixos_sf_factory_install_py() {
-      sh_hook_py_add_local_pkg_src_if_present \
+      nsf_py_add_local_pkg_src_if_present \
         "${builtins.toString ./src}"
     }
   '';
@@ -76,8 +76,8 @@ let
     shellHook = ''
       ${oldAttrs.shellHook}
       source ${shellHookLib}
-      sh_hook_py_set_interpreter_env_from_path
-      # sh_hook_lib_mypy_5701_workaround_from_path
+      nsf_py_set_interpreter_env_from_path
+      # nsf_py_mypy_5701_workaround
       sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
       sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
       sh_hook_py_add_local_pkg_src_nixos_sf_factory_common_install_py

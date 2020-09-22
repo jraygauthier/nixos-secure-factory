@@ -4,33 +4,37 @@
 self: super:
 
 let
-  nsf-pin = {
-    inherit (import
-      ./pkgs/tools/package-management/nsf-pin/release.nix
-      { pkgs = self; })
-    cli nix-lib;
+  nsf-pin = import "${pickedSrcs.nsf-pin.src}/release.nix" {
+    pkgs = self;
   };
-  nixos-sf-ssh-auth = {
-    inherit (import
-      ./pkgs/tools/admin/nixos-sf-ssh-auth/release.nix
-      { pkgs = self; })
-    cli python-lib nix-lib;
+
+  nsf-py = import "${pickedSrcs.nsf-py.src}/release.nix" {
+    pkgs = self;
+  };
+
+  nsf-shc = import "${pickedSrcs.nsf-shc.src}/release.nix" {
+    pkgs = self;
+  };
+
+  nsf-ssh-auth = import "${pickedSrcs.nsf-ssh-auth.src}/release.nix" {
+    pkgs = self;
   };
 in
 
 {
-  # Tag to check that our overlay is already available.
-  has-overlay-nixos-secure-factory-internal = true;
-
-  nsf-shell-complete-nix-lib = (import
-    ./pkgs/build-support/nsf-shell-complete/release.nix
-    { pkgs = self; }
-    ).nix-lib;
-
-  nixos-sf-ssh-auth-cli = nixos-sf-ssh-auth.cli;
-  nixos-sf-ssh-auth-python-lib = nixos-sf-ssh-auth.python-lib;
-  nixos-sf-ssh-auth-nix-lib = nixos-sf-ssh-auth.nix-lib;
-
+  # **IMPORTANT**: In order too prevent these our dependencies're
+  # own `release.nix` module to append their overlays to the package set,
+  # we want to make sure that our internal overlay is a strict
+  # superset of theirs.
+  # See `nixos-secure-factory/.nix/overlay-internal.nix`.
+  # TOOD: Automated check for this that at least raise a warning.
   nsf-pin-cli = nsf-pin.cli;
   nsf-pin-nix-lib = nsf-pin.nix-lib;
+
+  nsf-py-nix-lib = nsf-py.nix-lib;
+
+  nsf-shc-nix-lib = nsf-shc.nix-lib;
+
+  nsf-ssh-auth-cli = nsf-ssh-auth.cli;
+  nsf-ssh-auth-nix-lib = nsf-ssh-auth.nix-lib;
 }

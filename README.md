@@ -41,7 +41,7 @@ External tools / extensions
 Those are standalone tools that were developed as a mean of extending the
 capabilities of the current framework but that can even find uses outside of it.
 
- -  [nixos-sf-ssh-auth]
+ -  [nsf-ssh-auth]
 
     A nix lib to simplify the management of ssh public keys allowed remote
     access to individual linux users. This introduce the concept of a *ssh auth
@@ -53,7 +53,7 @@ capabilities of the current framework but that can even find uses outside of it.
     `device-common-ssh-auth-dir` and `device-ssh-auth-dir` to respectively allow
     authorizations throughout all devices and on a per device basis.
 
- -  [nixos-sf-atlassian-tools]
+ -  [nsf-atlassian-tools]
 
     Of particular interest, provides a cli helper to manage **ssh authorizations**
     to [bitbucket] repositories via its rest api (in case you chose to host your
@@ -71,7 +71,7 @@ capabilities of the current framework but that can even find uses outside of it.
     Using [bitbucket] is really a pretty nice **zero infrastructure** and
     **free** mean of distributing **system updates** to your devices.
 
- -  [nixos-sf-zerotier-tools]
+ -  [nsf-zerotier-tools]
 
     Of particular interest, provide a cli helper to manager authorization to one
     or many [zerotier] (a distributed vpn) **private network(s)** of machines
@@ -83,9 +83,9 @@ capabilities of the current framework but that can even find uses outside of it.
     **free** mean of **remote access** to your devices (e.g.: through ssh, vnc,
     sftp, etc) even though these are *behind firewalls*.
 
-[nixos-sf-ssh-auth]: https://github.com/jraygauthier/nixos-sf-ssh-auth
-[nixos-sf-atlassian-tools]: https://github.com/amotus/nixos-sf-atlassian-tools
-[nixos-sf-zerotier-tools]: https://github.com/amotus/nixos-sf-zerotier-tools
+[nsf-ssh-auth]: https://github.com/jraygauthier/nsf-ssh-auth
+[nsf-atlassian-tools]: https://github.com/amotus/nsf-atlassian-tools
+[nsf-zerotier-tools]: https://github.com/amotus/nsf-zerotier-tools
 
 [bitbucket]: https://bitbucket.org
 [zerotier]: https://www.zerotier.com/

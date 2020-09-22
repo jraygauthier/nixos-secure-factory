@@ -130,7 +130,7 @@ _ensure_current_factory_user_access_to_installed_device() {
   factory_user_id="$(get_required_factory_info__user_id)" || return 1
 
   # Add the current factory user as a user to the config's ssh auth dir.
-  # The presumes the nixos configuration uses the 'nixos-sf-ssh-auth'
+  # The presumes the nixos configuration uses the 'nsf-ssh-auth'
   # library.
   _add_factory_user_to_cfg_ssh_auth_dir "$factory_user_id"
 
