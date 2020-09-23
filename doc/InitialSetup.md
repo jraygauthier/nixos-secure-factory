@@ -94,21 +94,21 @@ device configurations. Specific device factories are required to:
 
     2 mandatory env var should be set there:
 
-     1. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_TYPE_FACTORY_INSTALL_DEFS_DIR`
+     1. `PKG_NSF_FACTORY_COMMON_INSTALL_DEVICE_TYPE_FACTORY_INSTALL_DEFS_DIR`
 
         Should points to the root of the factory install device type
         definitions (e.g.: `my_factory_install/device-type`).
 
-     2. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR`
+     2. `PKG_NSF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR`
 
         Should points to the root of your local of `my_device_config`.
 
-     3. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_TYPE_DEFS_DIR`
+     3. `PKG_NSF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_TYPE_DEFS_DIR`
 
         Should point to the location of the device configuration type defintions
         dir. (e.g.: `my_device_config/device-type`).
 
-     4. `PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR`
+     4. `PKG_NSF_FACTORY_COMMON_INSTALL_DEVICE_CONFIG_SSH_AUTH_DIR`
 
         Should point to a writable location in the device configuration (e.g.:
         `my_factory_install/device-ssh`) where the factory tools will

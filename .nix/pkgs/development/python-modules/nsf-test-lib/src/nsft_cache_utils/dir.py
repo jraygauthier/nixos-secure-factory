@@ -71,7 +71,7 @@ class DisabledCacheDirProvider(ICacheDirProvider):
 
 
 def _is_dir_caching_disabled() -> bool:
-    no_dir_cache_env_var = os.environ.get("NIXOS_SF_TEST_LIB_NO_DIR_CACHE", "0")
+    no_dir_cache_env_var = os.environ.get("NSF_TEST_LIB_NO_DIR_CACHE", "0")
     if "1" == no_dir_cache_env_var:
         return True
 

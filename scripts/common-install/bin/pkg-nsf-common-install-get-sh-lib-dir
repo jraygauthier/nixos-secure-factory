@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-if test -z ${PKG_NIXOS_SF_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR+x}; then
+if test -z ${PKG_NSF_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR+x}; then
   default_pkg_dir="$(cd "$(dirname "$0")/.." > /dev/null && pwd)"
   lib_dir="$default_pkg_dir/sh-lib"
 else
-  lib_dir="$PKG_NIXOS_SF_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR/sh-lib"
+  lib_dir="$PKG_NSF_COMMON_INSTALL_DEV_OVERRIDE_ROOT_DIR/sh-lib"
 fi
 echo "$lib_dir"

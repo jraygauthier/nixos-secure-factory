@@ -65,9 +65,9 @@ let
 
       buildPhase = ''
         if [[ "1" != "''${IN_NIX_SHELL+1}" ]]; then
-          export "NIXOS_SF_TEST_LIB_NO_DIR_CACHE=1"
+          export "NSF_TEST_LIB_NO_DIR_CACHE=1"
         fi
-        export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
+        export "NSF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
         pytest --color=yes "${testPath}" | tee ./pytest.log
       '';
 
@@ -122,7 +122,7 @@ rec {
       shellHook = ''
         export PATH="${builtins.toString ./bin}:$PATH"
         export "PYTHON_INTERPRETER=${devPython}/bin/python"
-        export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
+        export "NSF_TEST_LIB_BIN_PATH=${coreutils}/bin:${gnupg}/bin"
 
         # TODO: Make this more concise while avoiding the vscode debugger issue
         # observed when using the bash colon trick.

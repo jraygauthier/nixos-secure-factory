@@ -21,7 +21,7 @@ rec {
       ${oldAttrs.shellHook}
       pythonInterpreter="$(which python)"
       export "PYTHON_INTERPRETER=$pythonInterpreter"
-      export "NIXOS_SF_TEST_LIB_BIN_PATH=${coreutils}/bin:${pkgs.gnupg}/bin"
+      export "NSF_TEST_LIB_BIN_PATH=${coreutils}/bin:${pkgs.gnupg}/bin"
 
       check_all() {
         mypy . && pytest . && flake8

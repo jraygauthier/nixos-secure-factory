@@ -13,7 +13,7 @@ def get_nsf_workspace_dir_path() -> Path:
 
 
 def get_device_cfg_repo_root_dir_path() -> Path:
-    env_var_name = "PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR"
+    env_var_name = "PKG_NSF_FACTORY_COMMON_INSTALL_DEVICE_OS_CONFIG_REPO_DIR"
     out = os.environ.get(env_var_name, None)
     if out is None:
         raise Exception((

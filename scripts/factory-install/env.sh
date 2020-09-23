@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-current_pkg_root_dir_env_var_name="PKG_NIXOS_SF_FACTORY_INSTALL_PACKAGE_ROOT_DIR"
+current_pkg_root_dir_env_var_name="PKG_NSF_FACTORY_INSTALL_PACKAGE_ROOT_DIR"
 
 if ! current_pkg_root_dir="$(printenv "$current_pkg_root_dir_env_var_name")" \
     || [[ "" == "$current_pkg_root_dir" ]]; then

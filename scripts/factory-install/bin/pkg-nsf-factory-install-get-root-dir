@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-if test -z ${PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR+x}; then
+if test -z ${PKG_NSF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR+x}; then
   default_pkg_dir="$(cd "$(dirname "$0")/.." > /dev/null && pwd)"
   pkg_root_dir="$default_pkg_dir"
 else
-  pkg_root_dir="$PKG_NIXOS_SF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR"
+  pkg_root_dir="$PKG_NSF_FACTORY_INSTALL_DEV_OVERRIDE_ROOT_DIR"
 fi
 echo "$pkg_root_dir"

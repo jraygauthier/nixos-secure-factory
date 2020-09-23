@@ -4,7 +4,7 @@ Readme
 Configuration and environment variables
 ---------------------------------------
 
- -  `NIXOS_SF_TEST_LIB_BIN_PATH`: The `PATH` environment variable used to run
+ -  `NSF_TEST_LIB_BIN_PATH`: The `PATH` environment variable used to run
     this library's external (non-python) executable dependencies.
 
     This prevent one of this test library's depandency to hide a flaw in package
@@ -24,7 +24,7 @@ Configuration and environment variables
 
      -  `src/nsft_pgp_utils/ctx_proc_types.py::get_default_gpg_proc_ctx`.
 
- -  `NIXOS_SF_TEST_LIB_NO_DIR_CACHE`: Disallow any caching of directories
+ -  `NSF_TEST_LIB_NO_DIR_CACHE`: Disallow any caching of directories
     (fixtures) when set to 1.
 
     This directly impacts `src/nsft_cache_utils/dir.py::obtain_cache_dir` via

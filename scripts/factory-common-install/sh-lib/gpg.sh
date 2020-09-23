@@ -18,13 +18,13 @@ get_gpg_sandbox_dir() {
   ws_dir="$(get_nixos_secure_factory_workspace_dir)"
   local default_sandbox_gpg_home_dir="$ws_dir/.gnupg"
 
-  local gpg_home_sanbox_dir="${PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_SANDBOXED_GPG_HOME_DIR:-$default_sandbox_gpg_home_dir}"
+  local gpg_home_sanbox_dir="${PKG_NSF_FACTORY_COMMON_INSTALL_SANDBOXED_GPG_HOME_DIR:-$default_sandbox_gpg_home_dir}"
   echo "$gpg_home_sanbox_dir"
 }
 
 
 is_gpg_home_sandboxed() {
-  local gpg_home_sanbox_disable_value="${PKG_NIXOS_SF_FACTORY_COMMON_INSTALL_SANDBOXED_GPG_HOME_DISABLE:-0}"
+  local gpg_home_sanbox_disable_value="${PKG_NSF_FACTORY_COMMON_INSTALL_SANDBOXED_GPG_HOME_DISABLE:-0}"
   # 1>&2 echo "gpg_home_sanbox_disable_value='$gpg_home_sanbox_disable_value'"
   ! test "1" == "${gpg_home_sanbox_disable_value:-0}"
 }

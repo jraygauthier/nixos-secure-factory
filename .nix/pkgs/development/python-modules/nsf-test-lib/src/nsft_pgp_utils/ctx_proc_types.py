@@ -47,7 +47,7 @@ def get_default_gpg_proc_ctx() -> GpgProcContextExp:
         # program under test is packaged correctly without having us injecting
         # its gpg dependancy. This also makes a little gpg sandbox.
         env = {
-            "PATH": os.environ["NIXOS_SF_TEST_LIB_BIN_PATH"]
+            "PATH": os.environ["NSF_TEST_LIB_BIN_PATH"]
         }
     except KeyError:
         env = {

@@ -81,10 +81,10 @@ rec {
         shell_dir="${toString ./.}"
         test -e "$shell_dir/env.sh" || die "Cannot find expected '$shell_dir/env.sh'!"
 
-        export PKG_NIXOS_SF_FACTORY_INSTALL_PACKAGE_ROOT_DIR="$shell_dir"
+        export PKG_NSF_FACTORY_INSTALL_PACKAGE_ROOT_DIR="$shell_dir"
         . "$shell_dir/env.sh"
 
-        export PKG_NIXOS_SF_FACTORY_INSTALL_IN_ENV=1
+        export PKG_NSF_FACTORY_INSTALL_IN_ENV=1
       '';
 
       passthru.shellHook = shellHook;
@@ -110,11 +110,11 @@ rec {
         shell_dir="${toString ./.}"
         test -e "$shell_dir/env.sh" || die "Cannot find expected '$shell_dir/env.sh'!"
 
-        export "PKG_NIXOS_SF_FACTORY_INSTALL_PACKAGE_ROOT_DIR=$shell_dir"
+        export "PKG_NSF_FACTORY_INSTALL_PACKAGE_ROOT_DIR=$shell_dir"
         . "$shell_dir/env.sh"
 
-        export PKG_NIXOS_SF_FACTORY_INSTALL_IN_BUILD_ENV=1
-        export PKG_NIXOS_SF_FACTORY_INSTALL_IN_ENV=1
+        export PKG_NSF_FACTORY_INSTALL_IN_BUILD_ENV=1
+        export PKG_NSF_FACTORY_INSTALL_IN_ENV=1
 
         export PATH="${builtins.toString ./bin}:$PATH"
 
