@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
+common_sh_lib_dir="$(pkg-nsf-common-get-sh-lib-dir)"
 # shellcheck source=sh_stream.sh
 . "$common_sh_lib_dir/sh_stream.sh"
 
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/prompt.sh
 . "$common_factory_install_sh_lib_dir/prompt.sh"
 # shellcheck source=SCRIPTDIR/../sh-lib/gpg.sh

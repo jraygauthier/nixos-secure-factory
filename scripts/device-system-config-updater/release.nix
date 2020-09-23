@@ -11,6 +11,6 @@ with pkgs;
 
 {
   default = callPackage ./. {
-      inherit nixos-sf-device-system-config;
+      inherit nsf-device-system-config;
     };
 }

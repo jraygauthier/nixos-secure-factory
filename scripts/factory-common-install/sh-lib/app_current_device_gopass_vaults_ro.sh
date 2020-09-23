@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/app_factory_gopass_vaults.sh
 . "$common_factory_install_sh_lib_dir/app_factory_gopass_vaults_ro.sh"
 # shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_store.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_store.sh"
 
-common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
+common_install_sh_lib_dir="$(pkg-nsf-common-install-get-sh-lib-dir)"
 # shellcheck source=device_secrets.sh
 . "$common_install_sh_lib_dir/device_secrets.sh"
 

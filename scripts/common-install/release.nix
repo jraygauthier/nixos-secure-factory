@@ -10,5 +10,5 @@ in
 with pkgs;
 
 {
-  default = callPackage ./. { inherit nixos-sf-common; };
+  default = callPackage ./. { inherit nsf-common; };
 }

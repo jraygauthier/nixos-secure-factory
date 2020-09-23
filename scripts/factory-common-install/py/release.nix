@@ -29,7 +29,7 @@ let
     '';
   };
 
-  sfTestLibRootDir = repoRootDir + "/.nix/pkgs/development/python-modules/nixos-sf-test-lib";
+  sfTestLibRootDir = repoRootDir + "/.nix/pkgs/development/python-modules/nsf-test-lib";
   sfTestLibLocalSrcDir = sfTestLibRootDir + "/src";
 
   sfSshAuthCliLocalSrcDir = wsRootDir + "/nsf-ssh-auth/cli/src";

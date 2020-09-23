@@ -7,7 +7,7 @@ if ! current_pkg_root_dir="$(printenv "$current_pkg_root_dir_env_var_name")" \
   exit 1
 fi
 
-if ! [[ -f "$current_pkg_root_dir/bin/pkg-nixos-sf-factory-install-get-root-dir" ]]; then
+if ! [[ -f "$current_pkg_root_dir/bin/pkg-nsf-factory-install-get-root-dir" ]]; then
   1>&2 echo "ERROR: '$current_pkg_root_dir_env_var_name' env var should point to a valid" \
     "path to factory install package sources."
   exit 1

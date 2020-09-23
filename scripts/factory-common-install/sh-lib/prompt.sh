@@ -92,7 +92,7 @@ _prompt_for_custom_choices_impl() {
   trap "{ rm_out_file; }" EXIT
 
   local _sh_lib_dir
-  _sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+  _sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
   "$_sh_lib_dir/prompt_for_custom_choices_readline" -of "$_out_file" "$@"
   _return_code="$?"
   # echo "return_code1=$_return_code"

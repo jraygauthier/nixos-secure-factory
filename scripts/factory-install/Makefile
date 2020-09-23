@@ -24,7 +24,7 @@ lint-python:
 
 lint-shell:
 	shellcheck -x -P \
-	  "$(shell pkg-nixos-sf-data-deploy-tools-get-sh-lib-dir)" \
+	  "$(shell pkg-nsf-data-deploy-tools-get-sh-lib-dir)" \
 	  $(shell find ./sh-lib -type f -name "*.sh") \
 	  $(shell find ./bin -mindepth 1 -executable -type f)
 

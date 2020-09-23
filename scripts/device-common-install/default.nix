@@ -1,6 +1,6 @@
 { stdenv
 , makeWrapper
-, nixos-sf-common-install
+, nsf-common-install
 , coreutils
 , gnugrep
 , usbutils
@@ -20,15 +20,15 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-device-common-install";
+  pname = "nsf-device-common-install";
   name = "${pname}-${version}";
 
   src = ./.;
 
   nativeBuildInputs = [ makeWrapper ];
-  propagatedUserEnvPkgs = [ nixos-sf-common-install ];
+  propagatedUserEnvPkgs = [ nsf-common-install ];
   buildInputs = [
-    nixos-sf-common-install
+    nsf-common-install
     coreutils
     gnugrep
     parted

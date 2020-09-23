@@ -161,6 +161,6 @@ get_writable_device_cfg_ssh_auth_root_dir() {
 
 get_nixos_secure_factory_workspace_dir() {
   local ws_dir
-  ws_dir="$(pkg-nixos-sf-factory-common-install-get-workspace-dir)"
+  ws_dir="$(pkg-nsf-factory-common-install-get-workspace-dir)"
   echo "$ws_dir"
 }

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-common_sh_lib_dir="$(pkg-nixos-sf-common-get-sh-lib-dir)"
+common_sh_lib_dir="$(pkg-nsf-common-get-sh-lib-dir)"
 # shellcheck source=permissions.sh
 . "$common_sh_lib_dir"/permissions.sh
 # shellcheck source=sh_stream.sh

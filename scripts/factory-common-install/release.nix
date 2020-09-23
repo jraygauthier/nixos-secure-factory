@@ -15,14 +15,14 @@ let
       inherit pkgs;
     };
 
-  nixos-sf-factory-common-install-py = pyRelease.default;
+  nsf-factory-common-install-py = pyRelease.default;
 
   default = (callPackage ./. {
     inherit nsf-shc-nix-lib;
-    inherit nixos-sf-common-install;
-    inherit nixos-sf-device-system-config;
-    inherit nixos-sf-device-system-config-updater;
-    inherit nixos-sf-factory-common-install-py;
+    inherit nsf-common-install;
+    inherit nsf-device-system-config;
+    inherit nsf-device-system-config-updater;
+    inherit nsf-factory-common-install-py;
   } // {
     envShellHook = writeScript "envShellHook.sh" ''
     '';

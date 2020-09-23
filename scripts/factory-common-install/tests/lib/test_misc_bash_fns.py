@@ -18,7 +18,7 @@ def _get_cfi_sh_lib_dir():
         "../../sh-lib"))
 
     # return sanitize_bash_path_out(subprocess.check_output(
-    # "pkg-nixos-sf-factory-common-install-get-sh-lib-dir"))
+    # "pkg-nsf-factory-common-install-get-sh-lib-dir"))
 
 
 def _get_cfi_sh_module_path(name):
@@ -27,7 +27,7 @@ def _get_cfi_sh_module_path(name):
 
 def test_get_common_install_sh_lib_dir():
     ci_sh_lib_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-sf-common-install-get-sh-lib-dir")
+        "pkg-nsf-common-install-get-sh-lib-dir")
     )
     LOGGER.info("ci_sh_lib_dir: %s", ci_sh_lib_dir)
     assert os.path.exists(ci_sh_lib_dir)

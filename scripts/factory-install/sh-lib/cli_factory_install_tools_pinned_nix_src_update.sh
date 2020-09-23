@@ -3,7 +3,7 @@
 nsf_pin_sh_lib_dir="$(pkg-nsf-pin-get-sh-lib-dir)"
 . "$nsf_pin_sh_lib_dir/nix_src_update_helpers.sh"
 
-factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-install-get-sh-lib-dir)"
+factory_install_sh_lib_dir="$(pkg-nsf-factory-install-get-sh-lib-dir)"
 . "$factory_install_sh_lib_dir/workspace_paths.sh"
 
 

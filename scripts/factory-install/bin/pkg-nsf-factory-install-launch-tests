@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-factory-install-get-sh-lib-dir")"
+
+
+list_all_modules() {
+  find "$($script_dir/pkg-nsf-factory-install-get-sh-lib-dir)" -mindepth 1 -maxdepth 1 -name '*.sh'
+}
+
+
+# Source all modules.
+for m in $(list_all_modules); do
+  echo "Sourcing module '$m'"
+  . "$m"
+done

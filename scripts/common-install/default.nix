@@ -1,7 +1,7 @@
 { stdenv
 , lib
 , makeWrapper
-, nixos-sf-common
+, nsf-common
 , coreutils
 , gnugrep
 , gnupg
@@ -12,7 +12,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-common-install";
+  pname = "nsf-common-install";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -21,15 +21,15 @@ stdenv.mkDerivation rec {
 
 
   propagatedUserEnvPkgs = [
-    nixos-sf-common
+    nsf-common
   ];
 
   propagatedBuildInputs = [
-    nixos-sf-common
+    nsf-common
   ];
 
   buildInputs = [
-    nixos-sf-common
+    nsf-common
     coreutils
     gnugrep
     gnupg

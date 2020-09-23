@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/tools.sh
 . "$common_factory_install_sh_lib_dir/tools.sh"
 
 # TODO: Replace all this by a pytest test.
 
-TESTED_PACKAGE_NAME="nixos-sf-factory-common-install"
+TESTED_PACKAGE_NAME="nsf-factory-common-install"
 
 _list_all_modules() {
   find "$common_factory_install_sh_lib_dir" -mindepth 1 -maxdepth 1 -name '*.sh'
@@ -34,7 +34,7 @@ launch_all_tests() {
   printf -- "===============================================\n\n"
 
   local factory_common_install_pkg_root_dir
-  factory_common_install_pkg_root_dir="$(pkg-nixos-sf-factory-common-install-get-root-dir)"
+  factory_common_install_pkg_root_dir="$(pkg-nsf-factory-common-install-get-root-dir)"
 
   "$factory_common_install_pkg_root_dir/enter-build-env.sh" \
     --run "pytest \"$factory_common_install_pkg_root_dir/tests/lib\""

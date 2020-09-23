@@ -16,7 +16,7 @@ Required refactors
     It might well be the default behavior when no `env` attribute found
     in `release.nix`.
 
- -  `etc/nixos-device-system-config` -> `etc/nixos-sf-device-system-config`.
+ -  `etc/nixos-device-system-config` -> `etc/nsf-device-system-config`.
 
     Needs to adapt updater package so that it keeps backward compatibility
     for some time.

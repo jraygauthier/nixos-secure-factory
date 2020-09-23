@@ -9,13 +9,13 @@
 , bashInteractive
 , nsf-pin-cli
 , nsf-shc-nix-lib
-, nixos-sf-factory-common-install
-, nixos-sf-factory-install-py
+, nsf-factory-common-install
+, nsf-factory-install-py
 }:
 
 let
 
-pythonLib = nixos-sf-factory-install-py;
+pythonLib = nsf-factory-install-py;
 pythonPkgs = with python3.pkgs; [
     pythonLib
   ];
@@ -25,7 +25,7 @@ in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-factory-install";
+  pname = "nsf-factory-install";
   name = "${pname}-${version}";
 
 
@@ -39,7 +39,7 @@ stdenv.mkDerivation rec {
   ];
 
   propagatedUserEnvPkgs = [
-    nixos-sf-factory-common-install
+    nsf-factory-common-install
   ];
 
   propagatedBuildInputs = [
@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     nsf-pin-cli
-    nixos-sf-factory-common-install
+    nsf-factory-common-install
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.

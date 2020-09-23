@@ -53,7 +53,7 @@ in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-device-system-config-dir";
+  pname = "nsf-device-system-config-dir";
   name = "${pname}-${version}";
 
   pkgCfgDir = "etc/${etcCfgDirName}";
@@ -78,7 +78,7 @@ stdenv.mkDerivation rec {
 
     ln -s -T "$out/${pkgCfgDir}/device/${deviceId}" "$out/${pkgCfgDir}/current-device"
 
-    # The files usually found along the configuration in a nixos-sf project.
+    # The files usually found along the configuration in a nsf project.
     config_std_deps=( \
       "device-family" \
       "device-type" \

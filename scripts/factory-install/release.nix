@@ -15,16 +15,16 @@ let
       inherit pkgs;
     };
 
-  nixos-sf-factory-install-py = pyRelease.default;
+  nsf-factory-install-py = pyRelease.default;
 
   default = (callPackage ./. {
       inherit nsf-pin-cli;
       inherit nsf-shc-nix-lib;
-      inherit nixos-sf-factory-common-install;
-      inherit nixos-sf-factory-install-py;
+      inherit nsf-factory-common-install;
+      inherit nsf-factory-install-py;
   } // {
     envShellHook = writeScript "envShellHook.sh" ''
-      source "${nixos-sf-factory-common-install.envShellHook}"
+      source "${nsf-factory-common-install.envShellHook}"
     '';
   });
 

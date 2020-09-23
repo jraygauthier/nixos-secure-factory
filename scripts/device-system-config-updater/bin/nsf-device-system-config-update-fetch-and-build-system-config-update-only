@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+secure_system_update_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-system-config-updater-get-sh-lib-dir")"
+. "$secure_system_update_sh_lib_dir/local_system_updater.sh"
+
+update_current_system_fetch_and_build_system_config_update_only "$@"

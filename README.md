@@ -49,7 +49,7 @@ capabilities of the current framework but that can even find uses outside of it.
     and much more.
 
     It comes with a nice command line helper whose underlying library is used by
-    some of `nixos-sf-factory-install` tools, namely
+    some of `nsf-factory-install` tools, namely
     `device-common-ssh-auth-dir` and `device-ssh-auth-dir` to respectively allow
     authorizations throughout all devices and on a per device basis.
 

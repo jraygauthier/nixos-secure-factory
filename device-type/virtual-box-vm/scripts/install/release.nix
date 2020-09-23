@@ -11,7 +11,7 @@ with pkgs;
 
 rec {
   default = callPackage ./. {
-    inherit nixos-sf-device-common-install;
+    inherit nsf-device-common-install;
   };
 
   env = buildEnv {

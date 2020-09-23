@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+sh_lib_dir="$("$(dirname "$0")/pkg-nsf-secrets-deploy-tools-get-sh-lib-dir")"
+# shellcheck source=SCRIPTDIR/../sh-lib/pgp-gnupg-keyring-deploy.sh
+. "$sh_lib_dir/pgp-gnupg-keyring-deploy.sh"
+deploy_pgp_gnupg_otrust "$@"

@@ -4,9 +4,9 @@
 , coreutils
 , gnugrep
 , nsf-shc-nix-lib
-, nixos-sf-common-install
-, nixos-sf-device-system-config
-, nixos-sf-device-system-config-updater
+, nsf-common-install
+, nsf-device-system-config
+, nsf-device-system-config-updater
 , openssh
 , yq
 , jq
@@ -23,12 +23,12 @@
 , diffutils
 , bashInteractive
 , tightvnc
-, nixos-sf-factory-common-install-py
+, nsf-factory-common-install-py
 }:
 
 let
 
-pythonLib = nixos-sf-factory-common-install-py;
+pythonLib = nsf-factory-common-install-py;
 pythonPkgs = with python3.pkgs; [
     pythonLib
   ];
@@ -38,7 +38,7 @@ in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-factory-common-install";
+  pname = "nsf-factory-common-install";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -51,20 +51,20 @@ stdenv.mkDerivation rec {
   ];
 
   propagatedUserEnvPkgs = [
-    nixos-sf-common-install
-    nixos-sf-device-system-config
-    nixos-sf-factory-common-install-py
+    nsf-common-install
+    nsf-device-system-config
+    nsf-factory-common-install-py
   ];
 
   propagatedBuildInputs = [
     mr
-    nixos-sf-common-install
-    nixos-sf-device-system-config
+    nsf-common-install
+    nsf-device-system-config
   ];
 
   buildInputs = [
-    nixos-sf-common-install
-    nixos-sf-device-system-config
+    nsf-common-install
+    nsf-device-system-config
     coreutils
     gnugrep
     mr # Simplifies working with multiple repos.
@@ -92,7 +92,7 @@ stdenv.mkDerivation rec {
     xclip
     diffutils
 
-    nixos-sf-device-system-config-updater
+    nsf-device-system-config-updater
   ];
 
   postPatch = ''

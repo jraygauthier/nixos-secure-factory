@@ -2,7 +2,7 @@
 , lib
 , makeWrapper
 , jq
-, nixos-sf-device-system-config-updater
+, nsf-device-system-config-updater
 , deviceIdentifier
 , deviceSystemConfigDir
 }:
@@ -11,12 +11,12 @@ let
   # TODO: Retrieve this from wrapped package instead.
   systemConfigEtcCfgDirName = "nixos-device-system-config";
 
-  updateBuildAndInstallExe = "${nixos-sf-device-system-config-updater}/bin/nixos-sf-device-system-config-update-build-and-install";
+  updateBuildAndInstallExe = "${nsf-device-system-config-updater}/bin/nsf-device-system-config-update-build-and-install";
 in
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-device-system-config-dir-update";
+  pname = "nsf-device-system-config-dir-update";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -30,7 +30,7 @@ stdenv.mkDerivation rec {
 
   buildInputs = [
     # systemConfigPkg
-    nixos-sf-device-system-config-updater
+    nsf-device-system-config-updater
   ];
 
   installPhase = ''

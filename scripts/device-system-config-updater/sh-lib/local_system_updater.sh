@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-device_system_config_sh_lib_dir="$(pkg-nixos-sf-device-system-config-get-sh-lib-dir)"
+device_system_config_sh_lib_dir="$(pkg-nsf-device-system-config-get-sh-lib-dir)"
 # shellcheck source=device_system_config.sh
 . "$device_system_config_sh_lib_dir/device_system_config.sh"
 
@@ -17,7 +17,7 @@ _get_sys_update_yaml_defaults_cfg_path() {
     return 0
   fi
 
-  local out_cfg_file="/etc/nixos-sf-device-system-config-updater/config-defaults.yaml"
+  local out_cfg_file="/etc/nsf-device-system-config-updater/config-defaults.yaml"
   if ! [[ -f "$out_cfg_file" ]]; then
     1>&2 echo "ERROR: _get_sys_update_yaml_defaults_cfg_path: "
     1>&2 echo "  mandatory system update yaml cfg file does not exists at: '$out_cfg_file'."
@@ -34,7 +34,7 @@ _get_sys_update_yaml_cfg_path() {
     return 0
   fi
 
-  local out_cfg_file="/etc/nixos-sf-device-system-config-updater/config.yaml"
+  local out_cfg_file="/etc/nsf-device-system-config-updater/config.yaml"
   if ! [[ -f "$out_cfg_file" ]]; then
     return 1
   fi

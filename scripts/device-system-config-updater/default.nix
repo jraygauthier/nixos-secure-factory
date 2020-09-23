@@ -1,6 +1,6 @@
 { stdenv
 , makeWrapper
-, nixos-sf-device-system-config
+, nsf-device-system-config
 , coreutils
 , gnugrep
 , nix-prefetch-git
@@ -15,7 +15,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-device-system-config-updater";
+  pname = "nsf-device-system-config-updater";
   name = "${pname}-${version}";
 
   src = ./.;
@@ -29,7 +29,7 @@ stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    nixos-sf-device-system-config
+    nsf-device-system-config
     coreutils
     gnugrep
     nix-prefetch-git

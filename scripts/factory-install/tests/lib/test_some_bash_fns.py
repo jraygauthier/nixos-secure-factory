@@ -20,7 +20,7 @@ def _get_fi_sh_lib_dir():
 
 def _get_cfi_sh_lib_dir():
     return sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-sf-factory-common-install-get-sh-lib-dir"))
+        "pkg-nsf-factory-common-install-get-sh-lib-dir"))
 
 
 def _get_fi_sh_module_path(name):
@@ -33,7 +33,7 @@ def _get_cfi_sh_module_path(name):
 
 def test_get_factory_common_install_sh_lib_dir():
     fci_sh_lib_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-sf-factory-common-install-get-sh-lib-dir")
+        "pkg-nsf-factory-common-install-get-sh-lib-dir")
     )
     LOGGER.info("fci_sh_lib_dir: %s", fci_sh_lib_dir)
     assert os.path.exists(fci_sh_lib_dir)

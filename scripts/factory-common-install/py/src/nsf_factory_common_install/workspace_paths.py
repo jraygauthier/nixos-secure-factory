@@ -7,7 +7,7 @@ from .sh_process import collect_process_stdout
 
 def get_nsf_workspace_dir_path() -> Path:
     ws_dir = collect_process_stdout(
-        "pkg-nixos-sf-factory-common-install-get-workspace-dir")
+        "pkg-nsf-factory-common-install-get-workspace-dir")
     assert ws_dir.exists()
     return ws_dir
 

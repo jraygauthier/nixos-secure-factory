@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-device_system_config_updater_sh_lib_dir="$(pkg-nixos-sf-device-system-config-updater-get-sh-lib-dir)"
+device_system_config_updater_sh_lib_dir="$(pkg-nsf-device-system-config-updater-get-sh-lib-dir)"
 # shellcheck source=local_system_updater.sh
 . "$device_system_config_updater_sh_lib_dir/local_system_updater.sh"
 
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
 # shellcheck source=SCRIPTDIR/../sh-lib/app_current_device_config.sh
 . "$common_factory_install_sh_lib_dir/app_current_device_config.sh"
 
@@ -49,15 +49,15 @@ _run_device_cmd_as_user_w_tty_w_args() {
 
 
 update_device_system_cli() {
-  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update" "$@"
+  _run_device_cmd_as_user_w_tty_w_args "root" "nsf-device-system-config-update" "$@"
 }
 
 update_device_system_now_cli() {
-  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update-now" "$@"
+  _run_device_cmd_as_user_w_tty_w_args "root" "nsf-device-system-config-update-now" "$@"
 }
 
 update_device_system_fetch_and_build_only() {
-  _run_device_cmd_as_user_w_tty_w_args "root" "nixos-sf-device-system-config-update-fetch-and-build-system-closure-only" "$@"
+  _run_device_cmd_as_user_w_tty_w_args "root" "nsf-device-system-config-update-fetch-and-build-system-closure-only" "$@"
 }
 
 

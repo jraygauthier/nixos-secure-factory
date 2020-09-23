@@ -15,7 +15,7 @@ let
       inherit pkgs;
     }).py-release;
 
-  nixos-sf-factory-common-install-py =
+  nsf-factory-common-install-py =
     sffciPyRelease.default;
 
   pythonPackages = pkgs.python3Packages;
@@ -40,7 +40,7 @@ let
   sfRepoLocalRootDir = repoRootDir;
 
   sfTestLibLocalSrcDir = sfRepoLocalRootDir
-    + "/.nix/pkgs/development/python-modules/nixos-sf-test-lib/src";
+    + "/.nix/pkgs/development/python-modules/nsf-test-lib/src";
 
   sffciPyLocalSrcDir = sfRepoLocalRootDir
     + "/scripts/factory-common-install/py/src";

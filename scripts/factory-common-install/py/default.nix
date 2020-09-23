@@ -7,7 +7,7 @@
 }:
 
 buildPythonPackage rec  {
-  pname = "nixos-sf-factory-common-install-py";
+  pname = "nsf-factory-common-install-py";
   version = "0.0.0";
   src = ./.;
   buildInputs = [];

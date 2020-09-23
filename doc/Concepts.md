@@ -25,7 +25,7 @@ Concepts
     Note that this is not particularly recommanded as it can make the
     configuration heavier in the long run.
 
-    Example at <https://github.com/jraygauthier/nixos-sf-demo-device-secrets>.
+    Example at <https://github.com/jraygauthier/nsf-demo-device-secrets>.
 
  -  *factory install repository*:
 

@@ -6,7 +6,7 @@ PYTHON_BINS = $(shell find ./bin -mindepth 1 -maxdepth 1 -exec file --mime-type 
 SH_BINS = $(shell find ./bin -mindepth 1 -maxdepth 1 -executable -type f -exec file --mime-type {} + \
 	| grep 'text/x-shellscript' | awk -F: '{ print $$1 }')
 SH_MODULES = $(shell find ./sh-lib -type f -name "*.sh")
-SH_DEPS_SRC_PATHS = $(shell pkg-nixos-sf-device-system-config-updater-get-sh-lib-dir):$(shell pkg-nixos-sf-device-system-config-get-sh-lib-dir):$(shell pkg-nixos-sf-common-install-get-sh-lib-dir):$(shell pkg-nixos-sf-common-get-sh-lib-dir)
+SH_DEPS_SRC_PATHS = $(shell pkg-nsf-device-system-config-updater-get-sh-lib-dir):$(shell pkg-nsf-device-system-config-get-sh-lib-dir):$(shell pkg-nsf-common-install-get-sh-lib-dir):$(shell pkg-nsf-common-get-sh-lib-dir)
 
 
 .PHONY: all clean release typechecks tests lint lint-python lint-shell

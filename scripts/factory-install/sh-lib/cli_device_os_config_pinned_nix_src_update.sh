@@ -2,10 +2,10 @@
 nsf_pin_sh_lib_dir="$(pkg-nsf-pin-get-sh-lib-dir)"
 . "$nsf_pin_sh_lib_dir/nix_src_update_helpers.sh"
 
-common_install_sh_lib_dir="$(pkg-nixos-sf-common-install-get-sh-lib-dir)"
+common_install_sh_lib_dir="$(pkg-nsf-common-install-get-sh-lib-dir)"
 . "$common_install_sh_lib_dir/prettyprint.sh"
 
-common_factory_install_sh_lib_dir="$(pkg-nixos-sf-factory-common-install-get-sh-lib-dir)"
+common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-dir)"
 . "$common_factory_install_sh_lib_dir/workspace_paths.sh"
 
 

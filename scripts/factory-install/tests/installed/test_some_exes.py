@@ -15,7 +15,7 @@ def setup_module(module):
 
 def test_get_factory_common_install_sh_lib_dir():
     fci_sh_lib_dir = sanitize_bash_path_out(subprocess.check_output(
-        "pkg-nixos-sf-factory-common-install-get-sh-lib-dir")
+        "pkg-nsf-factory-common-install-get-sh-lib-dir")
     )
     LOGGER.info("fci_sh_lib_dir: %s", fci_sh_lib_dir)
     assert os.path.exists(fci_sh_lib_dir)

@@ -6,7 +6,7 @@
 
 stdenv.mkDerivation rec {
   version = "0.0.0";
-  pname = "nixos-sf-device-system-config";
+  pname = "nsf-device-system-config";
   name = "${pname}-${version}";
 
   src = ./.;

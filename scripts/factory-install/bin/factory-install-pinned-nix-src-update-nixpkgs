@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nixos-sf-factory-install-get-sh-lib-dir")"
+factory_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-factory-install-get-sh-lib-dir")"
 . "$factory_install_sh_lib_dir/cli_factory_install_tools_pinned_nix_src_update.sh"
 update_factory_install_pinned_nix_srcs_nixpkgs_repo_cli "$@"
