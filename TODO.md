@@ -4,9 +4,10 @@ Todo
 Required refactors
 ------------------
 
- -  Move the python shell hook helpers to a separate `nsf-py`
-    project. This will allow these to be used outside of
-    this the sf context.
+ -  Prefix all command with `nsf`.
+
+     -  `device-.+` -> `nsf-device-.+`
+     -  `factory-.+` -> `nsf-factory-.+`
 
  -  `device-liveenv-install-factory-tools` -> should fetch the
     package env from `./release.nix` instead of `./env.nix`. This
