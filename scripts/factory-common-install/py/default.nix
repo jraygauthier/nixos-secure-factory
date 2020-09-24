@@ -31,6 +31,7 @@ buildPythonPackage rec  {
     ${nsfShC.pkg.installClickExesBashCompletion [
       "device-common-ssh-auth-dir"
       "device-ssh-auth-dir"
+      "device-state"
     ]}
   '';
 }

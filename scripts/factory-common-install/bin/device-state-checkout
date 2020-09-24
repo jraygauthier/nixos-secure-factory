@@ -1,5 +1,0 @@
-#!/usr/bin/env python
-from nsf_factory_common_install.cli_device_state import run_cli_checkout
-
-if __name__ == "__main__":
-    run_cli_checkout()

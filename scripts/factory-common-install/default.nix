@@ -131,7 +131,6 @@ stdenv.mkDerivation rec {
     PATH="${bashInteractive}/bin:$PATH" patchShebangs "$out"
 
     ${nsfShC.pkg.installClickExesBashCompletion [
-      "device-state-checkout"
     ]}
   '';
 

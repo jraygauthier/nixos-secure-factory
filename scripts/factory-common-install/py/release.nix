@@ -69,7 +69,19 @@ let
       ${nsfShC.shell.loadClickExesBashCompletion [
         "device-common-ssh-auth-dir"
         "device-ssh-auth-dir"
+        "device-state"
       ]}
+
+      # Make the package environement variable available from within the python
+      # package nix shell environment as well.
+      shell_parent_dir="${toString ../.}"
+      test -e "$shell_parent_dir/env.sh" || die "Cannot find expected '$shell_parent_dir/env.sh'!"
+
+      export "PKG_NSF_FACTORY_COMMON_INSTALL_PACKAGE_ROOT_DIR=$shell_parent_dir"
+      . "$shell_parent_dir/env.sh"
+
+      export PKG_NSF_FACTORY_COMMON_INSTALL_IN_BUILD_ENV=1
+      export PKG_NSF_FACTORY_COMMON_INSTALL_IN_ENV=1
 
       source ${shellHookLib}
       nsf_py_set_interpreter_env_from_path

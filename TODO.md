@@ -4,10 +4,13 @@ Todo
 Required refactors
 ------------------
 
- -  Prefix all command with `nsf`.
+ -  Prefix all commands with `nsf`.
 
      -  `device-.+` -> `nsf-device-.+`
      -  `factory-.+` -> `nsf-factory-.+`
+
+    Note, some commands are defined as scripts under the `bin` folder.
+    Other commands (python) via the `*/py/setup.cfg` file.
 
  -  `device-liveenv-install-factory-tools` -> should fetch the
     package env from `./release.nix` instead of `./env.nix`. This

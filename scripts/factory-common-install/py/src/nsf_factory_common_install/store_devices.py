@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from itertools import islice, chain
 
-from .repo_device_cfg import get_device_cfg_paths
+from .repo_device_cfg import get_device_cfg_repo_paths
 
 
 def list_available_device_ids() -> List[str]:
-    root_dir = get_device_cfg_paths().instance_set_dir
+    root_dir = get_device_cfg_repo_paths().instance_set_dir
     out = list(chain.from_iterable(x[1] for x in islice(os.walk(root_dir), 0, 1)))
     return out
 
@@ -26,12 +26,8 @@ def match_device_id(
     return [x for x in available_devices if search_str in x]
 
 
-def list_ac_available_device_ids(ctx, args, incomplete: str) -> List[str]:
-    return match_device_id(incomplete)
-
-
 def get_device_specific_cfg_dir_path(device_id: str) -> Path:
-    return get_device_cfg_paths().instance_set_dir.joinpath(device_id)
+    return get_device_cfg_repo_paths().instance_set_dir.joinpath(device_id)
 
 
 def ensure_specific_device_cfg_dir_path(device_id: str) -> Path:
@@ -41,7 +37,7 @@ def ensure_specific_device_cfg_dir_path(device_id: str) -> Path:
 
 
 def get_device_info_json_cfg_path(device_id: str) -> Path:
-    return get_device_cfg_paths().instance_set_dir.joinpath(device_id, "device.json")
+    return get_device_cfg_repo_paths().instance_set_dir.joinpath(device_id, "device.json")
 
 
 def load_device_info_from_store_cfg_plain(device_id: str) -> Dict[str, Any]:

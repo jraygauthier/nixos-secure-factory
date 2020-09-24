@@ -6,7 +6,7 @@ from .workspace_paths import (
     get_nsf_workspace_dir_path,
 )
 
-from .file_device_info import load_device_id_from_device_info_yaml_file
+from .file_device_info import load_device_id_from_device_info_file
 from .store_devices import get_device_specific_cfg_dir_path
 
 
@@ -27,7 +27,7 @@ def dump_to_current_device_info_ws_yaml_store(
 
 
 def get_current_device_id() -> str:
-    return load_device_id_from_device_info_yaml_file(
+    return load_device_id_from_device_info_file(
         get_current_device_info_ws_yaml_store_filename())
 
 
