@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
+#
+# **IMPORTANT**: Always keep in sync with:
+# '../py/src/nsf_factory_common_install/workspace_paths.py'
+#
+
 if test -z ${PKG_NSF_FACTORY_COMMON_INSTALL_WORKSPACE_DIR+x}; then
   script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
   user_home_ws_dir="$HOME/.nixos-secure-factory"

@@ -63,6 +63,48 @@ Required refactors
 Exploring some ideas
 --------------------
 
+ -  Instead of accepting the pkgs implicitly if it has all of the
+    required internal overlay packages nominally, we should instead require that
+    our user provide additionnal attributes so that the intention
+    of providing the whole internal overlay is made explicit.
+
+    By default if the following is not set, we should implicitly add our internal overlay
+    with well known pin:
+
+    ```nix
+    nix-pin-config.overlay.nixos-secure-factory-internal.provider = "nixos-secure-factory-internal";
+    ```
+
+    This is the principle of least surprise in action. However, there are 2 side effects to this:
+
+     1. Performance degradation as we're adding a new overlay.
+     2. Local sources as specified by user repo / flake won't be used for internal packages which
+        can lead to some surprises, in particular when our public interface changes due to some
+        common / indirect dependencies.
+
+    As part of the provided pkgs set:
+
+    ```nix
+    nix-pin-config.overlay.nixos-secure-factory-internal.provider = "custom-factory-internal";
+    ```
+
+    By telling so, the user of our repo / flake is telling us that he intends on controlling
+    the whole of our internal dependencies.
+
+    Once user does that, we should fail if any missing package instead of
+    silently using the internal overlay pins.
+
+    Also, a stack of provided overlay should be kept for debugging purposes (first
+    being the top of the stack):
+
+    ```nix
+    nix-pin-config.overlay-stack = [
+        "nixos-secure-factory-internal"
+        "custom-factory-internal"
+        "custom-factory-internal-internal"
+    ]
+    ```
+
  -  See if we can reuse the [nix-deploy] tool.
 
  -  A way to extend some of the executables.

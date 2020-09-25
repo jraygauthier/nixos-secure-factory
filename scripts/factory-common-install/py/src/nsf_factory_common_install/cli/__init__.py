@@ -11,3 +11,8 @@ def run_cli_device_ssh_auth() -> None:
 def run_cli_device_state() -> None:
     from .device_state import run_cli
     run_cli()
+
+
+def run_cli_device_current_state() -> None:
+    from .device_current_state import run_cli
+    run_cli()

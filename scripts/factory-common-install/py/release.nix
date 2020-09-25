@@ -70,7 +70,14 @@ let
         "device-common-ssh-auth-dir"
         "device-ssh-auth-dir"
         "device-state"
+        "device-current-state"
       ]}
+
+      source ${shellHookLib}
+      nsf_py_set_interpreter_env_from_path
+
+      sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
+      sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
 
       # Make the package environement variable available from within the python
       # package nix shell environment as well.
@@ -82,12 +89,6 @@ let
 
       export PKG_NSF_FACTORY_COMMON_INSTALL_IN_BUILD_ENV=1
       export PKG_NSF_FACTORY_COMMON_INSTALL_IN_ENV=1
-
-      source ${shellHookLib}
-      nsf_py_set_interpreter_env_from_path
-
-      sh_hook_py_add_local_pkg_src_nixos_sf_test_lib
-      sh_hook_py_add_local_pkg_src_nixos_sf_ssh_auth_cli
     '';
   });
 in

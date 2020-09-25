@@ -32,6 +32,7 @@ buildPythonPackage rec  {
       "device-common-ssh-auth-dir"
       "device-ssh-auth-dir"
       "device-state"
+      "device-current-state"
     ]}
   '';
 }
