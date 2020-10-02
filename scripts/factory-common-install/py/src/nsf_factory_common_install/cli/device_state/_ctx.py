@@ -4,19 +4,24 @@ from typing import Any, Dict, Iterable, Optional
 
 import click
 
+from nsf_factory_common_install.click.ctx_dict import (
+    init_ctx_dict_instance,
+    mk_ctx_dict_pass_decorator,
+)
 from nsf_factory_common_install.file_device_state import DeviceStateFile
 from nsf_factory_common_install.repo_device_cfg import (
     DeviceCfgRepo,
     DeviceCfgRepoInstance,
 )
 
-from ..click import mk_ctx_dict_pass_decorator
 from .._ctx import (
     CliCtxDbBase,
-    CliCtxDbWDeviceList,
-    CliCtxDbDeviceInstance,
     get_cli_ctx_db_base,
     mk_cli_db_obj_d,
+)
+from .._ctx_device_list import (
+    CliCtxDbWDeviceList,
+    CliCtxDbDeviceInstance
 )
 
 
@@ -81,7 +86,7 @@ def get_cli_ctx_db(ctx: click.Context) -> CliCtxDbInterface:
 
 @dataclass
 class CliCtx:
-    KEY = "device_state"
+    KEY = "nsf_factory_intsall_device_state_cli"
 
     db: CliCtxDbInterface
 
@@ -130,10 +135,7 @@ def init_cli_ctx(
         checkout_target_file
     )
 
-    assert isinstance(ctx.obj, dict), (
-        f"Found instead: '{type(ctx.obj).__name__}'.")
-
-    ctx.obj[CliCtx.KEY] = init_ctx
+    init_ctx_dict_instance(ctx, CliCtx.KEY, init_ctx)
     return init_ctx
 
 

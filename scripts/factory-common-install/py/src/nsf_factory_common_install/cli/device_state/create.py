@@ -1,6 +1,6 @@
 import click
 
-from nsf_factory_common_install.cli.click import CliError
+from nsf_factory_common_install.click.error import CliError
 from nsf_factory_common_install.file_device_state import (
     DeviceStateFileError,
     DeviceStatePlainT,

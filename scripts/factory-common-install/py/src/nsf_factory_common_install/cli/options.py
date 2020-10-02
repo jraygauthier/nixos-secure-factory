@@ -12,9 +12,9 @@ from nsf_factory_common_install.repo_project import (
     ProjectRepoDevice
 )
 from nsf_factory_common_install.types_factory import FactoryMissingFieldsError
+from nsf_factory_common_install.click.error import CliError
 
 from ._auto_complete import list_ac_available_device_ids
-from .click import CliError
 
 
 def cli_default_user_option() -> Any:

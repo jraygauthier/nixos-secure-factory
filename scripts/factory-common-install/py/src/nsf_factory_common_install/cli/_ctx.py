@@ -1,23 +1,17 @@
+from abc import ABC
+from typing import Any, Callable, Dict, Optional
+
 import click
-from abc import ABC, abstractmethod
-from typing import Iterable, Dict, Any, Callable
 
-from ..types_device import DeviceInstanceWIdWTypeWStateWStateFile
-from .click import find_mandatory_ctx_dict_instance
-
-
-CliCtxDbDeviceInstance = DeviceInstanceWIdWTypeWStateWStateFile
+from nsf_factory_common_install.click.ctx_dict import (
+    find_mandatory_ctx_dict_instance,
+    mk_ctx_dict_obj,
+)
 
 
 class CliCtxDbBase(ABC):
     KEY = "nsf_factory_intsall_cli_db"
     MkFnT = Callable[[click.Context], 'CliCtxDbBase']
-
-
-class CliCtxDbWDeviceList(CliCtxDbBase):
-    @abstractmethod
-    def list_device_instances(self) -> Iterable[CliCtxDbDeviceInstance]:
-        pass
 
 
 class _CliCtxLazyDb:
@@ -33,31 +27,22 @@ class _CliCtxLazyDb:
         return instance
 
 
-def mk_cli_db_obj_d(mk_db: CliCtxDbBase.MkFnT) -> Dict[str, Any]:
-    return {
-        CliCtxDbBase.KEY: _CliCtxLazyDb(mk_db)
-    }
+def mk_cli_db_obj_d(
+        mk_db: CliCtxDbBase.MkFnT, db_key: Optional[str] = None
+) -> Dict[str, Any]:
+    if db_key is None:
+        db_key = CliCtxDbBase.KEY
+
+    return mk_ctx_dict_obj({
+        db_key: _CliCtxLazyDb(mk_db)
+    })
 
 
-def get_cli_ctx_db_base(ctx: click.Context) -> CliCtxDbBase:
-    assert isinstance(ctx.obj, dict), (
-        "Expected 'obj' of 'dict' type. "
-        f"Found instead: '{type(ctx.obj).__name__}'."
-    )
+def get_cli_ctx_db_base(
+        ctx: click.Context, db_key: Optional[str] = None
+) -> CliCtxDbBase:
+    if db_key is None:
+        db_key = CliCtxDbBase.KEY
 
-    key = CliCtxDbBase.KEY
-    instance_type = _CliCtxLazyDb
-
-    lazy_db = find_mandatory_ctx_dict_instance(ctx, key, instance_type)
-    assert isinstance(lazy_db, instance_type), (
-        f"Expected instance of type '{instance_type}' at key '{key}'. "
-        f"Found instead: '{type(lazy_db).__name__}'."
-    )
-
+    lazy_db = find_mandatory_ctx_dict_instance(ctx, db_key, _CliCtxLazyDb)
     return lazy_db(ctx)
-
-
-def get_cli_ctx_db_w_device_list(ctx: click.Context) -> CliCtxDbWDeviceList:
-    out = get_cli_ctx_db_base(ctx)
-    assert isinstance(out, CliCtxDbWDeviceList)
-    return out

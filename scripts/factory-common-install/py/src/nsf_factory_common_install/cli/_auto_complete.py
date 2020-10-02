@@ -1,7 +1,7 @@
 """A set of commonly used click autocompletion helpers."""
 from typing import List, Any
 from ._device_set import match_device_by_id
-from ._ctx import get_cli_ctx_db_w_device_list
+from ._ctx_device_list import get_cli_ctx_db_w_device_list
 
 
 def list_ac_available_device_ids(

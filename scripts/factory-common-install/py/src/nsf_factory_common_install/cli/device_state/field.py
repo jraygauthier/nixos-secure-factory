@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from typing import List
 
 import click
 import yaml
@@ -7,12 +8,12 @@ import yaml
 from nsf_factory_common_install.file_device_state import (
     DeviceStateFileAccessError, DeviceStatePlainT)
 
-from ..click import CliError
+from nsf_factory_common_install.click.error import CliError
 from ._ctx import CliCtx, pass_cli_ctx
 from ._field_ac import (list_ac_editable_field_names, list_ac_field_values,
                         list_ac_readable_field_names,
                         list_ac_removable_field_names)
-from ._fields_schema import get_field_schema
+from ._fields_schema import get_field_schema, FieldValueInvalidError
 
 
 @click.group()
@@ -60,12 +61,13 @@ def _confirm_create_missing_state_file(filename: Path) -> bool:
 )
 @click.argument(  # type: ignore
     "field-value",
+    nargs=-1,
     autocompletion=list_ac_field_values
 )
 @pass_cli_ctx
 def _set(
         ctx: CliCtx,
-        field_name: str, field_value: str,
+        field_name: str, field_value: List[str],
         prompt_auto_yes: bool,
         prompt_auto_yes_create_field: bool
 ) -> None:
@@ -92,12 +94,17 @@ def _set(
         target_file.filename.parent.mkdir(exist_ok=True, parents=True)
         target_file.filename.touch()
 
-    sanitized_value = get_field_schema(field_name).sanitize(ctx.db, field_value)
+    try:
+        sanitized_value = get_field_schema(field_name).sanitize(ctx.db, field_value)
+    except FieldValueInvalidError as e:
+        raise CliError(
+            "Invalid value specified for field "
+            f"'{field_name}': {str(e)}") from e
 
     try:
         state_d[field_name] = sanitized_value
-    except KeyError:
-        raise CliError(f"Cannot find field '{field_name}'")
+    except KeyError as e:
+        raise CliError(f"Cannot find field '{field_name}'") from e
 
     try:
         ctx.rw_target_file.dump_plain(state_d)

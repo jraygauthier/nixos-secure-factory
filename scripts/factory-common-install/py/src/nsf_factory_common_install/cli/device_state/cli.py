@@ -40,7 +40,7 @@ class CliCtxDb(CliCtxDbInterface):
         # TODO: request the nsf-ssh-auth lib for this information instead.
         try:
             yield from (
-                d.name for d in self.project.device_cfg.ssh_auth.dir.joinpath(
+                d.stem for d in self.project.device_cfg.ssh_auth.dir.joinpath(
                     "authorized-on").iterdir())
         except FileNotFoundError:
             pass
