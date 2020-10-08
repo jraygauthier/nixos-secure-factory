@@ -120,23 +120,33 @@ def _set(
 @pass_cli_ctx
 def _get(ctx: CliCtx, field_name: str) -> None:
     try:
-        out_str = ctx.rw_target_file.load_plain()[field_name]
+        out_field = ctx.rw_target_file.load_plain()[field_name]
     except KeyError:
-        out_str = "null"
-        click.echo("null")
+        # click.echo("null")
         raise CliError(f"Cannot find field '{field_name}'")
     except DeviceStateFileAccessError as e:
         raise CliError(str(e)) from e
 
-    if out_str is None:
-        out_str = "null"
+    out_lines = []
 
-    if not isinstance(out_str, str):
+    if out_field is None:
+        out_lines = ["null"]
+    elif isinstance(out_field, list):
+        out_lines = out_field
+    elif isinstance(out_field, str):
+        out_lines = [out_field]
+    else:
         raise CliError(
             "Not a field. Please be more specific:\n"
-            f"{yaml.safe_dump(out_str, sort_keys=False)}")
+            f"{yaml.safe_dump(out_field, sort_keys=False)}")
 
-    click.echo(out_str)
+    for out_ln in out_lines:
+        if not isinstance(out_ln, str):
+            raise CliError(
+                "Not a field. Please be more specific:\n"
+                f"{yaml.safe_dump(out_ln, sort_keys=False)}")
+
+        click.echo(out_ln)
 
 
 # TODO: Consider allowing rm multiple fields at a time.
