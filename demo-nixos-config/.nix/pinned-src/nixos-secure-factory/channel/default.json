@@ -2,7 +2,7 @@
   "type": "fetchFromGitHub",
   "owner": "jraygauthier",
   "repo": "nixos-secure-factory",
-  "ref": "master",
-  "rev": "7359f2d2c6a0e24e3afbd04db0143b35d0388d49",
-  "sha256": "1blw6wx9z8rni3x1dnl00x5rli4zgj77y8b5675qz1g64xjjjkp2"
+  "ref": "release/v0.1.x",
+  "rev": "7a6016e2d4eb77704ce726d6f2ce316a8438fcaf",
+  "sha256": "0bxrjdwmwfj7a66745nfwrik1x08dc7mzwfsgj8m4i8jkzdhpmn4"
 }

@@ -1,4 +1,4 @@
 type: fetchFromGitHub
 owner: jraygauthier
 repo: nsf-py
-ref: master
+ref: release/v0.1.x
