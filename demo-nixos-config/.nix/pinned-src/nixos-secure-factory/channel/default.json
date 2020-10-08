@@ -3,6 +3,6 @@
   "owner": "jraygauthier",
   "repo": "nixos-secure-factory",
   "ref": "release/v0.1.x",
-  "rev": "7a6016e2d4eb77704ce726d6f2ce316a8438fcaf",
-  "sha256": "0bxrjdwmwfj7a66745nfwrik1x08dc7mzwfsgj8m4i8jkzdhpmn4"
+  "rev": "ddaf08ab09234309c2c326d7fe82ac5ef07557c8",
+  "sha256": "05lryhrmyrqxmrz3x259ylfl1f8q7w6xybnf4hrnwzz516x8si9n"
 }
