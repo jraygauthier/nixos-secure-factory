@@ -85,7 +85,7 @@ rec {
     else
       builtins.mapAttrs (k: v: v.default) srcs.localOrPinned;
 
-  nixpkgs = <nixpkgs>;
+  nixpkgs = pickedSrcs.nixpkgs.src;
 
   # This repo's overlay.
   overlay = self: super:
