@@ -24,7 +24,7 @@ pythonInterpreter = python3.withPackages (pp: pythonPkgs);
 in
 
 stdenv.mkDerivation rec {
-  version = "0.0.0";
+  version = "0.1.0";
   pname = "nsf-factory-install";
   name = "${pname}-${version}";
 

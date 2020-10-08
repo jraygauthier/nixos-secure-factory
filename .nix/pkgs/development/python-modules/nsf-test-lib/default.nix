@@ -10,7 +10,7 @@
 
 buildPythonPackage rec  {
   pname = "nsf-test-lib";
-  version = "0.0.0";
+  version = "0.1.0";
   src = nix-gitignore.gitignoreSourcePure [
     ../../../../../.gitignore
     ''

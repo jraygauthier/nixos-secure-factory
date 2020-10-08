@@ -12,7 +12,7 @@
 
 buildPythonPackage rec  {
   pname = "nsf-factory-install-py";
-  version = "0.0.0";
+  version = "0.1.0";
   src = ./.;
   buildInputs = [];
   checkInputs = [

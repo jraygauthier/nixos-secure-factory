@@ -175,7 +175,7 @@ in
           builtins.toJSON systemUpdaterDefaults);
 
         systemUpdaterConfigDefaults = pkgs.stdenv.mkDerivation rec {
-          version = "0.0.0";
+          version = "0.1.0";
           pname = "nsf-device-system-config-updater-config-defaults";
           name = "${pname}-${version}";
 
