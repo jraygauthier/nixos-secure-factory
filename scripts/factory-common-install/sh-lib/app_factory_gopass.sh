@@ -38,8 +38,18 @@ deauthorize_gpg_id_from_gopass_store() {
     { error_code="$?"; }
 
   if [[ "0" -eq "$error_code" ]] && echo "$error_msg" | grep -q "Starting rencrypt"; then
-    echo "Secrets in substore '$store_path' re-encryted to take into account that '$gpg_id' is now deauthorized."
-    return 0
+    # Detect errors conditions that are not reported by gopass and only found in stderr / stdout.
+    if echo "$error_msg" | grep -q "Failed to encrypt" || echo "$error_msg" | grep -q "Failed to write"; then
+      1>&2 echo "ERROR('$error_code'): There was a problem deauthorizing '$gpg_id' as recipient to substore: '$store_path'."
+      1>&2 echo " -> $error_msg"
+      1>&2 echo " -> TIP: Some of the key listed in this substore '.gpg-id' are **probably expired**."
+      1>&2 echo " -> You should clean these up."
+      1>&2 echo " -> ERROR output end. See above for details and tips."
+      return 1
+    else
+      echo "Secrets in substore '$store_path' re-encryted to take into account that '$gpg_id' is now deauthorized."
+      return 0
+    fi
   elif [[ "17" -eq "$error_code" ]] && echo "$error_msg" | grep -q "recipient not in stor"; then
     echo "Nothing to do, '$gpg_id' was already **not** authorized to '$store_path'."
     # echo " -> $error_msg"
@@ -77,8 +87,20 @@ authorize_gpg_id_to_gopass_store() {
     { error_code="$?"; }
 
   if [[ "0" -eq "$error_code" ]] && echo "$error_msg" | grep -q "Reencrypting existing secrets"; then
-    echo "Secrets in substore '$store_path' re-encryted for '$gpg_id'."
-    return 0
+    # Detect errors conditions that are not reported by gopass and only found in stderr / stdout.
+    if echo "$error_msg" | grep -q "Failed to encrypt" || echo "$error_msg" | grep -q "Failed to write"; then
+      1>&2 echo "ERROR('$error_code'): There was a problem authorizing '$gpg_id' as recipient to substore: '$store_path'."
+      1>&2 echo " -> $error_msg"
+      1>&2 echo " -> TIP: Some of the key listed in this substore '.gpg-id' are **probably expired**."
+      1>&2 echo " -> You should clean these up."
+      1>&2 echo " -> TIP: The user is not really deauthorized as **wrongly** reported by gopass."
+      1>&2 echo "    You will have to deauthorize it to remove dangling entry in '.gpg-id' and start again"
+      1>&2 echo " -> ERROR output end. See above for details and tips."
+      return 1
+    else
+      echo "Secrets in substore '$store_path' re-encryted for '$gpg_id'."
+      return 0
+    fi
   elif [[ "17" -eq "$error_code" ]] && echo "$error_msg" | grep -q "Recipient already in store"; then
     echo "Nothing to do, '$gpg_id' already authorized to '$store_path'."
     # echo " -> $error_msg"
@@ -90,6 +112,7 @@ authorize_gpg_id_to_gopass_store() {
   elif ! [[ "0" -eq "$error_code" ]]; then
     1>&2 echo "ERROR('$error_code'): There was a problem authorizing '$gpg_id' as recipient to substore: '$store_path'."
     1>&2 echo " -> $error_msg"
+    1>&2 echo " -> ERROR output end. See above for details."
     return 1
   fi
 
