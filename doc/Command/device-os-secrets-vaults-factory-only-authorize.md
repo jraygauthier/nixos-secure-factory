@@ -32,4 +32,4 @@ Impacted files (under both targeted stores / repositories):
 
 ## See also
 
- -  [factory-gpg](./factory-gpg)
+ -  [factory-gpg](./factory-gpg.md)
