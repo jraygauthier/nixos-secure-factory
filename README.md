@@ -27,6 +27,10 @@ Usage
 
 See [initial setup](./doc/InitialSetup.md) page.
 
+## Commands
+
+See [provided commands documentation](./doc/Commands.md).
+
 
 Concepts
 --------

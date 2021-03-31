@@ -1,58 +1,25 @@
 Commands
 ========
 
- -  `device-os-secrets-create`
+ -  [`device-os-secrets-create`](./Command/device-os-secrets-create.md)
 
-    EnvVars:
 
-     -  `NSF_DEVICE_ROOT_USER_GPG_DEFAULT_EXPIRE_DATE`
+ -  [`factory-gpg`](./Command/factory-gpg.md)
+ -  [`factory-gpg-create-identity`](./Command/factory-gpg-create-identity.md)
 
-        The "default* value that will be used when creating a device
-        root user's gpg identity.
+ -  [`factory-secrets-vaults-authorize`](./Command/factory-secrets-vaults-authorize.md)
+ -  [`factory-secrets-vaults-deauthorize`](./Command/factory-secrets-vaults-deauthorize.md)
+ -  [`factory-secrets-vaults-list-authorized`](./Command/factory-secrets-vaults-list-authorized.md)
 
-        One of: {"0", "\<n\>", "\<n\>w", "\<n\>m", "\<n\>y"}
 
-        When unspecified, static default will be "1y".
+ -  [`device-os-secrets-vault-authorize`](./Command/device-os-secrets-vault-authorize.md)
+ -  [`device-os-secrets-vault-deauthorize`](./Command/device-os-secrets-vault-deauthorize.md)
+ -  [`device-os-secrets-vault-list-authorized`](./Command/device-os-secrets-vault-list-authorized.md)
 
-     -  `NSF_DEVICE_ROOT_USER_GPG_EXPIRE_DATE`
 
-        The value that will be used when creating a device
-        root user's gpg identity.
-
-        Has priority over `NSF_DEVICE_ROOT_USER_GPG_DEFAULT_EXPIRE_DATE`.
-
- -  `factory-gpg-create-identity`
-
-    Settings:
-
-     -  `.factory-info.yaml`
-
-         -  `user.gpg.default-expire-date`
-
-            One of: {"0", "\<n\>", "\<n\>w", "\<n\>m", "\<n\>y"}
-
-            When unspecified via one of the above mean), user will
-            be prompted for a value by the command unless below
-            `NSF_FACTORY_USER_GPG_DEFAULT_EXPIRE_DATE` is provided.
-
-    EnvVars:
-
-     -  `NSF_FACTORY_USER_GPG_DEFAULT_EXPIRE_DATE`
-
-        The *default* value that will be used when creating the
-        current factory user's gpg identity in case
-        `.factory-info.yaml` does not specify it via the
-        `user.gpg.default-expire-date` field.
-
-        One of: {"0", "\<n\>", "\<n\>w", "\<n\>m", "\<n\>y"}
-
-        When unspecified via one of the above mean), user will
-        be prompted for a value by the command.
-
-     -  `NSF_FACTORY_USER_GPG_EXPIRE_DATE`
-
-        The value that will be used when creating the current factory user's
-        gpg identity.
-
-        Has priority over `NSF_FACTORY_USER_GPG_DEFAULT_EXPIRE_DATE`
-        and `.factory-info.yaml::user.gpg.default-expire-date`.
+ -  [`device-os-secrets-vaults-factory-only-authorize`
+    ](./Command/device-os-secrets-vaults-factory-only-authorize.md)
+ -  [`device-os-secrets-vaults-factory-only-deauthorize`
+    ](./Command/device-os-secrets-vaults-factory-only-deauthorize.md)
+ -  [`device-os-secrets-vaults-factory-only-list-authorized`
+    ](./Command/device-os-secrets-vaults-factory-only-list-authorized.md)
