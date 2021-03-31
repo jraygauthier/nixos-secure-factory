@@ -134,8 +134,17 @@ get_factory_info__user_email() {
 }
 
 
+get_factory_info__user_gpg_default_expire_date() {
+  # local default_expire_in="${NSF_FACTORY_USER_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+  local default_expire_in="${NSF_FACTORY_USER_GPG_DEFAULT_EXPIRE_DATE:-""}"
+  get_value_from_factory_info_yaml_or_if_null_then_replace_with \
+    '.user.gpg."default-expire-date"' "$default_expire_in"
+}
+
+
 get_factory_info__user_gpg_default_id() {
-  get_value_from_factory_info_yaml_or_if_null_then_replace_with '.user.gpg."default-id"' ""
+  get_value_from_factory_info_yaml_or_if_null_then_replace_with \
+    '.user.gpg."default-id"' ""
 }
 
 
@@ -206,6 +215,15 @@ prompt_for_factory_info_mandatory__user_email() {
   echo -e "\"user_email\" \u2208 \`${value_re}\`: The factory user's email address (e.g.: ebedard@mydomain.com)."
   # TODO: Autocompletion with gpg public id email if any.
   prompt_for_mandatory_parameter_loop "$1" "user_email" "$value_re"
+}
+
+
+prompt_for_factory_info_mandatory__user_gpg_default_expire_date() {
+  local value_re
+  value_re="$(get_gpg_expire_date_regexpr)"
+  echo -e "\"user_gpg_default_expire_date\" \u2208 \`${value_re}\`: The factory user's gpg key expiration date (e.g.: 0, <n>, <n>w, <n>m, <n>y)."
+  # TODO: Autocompletion with available gpg id and current email if any.
+  prompt_for_mandatory_parameter_loop "$1" "user_gpg_default_expire_date" "$value_re"
 }
 
 
@@ -281,6 +299,11 @@ read_or_prompt_for_factory_info__user_email() {
 }
 
 
+read_or_prompt_for_factory_info__user_gpg_default_expire_date() {
+  read_or_prompt_for_factory_info__x "$1" "user_gpg_default_expire_date"
+}
+
+
 read_or_prompt_for_factory_info__user_gpg_default_id() {
   read_or_prompt_for_factory_info__x "$1" "user_gpg_default_id"
 }
@@ -296,6 +319,7 @@ init_factory_state() {
 user_id
 user_full_name
 user_email
+user_gpg_default_expire_date
 user_gpg_default_id
 device_defaults_email_domain
 gopass_factory_only_vault_repo_name
@@ -306,6 +330,7 @@ EOF
   local user_id
   local user_full_name
   local user_email
+  local user_gpg_default_expire_date
   local user_gpg_default_id
   local device_defaults_email_domain
   local gopass_factory_only_vault_repo_name
@@ -325,6 +350,7 @@ EOF
 .user.id = \$user_id | \
 .user."full-name" = \$user_full_name | \
 .user.email = \$user_email | \
+.user.gpg."default-expire-date" = \$user_gpg_default_expire_date | \
 .user.gpg."default-id" = \$user_gpg_default_id | \
 .gopass."factory-only-vault".id = \$gopass_factory_only_vault_id | \
 .gopass."factory-only-vault"."repo-name" = \$gopass_factory_only_vault_repo_name | \
@@ -339,6 +365,7 @@ EOF
     --arg user_id "$user_id" \
     --arg user_full_name "$user_full_name" \
     --arg user_email "$user_email" \
+    --arg user_gpg_default_expire_date "$user_gpg_default_expire_date" \
     --arg user_gpg_default_id "$user_gpg_default_id" \
     --arg gopass_factory_only_vault_id "$gopass_factory_only_vault_id" \
     --arg gopass_factory_only_vault_repo_name "$gopass_factory_only_vault_repo_name" \

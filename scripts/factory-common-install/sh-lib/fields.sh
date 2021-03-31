@@ -31,3 +31,8 @@ get_file_basename_regexpr() {
 get_gpg_id_or_email_regexpr() {
   get_email_address_regexpr
 }
+
+
+get_gpg_expire_date_regexpr() {
+  echo "^[0-9]+[wmy]?$"
+}
