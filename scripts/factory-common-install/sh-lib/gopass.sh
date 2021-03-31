@@ -117,7 +117,12 @@ _list_authorized_pub_key_files_from_authorized_gpg_ids_and_public_key_files() {
     fi
   done < <(echo "$pubkey_files")
 
-  printf "%s\n" "${auth_gpg_ids_a[@]}"
+  for pk in "${auth_gpg_ids_a[@]}"; do
+    if [[ "$pk" == "null" ]]; then
+      continue
+    fi
+    printf "%s\n" "$pk"
+  done
 }
 
 
