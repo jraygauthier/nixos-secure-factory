@@ -68,4 +68,4 @@ Impacted files under each targeted vault repository:
 
 ## See also
 
- -  [factory-gpg](./factory-gpg)
+ -  [factory-gpg](./factory-gpg.md)

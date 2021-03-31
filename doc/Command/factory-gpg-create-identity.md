@@ -37,4 +37,4 @@
 
 ## See also
 
- -  [factory-gpg](./factory-gpg)
+ -  [factory-gpg](./factory-gpg.md)
