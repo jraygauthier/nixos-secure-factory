@@ -392,8 +392,11 @@ create_gpg_master_identity_with_signing_subkey() {
   local email="$2"
   local user_name="$3"
   local passphrase="${4:-}"
+  local default_expire_in="${NSF_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+  local expire_in="${5:-"$default_expire_in"}"
 
-  local expire_in="1y"
+  local master_key_expire_in="$expire_in"
+  local sign_subkey_expire_in="$expire_in"
 
   printf -- "\n"
   printf -- "Creating gpg identity with signing subkey\n"
@@ -415,7 +418,7 @@ Subkey-Length: 4096
 Subkey-Usage: cert, encrypt
 Name-Real: ${user_name}
 Name-Email: ${email}
-Expire-Date: ${expire_in}
+Expire-Date: ${master_key_expire_in}
 Preferences: SHA512 SHA384 SHA256 SHA224 AES256 AES192 AES CAST5 ZLIB BZIP2 ZIP Uncompressed
 EOF
 )
@@ -434,7 +437,11 @@ EOF
     --passphrase "$passphrase" \
     --list-secret-keys
   nix-gpg --homedir "$target_gpg_home_dir" \
-    --batch --passphrase "$passphrase" --quick-add-key "$master_key_fingerprint" rsa4096 sign 1y
+    --batch --passphrase "$passphrase" \
+    --quick-add-key "$master_key_fingerprint" \
+    rsa4096 \
+    sign \
+    "$sign_subkey_expire_in"
 }
 
 
@@ -594,9 +601,11 @@ create_gpg_master_keypair_and_export_to_dir() {
   local email="$2"
   local user_name="$3"
   local passphrase="${4:-}"
+  local default_expire_in="${NSF_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+  local expire_in="${5:-"$default_expire_in"}"
   local default_tmp_dir="$TEMP"
-  local tmp_dir="${5:-"$default_tmp_dir"}"
-  local common_basename_prefix="${6:-}"
+  local tmp_dir="${6:-"$default_tmp_dir"}"
+  local common_basename_prefix="${7:-}"
 
   printf -- "\n"
   printf -- "Creating gpg master keypair exporting to dir\n"
@@ -607,7 +616,8 @@ create_gpg_master_keypair_and_export_to_dir() {
   # export GNUPGHOME="$tmp_gpg_home"
   wipe_gpg_home_dir "$tmp_gpg_home"
 
-  create_gpg_master_identity_with_signing_subkey "$tmp_gpg_home" "$email" "$user_name"
+  create_gpg_master_identity_with_signing_subkey \
+    "$tmp_gpg_home" "$email" "$user_name" "$passphrase" "$expire_in"
 
   export_gpg_master_keys_to_dir \
     "$out_dir" "$tmp_gpg_home" \
@@ -620,11 +630,13 @@ create_gpg_master_keypair_and_import_laptop_keypair_to_target_homedir() {
   local email="$2"
   local user_name="$3"
   local passphrase="$4"
+  local default_expire_in="${NSF_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+  local expire_in="${5:-"$default_expire_in"}"
   local default_tmp_dir="$TEMP"
-  local tmp_dir="${5:-"$default_tmp_dir"}"
+  local tmp_dir="${6:-"$default_tmp_dir"}"
   local default_master_key_target_dir
   default_master_key_target_dir="$(get_default_gpg_master_key_target_dir "$tmp_dir")"
-  local master_key_target_dir="${6:-"${default_master_key_target_dir}"}"
+  local master_key_target_dir="${7:-"${default_master_key_target_dir}"}"
 
   printf -- "\n"
   printf -- "Creating gpg master keypair importing only laptop keypair to homedir\n"
@@ -641,6 +653,7 @@ create_gpg_master_keypair_and_import_laptop_keypair_to_target_homedir() {
     "$email" \
     "$user_name" \
     "$passphrase" \
+    "$expire_in" \
     "$tmp_dir" \
     "$common_basename_prefix"
 
@@ -664,9 +677,12 @@ rm_current_user_gpg_identity() {
 create_current_user_gpg_identity() {
   local defaul_gpg_home_dir
   defaul_gpg_home_dir="$(get_default_gpg_home_dir)"
+
+  local default_expire_in="${NSF_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+  local expire_in="${4:-"$default_expire_in"}"
   create_gpg_master_keypair_and_import_laptop_keypair_to_target_homedir \
     "$defaul_gpg_home_dir" \
-    "$1" "$2" "$3" "${4:-}" "${5:-}"
+    "$1" "$2" "$3" "$expire_in" "${5:-}" "${6:-}"
 }
 
 
