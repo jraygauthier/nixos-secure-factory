@@ -163,7 +163,13 @@ create_factory_gpg_identity_cli() {
   read_or_prompt_for_factory_info__user_full_name "user_full_name"
   read_or_prompt_for_factory_info__user_email "user_email"
   prompt_for_passphrase_loop "gpg_passphrase"
-  read_or_prompt_for_factory_info__user_gpg_default_expire_date "user_gpg_default_expire_date"
+
+  local user_gpg_expire_date
+  if test -z "${NSF_FACTORY_USER_GPG_EXPIRE_DATE+x}"; then
+    read_or_prompt_for_factory_info__user_gpg_default_expire_date "user_gpg_expire_date"
+  else
+    user_gpg_expire_date="$NSF_FACTORY_USER_GPG_EXPIRE_DATE"
+  fi
 
   local secure_dir
   secure_dir="$(get_factory_secure_dir_impl)"
@@ -171,7 +177,7 @@ create_factory_gpg_identity_cli() {
     "$user_email" \
     "$user_full_name" \
     "$gpg_passphrase" \
-    "$user_gpg_default_expire_date" \
+    "$user_gpg_expire_date" \
     "$secure_dir"
 
   printf -- "\n"
