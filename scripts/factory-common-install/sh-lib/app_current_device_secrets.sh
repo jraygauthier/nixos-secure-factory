@@ -383,8 +383,11 @@ create_device_root_user_gpg_identity() {
   local user_name="root"
   local passphrase=""
 
-  local default_expire_in="${NSF_DEVICE_ROOT_USER_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
-  local expire_in="$default_expire_in"
+  local default_expire_in
+  default_expire_in="${NSF_DEVICE_ROOT_USER_GPG_DEFAULT_EXPIRE_DATE:-"1y"}"
+
+  local expire_in
+  expire_in="${NSF_DEVICE_ROOT_USER_GPG_EXPIRE_DATE:-"$default_expire_in"}"
 
   local secure_dir
   secure_dir="$(get_factory_secure_dir_impl)"
