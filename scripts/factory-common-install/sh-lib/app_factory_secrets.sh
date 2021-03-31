@@ -163,10 +163,16 @@ create_factory_gpg_identity_cli() {
   read_or_prompt_for_factory_info__user_full_name "user_full_name"
   read_or_prompt_for_factory_info__user_email "user_email"
   prompt_for_passphrase_loop "gpg_passphrase"
+  read_or_prompt_for_factory_info__user_gpg_default_expire_date "user_gpg_default_expire_date"
 
   local secure_dir
   secure_dir="$(get_factory_secure_dir_impl)"
-  create_current_user_gpg_identity "$user_email" "$user_full_name" "$gpg_passphrase" "$secure_dir"
+  create_current_user_gpg_identity \
+    "$user_email" \
+    "$user_full_name" \
+    "$gpg_passphrase" \
+    "$user_gpg_default_expire_date" \
+    "$secure_dir"
 
   printf -- "\n"
   printf -- "Listing master key files so that user copy these to a usb stick\n"
