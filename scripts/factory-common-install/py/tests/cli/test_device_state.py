@@ -12,3 +12,9 @@ def test_help(caplog: LogCaptureFixture) -> None:
 def test_info(caplog: LogCaptureFixture) -> None:
     result = invoke_cli(caplog, cli, ['info'])
     assert 0 == result.exit_code
+
+
+def test_device_state_checkout_with_device_identifier(
+        caplog: LogCaptureFixture) -> None:
+    result = invoke_cli(caplog, cli, ['checkout', 'qc-zilia-test-a11aa'])
+    assert 0 == result.exit_code

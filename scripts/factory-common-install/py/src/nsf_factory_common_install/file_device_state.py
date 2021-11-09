@@ -64,6 +64,7 @@ def parse_device_state(in_d: DeviceStatePlainT) -> DeviceState:
             type=parse_device_state_field_type(in_d),
             hostname=in_d['hostname'],
             ssh_port=in_d['ssh-port'],
+            serial_number=in_d['serial-number'],
             gpg_id=in_d.get('gpg-id', None),
             factory_installed_by=in_d.get('factory-installed-by', None),
         )

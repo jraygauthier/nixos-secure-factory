@@ -76,6 +76,7 @@ def _get_known_field_schema_d() -> Dict[str, Optional[FieldSchemaEntry]]:
     return {
         "identifier": None,
         "type": None,
+        "serial-number": None,
         "backend": None,
         "hostname": None,
         "ssh-port": None,

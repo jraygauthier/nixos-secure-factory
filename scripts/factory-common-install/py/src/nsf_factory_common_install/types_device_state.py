@@ -13,6 +13,7 @@ class DeviceIdWType(NamedTuple):
 class DeviceState:
     id: str
     type: str
+    serial_number: str
     hostname: str
     ssh_port: str
     gpg_id: Optional[str]
