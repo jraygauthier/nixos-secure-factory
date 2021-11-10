@@ -19,6 +19,21 @@ from .._device_set import MatchNotUniqueError, match_unique_device_by_id
 from ._ctx import CliCtx, pass_cli_ctx
 
 
+def find_device_id(ctx,param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    ctx.parent.params['device_id']= 'tata'
+    return 'qc-zilia-test-a11aa'
+
+
+def find_device_id_from_sn(checkout_fn):
+    def checkout_device_from_id(*args, **kwargs):
+        print('Good')
+        checkout_fn(*args, **kwargs)
+
+    return checkout_device_from_id
+
+
 @click.command()
 @click.argument(  # type: ignore
     "device-id",
@@ -26,8 +41,10 @@ from ._ctx import CliCtx, pass_cli_ctx
     required=False,
     default=None
 )
-@pass_cli_ctx
-def checkout(ctx: CliCtx, device_id: Optional[str]) -> None:
+@click.option("--serial-number", "-sn", "device_sn", callback=find_device_id,
+              help="Checkout device per Serial number")
+@pass_cli_ctx          
+def checkout(ctx: CliCtx, device_id: Optional[str], device_sn: Optional[str]) -> None:
     """Checkout a particular device state.
 
     DEVICE_ID: The device id when not already specified via the

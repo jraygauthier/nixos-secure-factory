@@ -19,7 +19,7 @@ def test_device_state_checkout_with_device_identifier(
     result = invoke_cli(caplog, cli, ['checkout', 'qc-zilia-test-a11aa'], input='y\n')
     assert 0 == result.exit_code
 
-""" def test_device_state_checkout_with_sn(
+def test_device_state_checkout_with_sn(
         caplog: LogCaptureFixture) -> None:
     result = invoke_cli(caplog, cli, ['checkout', '--serial-number', '100001'], input='y\n')
-    assert 0 == result.exit_code """
+    assert 0 == result.exit_code
