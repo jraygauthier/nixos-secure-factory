@@ -19,6 +19,21 @@ def match_device_by_id(
     return [x for x in available_devices if search_str in x.id]
 
 
+def match_device_by_sn(
+        search_str: str, available_devices: Iterable[_T]
+) -> List[_T]:
+
+    return [x for x in available_devices if search_str == x.state.serial_number]
+
+
+def match_unique_device_by_serial_number(
+        search_str: str, available_devices: Iterable[_T]
+) -> _T:
+    matching_devices = match_device_by_sn(search_str, available_devices)
+    assert len(matching_devices) == 1
+    return matching_devices[0]
+
+
 def match_unique_device_by_id(
         search_str: str, available_devices: Iterable[_T]
 ) -> _T:
