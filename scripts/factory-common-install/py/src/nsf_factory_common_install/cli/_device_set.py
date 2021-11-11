@@ -30,7 +30,7 @@ def match_unique_device_by_serial_number(
         search_str: str, available_devices: Iterable[_T]
 ) -> _T:
     matching_devices = match_device_by_sn(search_str, available_devices)
-    assert len(matching_devices) == 1
+    assert len(matching_devices) == 1, f"There is {len(matching_devices)} serial number matching {search_str}"
     return matching_devices[0]
 
 
@@ -60,7 +60,7 @@ def match_unique_device_by_id(
             matching_devices_msg_str
         ))
 
-    assert matching_count == 1
+    assert matching_count == 1, f"There is {len(matching_count)} matching device id"
     return matching_devices[0]
 
 
