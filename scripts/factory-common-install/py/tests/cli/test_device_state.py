@@ -21,5 +21,5 @@ def test_device_state_checkout_with_device_identifier(
 
 def test_device_state_checkout_with_sn(
         caplog: LogCaptureFixture) -> None:
-    result = invoke_cli(caplog, cli, ['checkout', '--serial-number', '100001'], input='y\n')
+    result = invoke_cli(caplog, cli, ['checkout', '--serial-number', '0001'], input='y\n')
     assert 0 == result.exit_code

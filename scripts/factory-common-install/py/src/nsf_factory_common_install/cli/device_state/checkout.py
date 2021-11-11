@@ -1,6 +1,7 @@
 import sys
 import textwrap
 from typing import Optional
+from functools import update_wrapper
 
 import click
 
@@ -15,23 +16,21 @@ from nsf_factory_common_install.file_device_state import (
 from nsf_factory_common_install.prompt import prompt_for_user_approval
 
 from .._auto_complete import list_ac_available_device_ids
-from .._device_set import MatchNotUniqueError, match_unique_device_by_id
+from .._device_set import MatchNotUniqueError, match_unique_device_by_id, match_unique_device_by_serial_number
 from ._ctx import CliCtx, pass_cli_ctx
-
-
-def find_device_id(ctx,param, value):
-    if not value or ctx.resilient_parsing:
-        return
-    ctx.parent.params['device_id']= 'tata'
-    return 'qc-zilia-test-a11aa'
 
 
 def find_device_id_from_sn(checkout_fn):
     def checkout_device_from_id(*args, **kwargs):
-        print('Good')
-        checkout_fn(*args, **kwargs)
-
-    return checkout_device_from_id
+        device_serial_number = kwargs['device_sn']
+        if device_serial_number is not None:
+            ctx = args[0]
+            device_repos = ctx.checkout_device_repo
+            device = match_unique_device_by_serial_number(
+                device_serial_number, device_repos.iter_instances())
+            kwargs['device_id'] = device.id
+        return checkout_fn(*args, **kwargs)
+    return update_wrapper(checkout_device_from_id, checkout_fn)
 
 
 @click.command()
@@ -41,9 +40,10 @@ def find_device_id_from_sn(checkout_fn):
     required=False,
     default=None
 )
-@click.option("--serial-number", "-sn", "device_sn", callback=find_device_id,
+@click.option("--serial-number", "-sn", "device_sn",
               help="Checkout device per Serial number")
-@pass_cli_ctx          
+@pass_cli_ctx
+@find_device_id_from_sn
 def checkout(ctx: CliCtx, device_id: Optional[str], device_sn: Optional[str]) -> None:
     """Checkout a particular device state.
 
