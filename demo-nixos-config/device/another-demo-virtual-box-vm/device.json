@@ -5,6 +5,7 @@
   "hostname": "auto",
   "ssh-port": "auto",
   "uart-pty": "auto",
+  "serial-number": "0003",
   "email": "another-demo-virtual-box-vm@gmail.com",
   "gpg-id": "BBC8F046A7E47B2C9D325D30EAFCBBEA44A1FADC"
 }
