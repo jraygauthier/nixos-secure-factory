@@ -16,7 +16,9 @@
 , screen
 , socat
 , picocom
+, pinentry
 , pinentry-curses
+, pinentry-gtk2
 , python3
 , virtualbox
 , mr
@@ -83,7 +85,9 @@ stdenv.mkDerivation rec {
     screen
     socat
     picocom
+    (lib.getOutput "tty" pinentry)  # most basic pin entry
     pinentry-curses  # basic pin entry
+    pinentry-gtk2  # gui pin entry
     pythonInterpreter
 
     # TODO: Consider this. Not certain if nix would be capable
