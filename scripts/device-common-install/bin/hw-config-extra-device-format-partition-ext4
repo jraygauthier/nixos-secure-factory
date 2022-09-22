@@ -11,7 +11,7 @@ declare partition_label
 partition_label="${2?}"
 
 
-wipefs -a "$partition"
+wipefs -f -a "$partition"
 mkfs.ext4 -L "$partition_label" "$partition"
 
 # Print the result

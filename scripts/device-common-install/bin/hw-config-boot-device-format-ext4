@@ -19,14 +19,14 @@ swap_part="$(get_device_partition_by_1b_index "${boot_device}" "2")"
 declare boot_part
 boot_part="$(get_device_partition_by_1b_index "${boot_device}" "3")"
 
-wipefs -a "$nixos_part"
+wipefs -f -a "$nixos_part"
 mkfs.ext4 -L nixos "$nixos_part"
-wipefs -a "$swap_part"
+wipefs -f -a "$swap_part"
 mkswap -L swap "$swap_part"
 
 if parted "$boot_device" -- print | grep ESP > /dev/null \
     || parted "$boot_device" -- print | grep ESP2; then
-  wipefs -a "$boot_part"
+  wipefs -f -a "$boot_part"
   mkfs.fat -F 32 -n boot "$boot_part"
 fi
 # Print the result
