@@ -17,9 +17,12 @@ ensure_run_from_nixos_live_cd
 # Currently, expect a partitioning compatible with what is
 # performed by 'hw-config-boot-device-partition-efi'
 # or 'hw-config-boot-device-partition-legacy'.
-declare nixos_part="${boot_device}1"
-declare swap_part="${boot_device}2"
-declare boot_part="${boot_device}3"
+declare nixos_part
+nixos_part="$(get_device_partition_by_1b_index "${boot_device}" "1")"
+declare swap_part
+swap_part="$(get_device_partition_by_1b_index "${boot_device}" "2")"
+declare boot_part
+boot_part="$(get_device_partition_by_1b_index "${boot_device}" "3")"
 
 wipefs -a "$nixos_part"
 pvcreate "$nixos_part"
