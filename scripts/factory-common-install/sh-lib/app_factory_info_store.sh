@@ -148,6 +148,11 @@ get_factory_info__user_gpg_default_id() {
 }
 
 
+get_factory_info__user_gpg_pinentry() {
+  get_value_from_factory_info_yaml_or_if_null_then_replace_with \
+    '.user.gpg."pinentry"' ""
+}
+
 get_required_factory_info__user_id() {
   get_value_from_factory_info_yaml_or_if_null_then_error '.user.id'
 }
@@ -267,6 +272,22 @@ prompt_for_factory_info_mandatory__x() {
 }
 
 
+prompt_for_factory_info_optional__user_gpg_pinentry() {
+  local value_re
+  value_re="$(get_file_basename_regexpr)"
+  echo -e "\"user_gpg_pinentry\" \u2208 \`${value_re}\`: The factory user preferred gpg pinentry program. The program must be available in PATH (e.g.: pinentry, pinentry-gtk-2, pinentry-curses)."
+  # TODO: Support autocompletion by listing all program in PATH prefixed by 'pinentry'.
+  prompt_for_optional_parameter_loop "$1" "user_gpg_pinentry" "$value_re"
+}
+
+
+prompt_for_factory_info_optional__x() {
+  local out_var_name="${1?}"
+  local param="${2?}"
+  "prompt_for_factory_info_optional__${param}" "$out_var_name"
+}
+
+
 read_or_prompt_for_factory_info__x() {
   local out_varname="${1?}"
   local param="${2?}"
@@ -327,17 +348,28 @@ gopass_default_device_vault_repo_name
 EOF
 )
 
+  local _OPT_PARAMS
+  _OPT_PARAMS=$(cat <<EOF
+user_gpg_pinentry
+EOF
+)
+
   local user_id
   local user_full_name
   local user_email
   local user_gpg_default_expire_date
   local user_gpg_default_id
+  local user_gpg_pinentry
   local device_defaults_email_domain
   local gopass_factory_only_vault_repo_name
   local gopass_default_device_vault_repo_name
 
   for param in $_REQ_PARAMS; do
     prompt_for_factory_info_mandatory__x "$param" "$param"
+  done
+
+  for param in $_OPT_PARAMS; do
+    prompt_for_factory_info_optional__x "$param" "$param"
   done
 
   local gopass_factory_only_vault_id
@@ -352,6 +384,7 @@ EOF
 .user.email = \$user_email | \
 .user.gpg."default-expire-date" = \$user_gpg_default_expire_date | \
 .user.gpg."default-id" = \$user_gpg_default_id | \
+.user.gpg."pinentry" = \$user_gpg_pinentry | \
 .gopass."factory-only-vault".id = \$gopass_factory_only_vault_id | \
 .gopass."factory-only-vault"."repo-name" = \$gopass_factory_only_vault_repo_name | \
 .gopass."default-device-vault".id = \$gopass_default_device_vault_id | \
@@ -367,6 +400,7 @@ EOF
     --arg user_email "$user_email" \
     --arg user_gpg_default_expire_date "$user_gpg_default_expire_date" \
     --arg user_gpg_default_id "$user_gpg_default_id" \
+    --arg user_gpg_pinentry "$user_gpg_pinentry" \
     --arg gopass_factory_only_vault_id "$gopass_factory_only_vault_id" \
     --arg gopass_factory_only_vault_repo_name "$gopass_factory_only_vault_repo_name" \
     --arg gopass_default_device_vault_id "$gopass_default_device_vault_id" \

@@ -9,7 +9,12 @@ common_factory_install_sh_lib_dir="$(pkg-nsf-factory-common-install-get-sh-lib-d
 
 
 run_factory_gpg() {
-  run_sandboxed_gpg "$@"
+  declare agent
+  agent="$(which factory-gpg-agent)"
+
+  run_sandboxed_gpg \
+    --agent-program "$agent" \
+    "$@"
 }
 
 
@@ -19,7 +24,24 @@ run_factory_gpgconf() {
 
 
 run_factory_gpg_agent() {
-  run_sandboxed_gpg_agent "$@"
+  declare pinentry_exe
+  pinentry_exe="$(get_factory_info__user_gpg_pinentry)"
+
+  if [[ -z "$pinentry_exe" ]]; then
+    pinentry_exe="pinentry"
+  fi
+
+  declare pinentry
+  pinentry="$(which "$pinentry_exe")"
+
+  declare extra_args=()
+  if [[ -n "$pinentry" ]]; then
+    extra_args=( --pinentry-program="$pinentry" )
+  fi
+
+  run_sandboxed_gpg_agent \
+    "${extra_args[@]}" \
+    "$@"
 }
 
 

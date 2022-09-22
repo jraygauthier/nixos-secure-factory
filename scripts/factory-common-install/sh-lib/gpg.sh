@@ -49,7 +49,8 @@ _run_sandboxed_gpg_pkg_exe() {
   local gpg_home_dir
   gpg_home_dir="$(get_default_gpg_home_dir)"
   GNUPGHOME="$gpg_home_dir" \
-    "$gpg_pkg_exe" "$@"
+    "$gpg_pkg_exe" \
+    "$@"
 }
 
 
