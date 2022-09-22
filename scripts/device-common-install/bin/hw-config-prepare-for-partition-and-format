@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
-. "$device_common_install_sh_lib_dir/tools.sh"
-
-liveenv-nixos-partition-umount
-hw-config-remove-lvm
-
+# DEPRECATED tool. Use 'hw-config-boot-device-prepare-for-partition-and-format' instead.
+declare script_dir
+script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
+"$script_dir/hw-config-boot-device-prepare-for-partition-and-format" \
+  "/dev/sda"

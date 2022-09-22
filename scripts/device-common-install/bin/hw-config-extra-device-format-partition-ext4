@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+declare partition
+partition="${1?}"
+
+declare partition_label
+partition_label="${2?}"
+
+
+wipefs -a "$partition"
+mkfs.ext4 -L "$partition_label" "$partition"
+
+# Print the result
+lsblk -o name,mountpoint,label,size,uuid

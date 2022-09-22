@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+
+declare boot_device
+boot_device="${1?}"
+
+declare nixos_partition_size
+nixos_partition_size="${2?}"
+
+declare data_partition_label="data"
+
+# Source some device specific tools.
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# Currently, expect a partitioning compatible with what is
+# performed by 'hw-config-boot-device-partition-efi'
+# or 'hw-config-boot-device-partition-legacy'.
+declare nixos_part="${boot_device}1"
+declare swap_part="${boot_device}2"
+declare boot_part="${boot_device}3"
+
+wipefs -a "$nixos_part"
+pvcreate "$nixos_part"
+pvdisplay
+
+wipefs -a "$swap_part"
+mkswap -L swap "$swap_part"
+
+if parted "$boot_device" -- print | grep ESP > /dev/null \
+    || parted "$boot_device" -- print | grep ESP2; then
+  wipefs -a "$boot_part"
+  mkfs.fat -F 32 -n boot "$boot_part"
+fi
+
+# Continue the lvm setup.
+vgcreate system_and_data "$nixos_part"
+vgdisplay
+yes | lvcreate -L "$nixos_partition_size" system_and_data -n nixos || true
+yes | lvcreate -l 100%FREE system_and_data -n "$data_partition_label" || true
+lvdisplay
+mkfs.ext4 -L nixos "/dev/system_and_data/nixos"
+mkfs.ext4 -L "$data_partition_label" "/dev/system_and_data/$data_partition_label"
+# Print the result
+lsblk -o name,mountpoint,label,size,uuid

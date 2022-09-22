@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+declare device
+device="${1?}"
+
+declare device_label
+device_label="${2?}"
+
+parted -s "$device" -- mklabel "$device_label"
+parted -s --align=opt "$device" -- mkpart primary "0%" "100%"
+# Print the resulting partition table.
+parted "$device" -- print

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+
+# Source some device specific tools.
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+declare boot_device
+boot_device="${1?}"
+
+# Currently, expect a partitioning compatible with what is
+# performed by 'hw-config-boot-device-partition-efi'
+# or 'hw-config-boot-device-partition-legacy'.
+declare nixos_part="${boot_device}1"
+declare swap_part="${boot_device}2"
+declare boot_part="${boot_device}3"
+
+wipefs -a "$nixos_part"
+mkfs.ext4 -L nixos "$nixos_part"
+wipefs -a "$swap_part"
+mkswap -L swap "$swap_part"
+
+if parted "$boot_device" -- print | grep ESP > /dev/null \
+    || parted "$boot_device" -- print | grep ESP2; then
+  wipefs -a "$boot_part"
+  mkfs.fat -F 32 -n boot "$boot_part"
+fi
+# Print the result
+lsblk -o name,mountpoint,label,size,uuid

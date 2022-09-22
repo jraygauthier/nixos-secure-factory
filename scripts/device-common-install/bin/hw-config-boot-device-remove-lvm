@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+declare nixos_partition
+nixos_partition="${1?}"
+
+# This small script allow one to remove any lvm
+# entities which might prevent one from partitionning
+# or formating the drives (failing with "device busy"
+# errors).
+
+# TODO: Iterate on 'system_and_data' volume groups to
+# find the volumes.
+yes | lvremove /dev/system_and_data/nixos || true
+yes | lvremove /dev/system_and_data/data || true
+# TODO: Iterate on the partition to find the volume groups.
+yes | vgremove /dev/system_and_data || true
+yes | pvremove "$nixos_partition" || true

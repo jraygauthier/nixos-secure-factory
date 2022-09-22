@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euf -o pipefail
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+declare boot_device
+boot_device="${1?}"
+
+parted -s "$boot_device" -- mklabel gpt
+physical_memory_size_mb="$(free -m --si | grep Mem: | awk '{print $2}')"
+echo "This device has ${physical_memory_size_mb}MB of phyical memory."
+echo "Will be using this as the swap partition size. "
+echo "This is so that it is possible to hibernate."
+parted -s --align=opt "$boot_device" -- mkpart primary 512MiB "-${physical_memory_size_mb}MB"
+parted -s --align=opt "$boot_device" -- mkpart primary linux-swap "-${physical_memory_size_mb}MB" "100%"
+parted -s "$boot_device" -- mkpart ESP fat32 1MiB 512MiB
+parted -s "$boot_device" -- set 3 boot on
+# Print the resulting partition table.
+parted "$boot_device" -- print
