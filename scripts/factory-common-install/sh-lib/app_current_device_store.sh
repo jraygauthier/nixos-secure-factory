@@ -121,6 +121,11 @@ get_required_current_device_type() {
 }
 
 
+get_required_current_device_backend() {
+  get_value_from_current_device_yaml_or_if_null_then_error '.backend'
+}
+
+
 get_current_device_hostname() {
   get_value_from_current_device_yaml_or_if_null_then_replace_with '.hostname' ""
 }
@@ -161,9 +166,14 @@ get_resolved_current_device_ssh_port() {
   local out
   out="$(get_current_device_ssh_port)" || return 1
 
-  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
   if [[ "$out" == "auto" ]]; then
-    out="2222"
+    declare backend
+    backend="$(get_required_current_device_backend)"
+    if [[ "$backend" == "virtual_box" ]]; then
+      out="2222"
+    else
+      out="22"
+    fi
   fi
 
   echo "$out"

@@ -28,9 +28,14 @@ read_or_prompt_for_current_device__ssh_port() {
     out="$(get_resolved_current_device_ssh_port)" || return 1
   fi
 
-  # TODO: auto -> retrieve from backend (e.g.: vbox backend).
   if [[ "$out" == "auto" ]]; then
-    out="2222"
+    declare backend
+    backend="$(get_required_current_device_backend)"
+    if [[ "$backend" == "virtual_box" ]]; then
+      out="2222"
+    else
+      out="22"
+    fi
   fi
 
   if [[ "$out" == "null" ]] || [[ "$out" == "" ]]; then
