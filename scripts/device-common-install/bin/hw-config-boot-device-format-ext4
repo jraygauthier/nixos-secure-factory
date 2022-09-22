@@ -24,8 +24,7 @@ mkfs.ext4 -L nixos "$nixos_part"
 wipefs -f -a "$swap_part"
 mkswap -L swap "$swap_part"
 
-if parted "$boot_device" -- print | grep -q ESP > /dev/null \
-    || parted "$boot_device" -- print | grep -q ESP2; then
+if is_block_device_efi "$boot_device"; then
   wipefs -f -a "$boot_part"
   mkfs.fat -F 32 -n boot "$boot_part"
 fi

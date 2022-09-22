@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
+declare device_common_install_sh_lib_dir
+device_common_install_sh_lib_dir="$(pkg-nsf-device-common-install-get-sh-lib-dir)"
+. "$device_common_install_sh_lib_dir/block_device_info.sh"
 
 if mountpoint -q "/mnt/"; then
   2>&1 echo "WARNING: liveenv-nixos-partition-mount: Nixos partition already mounted at '/mnt'. Nothing to do"
@@ -8,7 +11,9 @@ fi
 
 mkdir -p /mnt
 mount /dev/disk/by-label/nixos /mnt
-if parted /dev/sda -- print | grep -q ESP; then
+
+declare partition="/dev/disk/by-label/nixos"
+if is_partition_on_efi_block_device "$partition"; then
   mkdir -p /mnt/boot
   mount /dev/disk/by-label/boot /mnt/boot
 fi

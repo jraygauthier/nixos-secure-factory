@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+declare device_common_install_sh_lib_dir
+device_common_install_sh_lib_dir="$(pkg-nsf-device-common-install-get-sh-lib-dir)"
+. "$device_common_install_sh_lib_dir/block_device_info.sh"
+
 
 is_expected_hdd() {
   local expected_value
@@ -13,8 +17,11 @@ is_expected_hdd() {
   local hdd_upper_bound
   hdd_upper_bound=$(echo "($1 + $2)" | bc -l)
 
+  declare block_device
+  block_device="$(get_block_device_for_partition "/dev/disk/by-label/nixos")"
+
   local hdd_size
-  hdd_size="$(lsblk /dev/sda | head -n 2 | tail -n 1 | awk '{print $4}' | sed 's/[A-Z]//g')"
+  hdd_size="$(lsblk "$block_device" | head -n 2 | tail -n 1 | awk '{print $4}' | sed 's/[A-Z]//g')"
 
   if [ "1" -eq "$(echo "${hdd_size} >= ${hdd_lower_bound}" | bc -l)" ] && \
      [ "1" -eq "$(echo "${hdd_size} <= ${hdd_upper_bound}" | bc -l)" ]; then

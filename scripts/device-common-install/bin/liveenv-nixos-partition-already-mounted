@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
+declare device_common_install_sh_lib_dir
+device_common_install_sh_lib_dir="$(pkg-nsf-device-common-install-get-sh-lib-dir)"
+. "$device_common_install_sh_lib_dir/block_device_info.sh"
 
 if ! mountpoint -q "/mnt/"; then
   exit 1
 fi
 
-if parted /dev/sda -- print | grep -q ESP; then
+declare partition="/dev/disk/by-label/nixos"
+if is_partition_on_efi_block_device "$partition"; then
   if ! mountpoint -q "/mnt/boot"; then
     1>&2 echo "WARNING: liveenv-nixos-partition-already-mounted: missing expected '/mnt/boot' mount."
   fi
