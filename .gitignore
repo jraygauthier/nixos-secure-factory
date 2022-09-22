@@ -12,3 +12,4 @@
 **/.pytest_cache/
 **/dist/
 **/.vscode/launch.json
+/.direnv/
