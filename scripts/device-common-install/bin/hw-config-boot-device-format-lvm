@@ -31,8 +31,8 @@ pvdisplay
 wipefs -f -a "$swap_part"
 mkswap -L swap "$swap_part"
 
-if parted "$boot_device" -- print | grep ESP > /dev/null \
-    || parted "$boot_device" -- print | grep ESP2; then
+if parted "$boot_device" -- print | grep -q ESP > /dev/null \
+    || parted "$boot_device" -- print | grep -q ESP2; then
   wipefs -f -a "$boot_part"
   mkfs.fat -F 32 -n boot "$boot_part"
 fi

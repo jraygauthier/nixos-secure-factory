@@ -15,6 +15,6 @@ echo "This is so that it is possible to hibernate."
 parted -s --align=opt "$boot_device" -- mkpart primary 512MiB "-${physical_memory_size_mb}MB"
 parted -s --align=opt "$boot_device" -- mkpart primary linux-swap "-${physical_memory_size_mb}MB" "100%"
 parted -s "$boot_device" -- mkpart ESP fat32 1MiB 512MiB
-parted -s "$boot_device" -- set 3 boot on
+parted -s "$boot_device" -- set 3 esp on
 # Print the resulting partition table.
 parted "$boot_device" -- print
