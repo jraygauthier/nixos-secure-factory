@@ -184,6 +184,12 @@ prompt_for_optional_parameter_impl() {
   local _value_re=${3:-"$_default_value_re"}
   local _default_value="${4:-}"
   read -e -r -p "${_param}: " -i "$_default_value" "${_out_var_name?}"
+
+  if [[ -z "${!_out_var_name}" ]]; then
+    # Ok, this is an optional parameter.
+    return 0
+  fi
+
   if ! echo "${!_out_var_name}" | grep -Eq "$_value_re"; then
     1>&2 echo "ERROR: Variable '$_param''s value of '${!_out_var_name}' is not allowed to contain characters not in the set: '$_value_re'."
     return 1
