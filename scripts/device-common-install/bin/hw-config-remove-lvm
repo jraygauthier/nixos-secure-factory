@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-# DEPRECATED tool. Use 'hw-config-boot-device-remove-lvm' instead.
-declare script_dir
-script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
-"$script_dir/hw-config-boot-device-remove-lvm" \
-  "/dev/sda1"
+device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
+. "$device_common_install_sh_lib_dir/tools.sh"
+ensure_run_from_nixos_live_cd
+
+# This small script allow one to remove any lvm
+# entities which might prevent one from partitionning
+# or formating the drives (failing with "device busy"
+# errors).
+
+_effect() { 1>&2 echo "$" "$@"; "$@"; }
+
+declare lv_path
+while read -r lv_path; do
+  _effect lvremove -y "$lv_path"
+done < <( lvs --noheadings | awk '{ printf "/dev/%s/%s\n", $2, $1 }' )
+
+declare vg_path
+while read -r vg_path; do
+  _effect vgremove -y "$vg_path"
+done < <( vgs --noheadings | awk '{ printf "/dev/%s\n", $1 }' )
+
+declare pv_path
+while read -r pv_path; do
+  _effect pvremove -y "$pv_path"
+done < <( pvs --noheadings | awk '{ printf "%s\n", $1 }' | sort | uniq )

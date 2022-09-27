@@ -8,4 +8,7 @@ default_nixos_partition_size="60G"
 nixos_partition_size="${1:-${default_nixos_partition_size}}"
 
 "$script_dir/hw-config-boot-device-format-lvm" \
-  "/dev/sda" "$nixos_partition_size"
+  "/dev/sda" "system_and_data" \
+  "nixos" "nixos" "ext4" \
+  "$nixos_partition_size" \
+  "data" "data" "ext4"

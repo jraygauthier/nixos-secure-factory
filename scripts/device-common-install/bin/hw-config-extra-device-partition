@@ -4,10 +4,15 @@ device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-insta
 . "$device_common_install_sh_lib_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 
-declare device
-device="${1?}"
+_effect() { 1>&2 echo "$" "$@"; "$@"; }
 
-parted -s "$device" -- mklabel gpt
-parted -s --align=opt "$device" -- mkpart primary "0%" "100%"
-# Print the resulting partition table.
-parted "$device" -- print
+declare block_devices=( "$@" )
+
+
+declare device
+for device in "${block_devices[@]}"; do
+  _effect parted -s "$device" -- mklabel gpt
+  _effect parted -s --align=opt "$device" -- mkpart primary "0%" "100%"
+  # Print the resulting partition table.
+  _effect parted "$device" -- print
+done

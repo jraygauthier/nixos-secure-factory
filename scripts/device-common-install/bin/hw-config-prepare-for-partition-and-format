@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -euf -o pipefail
-# DEPRECATED tool. Use 'hw-config-boot-device-prepare-for-partition-and-format' instead.
 declare script_dir
 script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
-"$script_dir/hw-config-boot-device-prepare-for-partition-and-format" \
-  "/dev/sda"
+"$script_dir/liveenv-nixos-partition-umount"
+"$script_dir/hw-config-remove-lvm"

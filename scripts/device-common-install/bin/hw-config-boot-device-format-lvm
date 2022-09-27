@@ -2,17 +2,50 @@
 set -euf -o pipefail
 device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-install-get-sh-lib-dir")"
 
-declare boot_device
-boot_device="${1?}"
-
-declare nixos_partition_size
-nixos_partition_size="${2?}"
-
-declare data_partition_label="data"
-
 # Source some device specific tools.
 . "$device_common_install_sh_lib_dir/tools.sh"
 ensure_run_from_nixos_live_cd
+
+_effect() { 1>&2 echo "$" "$@"; "$@"; }
+
+declare boot_device="${1?}"
+
+declare partition_vg_label="${2?}"
+
+declare nixos_lv_label="${3?}"
+declare nixos_fs_label="${4?}"
+declare nixos_fs_type="${5?}"
+
+declare nixos_partition_size
+nixos_partition_size="${6:-}"
+
+declare data_lv_label="${7:-}"
+declare data_fs_label="${8:-}"
+declare data_fs_type="${9:-}"
+
+
+declare -A supported_fs_types=( ["ext4"]=1 )
+check_supported_fs_type() {
+  declare fs_type="${1?}"
+  if [[ -z "$fs_type" ]] || ! [[ "${supported_fs_types["$fs_type"]+x}" = "x" ]]; then
+    1>&2 echo "ERROR: this script does not support the '$fs_type' filesystem!"
+    1>&2 printf " ->  Please use one of the following: {"
+    1>&2 printf "%s," "${!supported_fs_types[@]}"
+    1>&2 printf "}\n"
+    exit 1
+  fi
+}
+
+check_supported_fs_type "$nixos_fs_type"
+if [[ -n "$nixos_partition_size" ]]; then
+  for arg in data_lv_label data_fs_label data_fs_type; do
+    if [[ -z "${!arg}" ]]; then
+      1>&2 echo "ERROR: missing '$arg'!"
+      exit 1
+    fi
+  done
+  check_supported_fs_type "$data_fs_type"
+fi
 
 # Currently, expect a partitioning compatible with what is
 # performed by 'hw-config-boot-device-partition-efi'
@@ -24,25 +57,37 @@ swap_part="$(get_device_partition_by_1b_index "${boot_device}" "2")"
 declare boot_part
 boot_part="$(get_device_partition_by_1b_index "${boot_device}" "3")"
 
-wipefs -f -a "$nixos_part"
-pvcreate "$nixos_part"
-pvdisplay
+_effect pvcreate -y "$nixos_part"
+_effect pvdisplay
 
-wipefs -f -a "$swap_part"
-mkswap -L swap "$swap_part"
+_effect wipefs -f -a "$swap_part"
+_effect mkswap -L swap "$swap_part"
 
 if is_block_device_efi "$boot_device"; then
-  wipefs -f -a "$boot_part"
-  mkfs.fat -F 32 -n boot "$boot_part"
+  _effect wipefs -f -a "$boot_part"
+  _effect mkfs.fat -F 32 -n boot "$boot_part"
 fi
 
 # Continue the lvm setup.
-vgcreate system_and_data "$nixos_part"
-vgdisplay
-yes | lvcreate -L "$nixos_partition_size" system_and_data -n nixos || true
-yes | lvcreate -l 100%FREE system_and_data -n "$data_partition_label" || true
-lvdisplay
-mkfs.ext4 -L nixos "/dev/system_and_data/nixos"
-mkfs.ext4 -L "$data_partition_label" "/dev/system_and_data/$data_partition_label"
+_effect vgcreate -y "$partition_vg_label" "$nixos_part"
+_effect vgdisplay
+if [[ -z "$nixos_partition_size" ]]; then
+  _effect lvcreate -y -l 100%FREE -n "$nixos_lv_label" "$partition_vg_label"
+else
+  _effect lvcreate -y -L "$nixos_partition_size" -n "$nixos_lv_label" "$partition_vg_label"
+  _effect lvcreate -y -l 100%FREE -n "$data_lv_label" "$partition_vg_label"
+fi
+_effect lvdisplay
+
+if [[ -z "$nixos_partition_size" ]]; then
+  _effect "mkfs.$nixos_fs_type" -L "$nixos_fs_label" "/dev/$partition_vg_label/$nixos_lv_label"
+else
+  _effect "mkfs.$nixos_fs_type" -L "$nixos_fs_label" "/dev/$partition_vg_label/$nixos_lv_label"
+  _effect "mkfs.$data_fs_type" -L "$data_fs_label" "/dev/$partition_vg_label/$data_lv_label"
+fi
+
 # Print the result
-lsblk -o name,mountpoint,label,size,uuid
+_effect lsblk -o name,mountpoint,label,size,uuid
+
+# Print the result
+_effect lvs

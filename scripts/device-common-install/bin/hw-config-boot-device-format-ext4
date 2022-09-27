@@ -6,8 +6,10 @@ device_common_install_sh_lib_dir="$("$(dirname "$0")/pkg-nsf-device-common-insta
 . "$device_common_install_sh_lib_dir/tools.sh"
 ensure_run_from_nixos_live_cd
 
-declare boot_device
-boot_device="${1?}"
+_effect() { 1>&2 echo "$" "$@"; "$@"; }
+
+declare boot_device="${1?}"
+declare nixos_fs_label="${2?}"
 
 # Currently, expect a partitioning compatible with what is
 # performed by 'hw-config-boot-device-partition-efi'
@@ -19,14 +21,15 @@ swap_part="$(get_device_partition_by_1b_index "${boot_device}" "2")"
 declare boot_part
 boot_part="$(get_device_partition_by_1b_index "${boot_device}" "3")"
 
-wipefs -f -a "$nixos_part"
-mkfs.ext4 -L nixos "$nixos_part"
-wipefs -f -a "$swap_part"
-mkswap -L swap "$swap_part"
+_effect wipefs -f -a "$nixos_part"
+_effect mkfs.ext4 -L "$nixos_fs_label" "$nixos_part"
+_effect wipefs -f -a "$swap_part"
+_effect mkswap -L swap "$swap_part"
 
 if is_block_device_efi "$boot_device"; then
-  wipefs -f -a "$boot_part"
-  mkfs.fat -F 32 -n boot "$boot_part"
+  _effect wipefs -f -a "$boot_part"
+  _effect mkfs.fat -F 32 -n boot "$boot_part"
 fi
+
 # Print the result
-lsblk -o name,mountpoint,label,size,uuid
+_effect lsblk -o name,mountpoint,label,size,uuid

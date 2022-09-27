@@ -4,4 +4,4 @@ set -euf -o pipefail
 declare script_dir
 script_dir="$(cd "$(dirname "$0")" > /dev/null && pwd)"
 "$script_dir/hw-config-boot-device-format-ext4" \
-  "/dev/sda"
+  "/dev/sda" "nixos"
