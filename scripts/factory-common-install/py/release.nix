@@ -65,7 +65,7 @@ let
       ]);
 
     shellHook = with nsf-py-nix-lib; with nsf-shc-nix-lib; ''
-      ${nsfPy.shell.runSetuptoolsShellHook "${builtins.toString ./.}" default}
+      ${nsfPy.shell.runSetuptoolsShellHook "${builtins.toString ./.}" default pythonPackages}
       ${nsfShC.shell.loadClickExesBashCompletion [
         "device-common-ssh-auth-dir"
         "device-ssh-auth-dir"

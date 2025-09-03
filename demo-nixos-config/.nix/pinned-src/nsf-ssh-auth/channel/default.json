@@ -2,7 +2,7 @@
   "type": "fetchFromGitHub",
   "owner": "jraygauthier",
   "repo": "nsf-ssh-auth",
-  "ref": "release/v0.1.x",
-  "rev": "1ed756bc3d600ab085970e6acc6571365a8a534f",
+  "ref": "master",
+  "rev": "46378a7fecf78a291a232850c7a582a25a6fa323",
   "sha256": "058i11pcrn4s6ld0hg2zn6wmbh855735vvrn7yrxnrikzj2zqqyk"
 }

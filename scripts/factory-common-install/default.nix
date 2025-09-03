@@ -114,7 +114,7 @@ stdenv.mkDerivation rec {
   '';
 
 
-  binPathDeps = stdenv.lib.makeBinPath buildInputs;
+  binPathDeps = lib.makeBinPath buildInputs;
 
   buildPhase = "true";
 

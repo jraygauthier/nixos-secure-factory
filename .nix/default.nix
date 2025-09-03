@@ -93,7 +93,19 @@ rec {
             else nixpkgsSrc;  # From top level.
       in
     assert null != nixpkgs;
-    import nixpkgs { inherit overlays; config = { allowUnfree = false; }; };
+    import nixpkgs {
+      inherit overlays;
+      config = {
+        # TODO: Rollback to `false`.
+        # According to logs, `font-bh-lucidatypewriter-75dpi` is the culprit.
+        # Why do we need this package?
+        allowUnfree = true;
+        permittedInsecurePackages = [
+          # TODO: Fixme. Needs a workaround.
+          "tightvnc-1.3.10"
+        ];
+      };
+    };
 
 
   ensurePkgs = { pkgs ? null, nixpkgs ? null }:
